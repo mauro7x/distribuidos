@@ -1,0 +1,12 @@
+# Repository core labels
+github: .github/**/*
+
+# TPs
+TP0: TP0/**/*
+TP1: TP1/**/*
+TP2: TP2/**/*
+
+# Various
+docs:
+  - docs/**/*
+  - '**/*.md'
