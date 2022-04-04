@@ -93,6 +93,7 @@ class Server:
         to exit gracefully when detected.
         """
 
+        logging.debug('Got close signal: closing server...')
         self._closed = True
 
     def __close_gracefully(self):
@@ -100,5 +101,8 @@ class Server:
         Shutdowns and closes server socket to free resources.
         """
 
+        logging.debug('Shutting socket down...')
         self._server_socket.shutdown(socket.SHUT_RDWR)
+        logging.debug('Socket shut down. Closing socket...')
         self._server_socket.close()
+        logging.info('Server closed gracefully')
