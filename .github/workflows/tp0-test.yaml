@@ -3,12 +3,12 @@ name: TP0 CI
 on:
   push:
     paths:
-      - TP0/server/**/*
+      - TP0/**/*
   pull_request:
     branches:
       - main
     paths:
-      - TP0/server/**/*
+      - TP0/**/*
 
 jobs:
   test:
