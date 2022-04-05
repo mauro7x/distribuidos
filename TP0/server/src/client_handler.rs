@@ -10,9 +10,14 @@ use std::{
     },
     thread::{self, JoinHandle},
 };
-
 use crate::constants::MAX_LEN;
 
+/// ## Arguments
+/// 
+/// * `id` (self-descriptive).
+/// * `finished`: AtomicBool used to check if thread executing has finished
+/// and can be joined in a non-blocking way.
+/// * `joiner`: `JoinHandle`r received from thread spawn.
 #[derive(Debug)]
 pub struct ClientHandler {
     id: u16,
@@ -21,6 +26,8 @@ pub struct ClientHandler {
 }
 
 impl ClientHandler {
+    /// Creates a ClientHandler, setting stream received as blocking,
+    /// and spawning a thread to execute the inner handler.
     pub fn new(id: u16, stream: TcpStream) -> Result<ClientHandler, Box<dyn Error>> {
         trace!("Creating ClientHandler for client #{}", id);
         stream.set_nonblocking(false)?;
@@ -38,6 +45,9 @@ impl ClientHandler {
         Ok(client_handler)
     }
 
+    /// Main thread handler function, calls `inner_handler` and catches
+    /// errors, logging a warning in case of any. Finally, flags `ClientHandler`
+    /// as finished.
     fn handle(id: u16, finished: Arc<AtomicBool>, stream: TcpStream) {
         trace!("[#{}] Starting handler execution", id);
 
@@ -49,6 +59,8 @@ impl ClientHandler {
         trace!("[#{}] Handler execution finished", id);
     }
 
+    /// Actual logic handler that will execute the protocol
+    /// to perform as an echo server with the client connection.
     fn inner_handler(id: u16, mut stream: TcpStream) -> Result<(), Box<dyn Error>> {
         let mut data = [0_u8; MAX_LEN];
 
@@ -71,10 +83,15 @@ impl ClientHandler {
         Ok(())
     }
 
+    /// Checks if handler is joineable without blocking
     pub fn joineable(&self) -> bool {
         self.finished.load(Ordering::Relaxed)
     }
 
+    /// Joins client handler, blocking if it has not finished.
+    /// 
+    /// (nit: you might want to use `joineable` to be sure it can be joined
+    /// without blocking!)
     pub fn join(self) {
         trace!("[#{}] Joining...", self.id);
 

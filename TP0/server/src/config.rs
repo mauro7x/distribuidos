@@ -6,6 +6,15 @@ use log::{debug, trace};
 use serde::Deserialize;
 use std::{env::var, error::Error, time::Duration};
 
+/// Config to be parsed from config file.
+/// All parameters are optional since they may not be present in the file.
+/// 
+/// ## Arguments
+/// 
+/// * `server_ip` (self-descriptive).
+/// * `server_port`: (self-descriptive).
+/// * `server_listen_backlog`: size of the backlog listening queue.
+/// * `accept_sleep_time_ms`: time to sleep when there are no connections to accept.
 #[derive(Debug, Deserialize)]
 struct FileConfig {
     server_ip: Option<String>,
@@ -14,6 +23,12 @@ struct FileConfig {
     accept_sleep_time_ms: Option<u64>,
 }
 
+/// ## Arguments
+/// 
+/// * `host` (self-descriptive).
+/// * `port`: (self-descriptive).
+/// * `listen_backlog`: size of the backlog listening queue.
+/// * `accept_sleep_time_ms`: time to sleep when there are no connections to accept.
 #[derive(Debug, Deserialize)]
 pub struct Config {
     pub host: String,
@@ -23,6 +38,8 @@ pub struct Config {
 }
 
 impl Config {
+    /// Reads configuration file and then overrides values present in
+    /// environment variables.
     pub fn new() -> Result<Config, Box<dyn Error>> {
         trace!("Reading config file...");
         let data = std::fs::read_to_string(CONFIG_FILE_PATH)?;
@@ -35,6 +52,9 @@ impl Config {
         Ok(config)
     }
 
+    /// Overrides config read from file with values present
+    /// in environment values, or default values if they are not
+    /// present in either place.
     fn override_with_envvars(file_config: FileConfig) -> Result<Config, Box<dyn Error>> {
         let config = Config {
             host: var(HOST_ENV).unwrap_or_else(|_| {

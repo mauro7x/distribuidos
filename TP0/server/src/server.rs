@@ -9,6 +9,14 @@ use std::{
     time::Duration,
 };
 
+/// ## Arguments
+/// 
+/// * `accept_sleep_time`: time to sleep when there are no connections to accept.
+/// * `ctrlc_receiver`: receiver from channel for handling Ctrl-C signals.
+/// * `next_id`: next ID to be used for incoming connections.
+/// * `port` (self-descriptive).
+/// * `listener`: TcpListener abstraction used for receiving connections.
+/// * `handlers`: array of ClientHandler's objects representing established connections.
 #[derive(Debug)]
 pub struct Server {
     accept_sleep_time: Duration,
@@ -20,6 +28,7 @@ pub struct Server {
 }
 
 impl Server {
+    /// Creates Server with non-blocking TcpListener initialized and bound.
     pub fn new(config: Config, rx: Receiver<()>) -> Result<Server, Box<dyn Error>> {
         trace!("Creating server with config: {:#?}", config);
         let listener_addr = format!("{}:{}", config.host, config.port);
@@ -40,6 +49,11 @@ impl Server {
         Ok(server)
     }
 
+    /// Runs server main loop, accepting connections in a non-blocking
+    /// way, allowing to check for Ctrl-C signals received, and to
+    /// join client's threads that have already finished executing.
+    /// 
+    /// Before finishing, joins every thread in a blocking way (graceful).
     pub fn run(mut self) -> Result<(), Box<dyn Error>> {
         trace!("Starting server...");
 
@@ -66,6 +80,7 @@ impl Server {
         Ok(())
     }
 
+    /// Checks if a Ctrl-C signal was received.
     fn stopped(&self) -> Result<bool, Box<dyn Error>> {
         match self.ctrlc_receiver.try_recv() {
             Ok(_) => {
@@ -82,6 +97,8 @@ impl Server {
         }
     }
 
+    /// Handles a new connection request createing a ClientHandler
+    /// and adding it to the array of client handlers.
     fn handle_new_connection(
         &mut self,
         stream: TcpStream,
@@ -95,6 +112,7 @@ impl Server {
         Ok(())
     }
 
+    /// Joins client's threads. Blocking will depend on `wait` argument.
     fn join_threads(&mut self, wait: bool) {
         if wait {
             trace!("Joining client handlers (blocking)...");
