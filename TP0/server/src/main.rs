@@ -1,5 +1,6 @@
-use server::greeter::greet;
+use app::server::Server;
 
 fn main() {
-    greet("World")
+    let server = Server::new();
+    server.say_hi();
 }
