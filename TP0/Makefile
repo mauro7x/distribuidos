@@ -37,3 +37,12 @@ docker-compose-down:
 docker-compose-logs:
 	docker-compose -f docker-compose-dev.yaml logs -f
 .PHONY: docker-compose-logs
+
+gen-docker-compose-n-clients:
+	docker build -t "n_clients_compose_script:latest" scripts/n_clients_compose
+	rm -rf tmp && mkdir tmp
+	cp docker-compose.template.yaml ./tmp/input
+	docker run -e N_CLIENTS=${N_CLIENTS} -v "$(PWD)"/tmp:/usr/app/src/files -it n_clients_compose_script
+	cp ./tmp/output docker-compose-dev.yaml
+	rm -rf tmp
+.PHONY: gen-docker-compose-n-clients
