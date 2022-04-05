@@ -1,13 +1,14 @@
 use app::{config::Config, server::Server};
+use log::{error, trace};
 use std::{error::Error, process};
 
 extern crate pretty_env_logger;
-use log::{error, trace};
 
 fn run() -> Result<(), Box<dyn Error>> {
     trace!("Starting execution");
     let config = Config::new()?;
-    let _server = Server::new(config);
+    let mut server = Server::new(config)?;
+    server.run()?;
 
     trace!("Finishing execution gracefully");
     Ok(())
