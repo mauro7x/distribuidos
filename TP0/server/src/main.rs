@@ -1,20 +1,23 @@
+use app::{config::Config, server::Server};
 use std::{error::Error, process};
 
-use app::{config::Config, server::Server};
+extern crate pretty_env_logger;
+use log::{error, trace};
 
 fn run() -> Result<(), Box<dyn Error>> {
+    trace!("Starting execution");
     let config = Config::new()?;
-    println!("Config: {:?}", config);
+    let _server = Server::new(config);
 
-    let server = Server::new();
-    server.say_hi();
-
+    trace!("Finishing execution gracefully");
     Ok(())
 }
 
 fn main() {
+    pretty_env_logger::init();
+
     if let Err(err) = run() {
-        println!("{}", err);
+        error!("{}", err);
         process::exit(1);
     }
 }

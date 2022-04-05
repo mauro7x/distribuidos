@@ -1,11 +1,15 @@
+use crate::config::Config;
+use log::{debug, trace};
+
+#[derive(Debug)]
 pub struct Server {}
 
 impl Server {
-    pub fn new() -> Self {
-        Server {}
-    }
+    pub fn new(config: Config) -> Self {
+        trace!("Creating server with config: {:#?}", config);
+        let server = Server {};
 
-    pub fn say_hi(&self) {
-        println!("Hello World from Server!");
+        debug!("Created successfully: {:#?}", server);
+        server
     }
 }

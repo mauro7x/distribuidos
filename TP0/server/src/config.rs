@@ -1,7 +1,8 @@
 use crate::constants::{
-    CONFIG_FILE_PATH, DEFAULT_HOST, DEFAULT_LISTEN_BACKLOG, DEFAULT_LOGGING_LEVEL, DEFAULT_PORT,
-    HOST_ENV, LISTEN_BACKLOG_ENV, LOGGING_LEVEL_ENV, PORT_ENV,
+    CONFIG_FILE_PATH, DEFAULT_HOST, DEFAULT_LISTEN_BACKLOG, DEFAULT_PORT, HOST_ENV,
+    LISTEN_BACKLOG_ENV, PORT_ENV,
 };
+use log::{debug, trace};
 use serde::Deserialize;
 use std::{env::var, error::Error};
 
@@ -10,7 +11,6 @@ struct FileConfig {
     server_ip: Option<String>,
     server_port: Option<u16>,
     server_listen_backlog: Option<u16>,
-    logging_level: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -18,15 +18,18 @@ pub struct Config {
     pub host: String,
     pub port: u16,
     pub listen_backlog: u16,
-    pub logging_level: String,
 }
 
 impl Config {
     pub fn new() -> Result<Config, Box<dyn Error>> {
+        trace!("Reading config file...");
         let data = std::fs::read_to_string(CONFIG_FILE_PATH)?;
         let file_config: FileConfig = serde_json::from_str(&data)?;
+        trace!("Read config file: {:#?}", data);
+        trace!("Overriding config with environment vars...");
         let config = Config::override_with_envvars(file_config)?;
 
+        debug!("Created successfully: {:#?}", config);
         Ok(config)
     }
 
@@ -45,11 +48,6 @@ impl Config {
                         .to_string()
                 })
                 .parse()?,
-            logging_level: var(LOGGING_LEVEL_ENV).unwrap_or_else(|_| {
-                file_config
-                    .logging_level
-                    .unwrap_or(DEFAULT_LOGGING_LEVEL.to_string())
-            }),
         };
 
         Ok(config)
