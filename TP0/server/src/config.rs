@@ -6,7 +6,7 @@ use serde::Deserialize;
 use std::{env::var, error::Error};
 
 #[derive(Debug, Deserialize)]
-struct PartialConfig {
+struct FileConfig {
     server_ip: Option<String>,
     server_port: Option<u16>,
     server_listen_backlog: Option<u16>,
@@ -22,9 +22,15 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new() -> Result<Self, Box<dyn Error>> {
+    pub fn new() -> Result<Config, Box<dyn Error>> {
         let data = std::fs::read_to_string(CONFIG_FILE_PATH)?;
-        let file_config: PartialConfig = serde_json::from_str(&data)?;
+        let file_config: FileConfig = serde_json::from_str(&data)?;
+        let config = Config::override_with_envvars(file_config)?;
+
+        Ok(config)
+    }
+
+    fn override_with_envvars(file_config: FileConfig) -> Result<Config, Box<dyn Error>> {
         let config = Config {
             host: var(HOST_ENV)
                 .unwrap_or_else(|_| file_config.server_ip.unwrap_or(DEFAULT_HOST.to_string())),
