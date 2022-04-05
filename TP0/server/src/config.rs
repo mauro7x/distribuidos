@@ -4,13 +4,14 @@ use crate::constants::{
 };
 use log::{debug, trace};
 use serde::Deserialize;
-use std::{env::var, error::Error};
+use std::{env::var, error::Error, time::Duration};
 
 #[derive(Debug, Deserialize)]
 struct FileConfig {
     server_ip: Option<String>,
     server_port: Option<u16>,
     server_listen_backlog: Option<u16>,
+    accept_sleep_time_ms: Option<u64>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -18,6 +19,7 @@ pub struct Config {
     pub host: String,
     pub port: u16,
     pub listen_backlog: u16,
+    pub accept_sleep_time: Duration,
 }
 
 impl Config {
@@ -35,8 +37,11 @@ impl Config {
 
     fn override_with_envvars(file_config: FileConfig) -> Result<Config, Box<dyn Error>> {
         let config = Config {
-            host: var(HOST_ENV)
-                .unwrap_or_else(|_| file_config.server_ip.unwrap_or(DEFAULT_HOST.to_string())),
+            host: var(HOST_ENV).unwrap_or_else(|_| {
+                file_config
+                    .server_ip
+                    .unwrap_or_else(|| DEFAULT_HOST.to_string())
+            }),
             port: var(PORT_ENV)
                 .unwrap_or_else(|_| file_config.server_port.unwrap_or(DEFAULT_PORT).to_string())
                 .parse()?,
@@ -48,6 +53,9 @@ impl Config {
                         .to_string()
                 })
                 .parse()?,
+            accept_sleep_time: Duration::from_millis(
+                file_config.accept_sleep_time_ms.unwrap_or(100),
+            ),
         };
 
         Ok(config)

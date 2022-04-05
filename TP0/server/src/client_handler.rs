@@ -21,8 +21,9 @@ pub struct ClientHandler {
 }
 
 impl ClientHandler {
-    pub fn new(id: u16, stream: TcpStream) -> ClientHandler {
+    pub fn new(id: u16, stream: TcpStream) -> Result<ClientHandler, Box<dyn Error>> {
         trace!("Creating ClientHandler for client #{}", id);
+        stream.set_nonblocking(false)?;
         let finished = Arc::new(AtomicBool::new(false));
         let cloned_finished = finished.clone();
         trace!("[#{}] Spawning thread...", id);
@@ -34,7 +35,7 @@ impl ClientHandler {
         };
 
         debug!("[#{}] Created successfully: {:#?}", id, client_handler);
-        client_handler
+        Ok(client_handler)
     }
 
     fn handle(id: u16, finished: Arc<AtomicBool>, stream: TcpStream) {
@@ -49,7 +50,7 @@ impl ClientHandler {
     }
 
     fn inner_handler(id: u16, mut stream: TcpStream) -> Result<(), Box<dyn Error>> {
-        let mut data = [0 as u8; MAX_LEN];
+        let mut data = [0_u8; MAX_LEN];
 
         trace!("[#{}] Receiving data from client...", id);
         let size = stream.read(&mut data)?;
@@ -60,7 +61,7 @@ impl ClientHandler {
         );
 
         trace!("[#{}] Writing data to client...", id);
-        stream.write(&data[0..size])?;
+        stream.write_all(&data[0..size])?;
         debug!("[#{}] Wrote data to client", id);
 
         if let Err(e) = stream.shutdown(Shutdown::Both) {
