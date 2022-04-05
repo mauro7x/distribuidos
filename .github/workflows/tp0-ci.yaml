@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./TP0
+        working-directory: ./TP0/server
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
