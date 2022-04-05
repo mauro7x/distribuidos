@@ -1,5 +1,6 @@
 use log::{debug, info, trace, warn};
 use std::{
+    error::Error,
     io::{Read, Write},
     net::{Shutdown, TcpStream},
     str,
@@ -36,34 +37,37 @@ impl ClientHandler {
         client_handler
     }
 
-    fn handle(id: u16, finished: Arc<AtomicBool>, mut stream: TcpStream) {
+    fn handle(id: u16, finished: Arc<AtomicBool>, stream: TcpStream) {
         trace!("[#{}] Starting handler execution", id);
 
-        let mut data = [0 as u8; MAX_LEN];
-        trace!("[#{}] Receiving data from client...", id);
-        let received = stream.read(&mut data);
-        match received {
-            Ok(size) => {
-                info!(
-                    "[#{}] Received data from client: {:?}",
-                    id,
-                    str::from_utf8(&data[0..size]).unwrap_or("could not convert data to string")
-                );
-
-                trace!("[#{}] Writing data to client...", id);
-                if let Err(e) = stream.write(&data[0..size]) {
-                    warn!("[#{}] Error while writing data to client: {}", id, e);
-                };
-            }
-            Err(e) => warn!("[#{}] Error while receiving data from client: {}", id, e),
+        if let Err(e) = ClientHandler::inner_handler(id, stream) {
+            warn!("[#{}] Error while handling client: {:?}", id, e);
         }
+
+        finished.store(true, Ordering::Relaxed);
+        trace!("[#{}] Handler execution finished", id);
+    }
+
+    fn inner_handler(id: u16, mut stream: TcpStream) -> Result<(), Box<dyn Error>> {
+        let mut data = [0 as u8; MAX_LEN];
+
+        trace!("[#{}] Receiving data from client...", id);
+        let size = stream.read(&mut data)?;
+        info!(
+            "[#{}] Received data from client: {:?}",
+            id,
+            str::from_utf8(&data[0..size])?
+        );
+
+        trace!("[#{}] Writing data to client...", id);
+        stream.write(&data[0..size])?;
+        debug!("[#{}] Wrote data to client", id);
 
         if let Err(e) = stream.shutdown(Shutdown::Both) {
             warn!("[#{}] Error while shutting client down: {}", id, e)
         };
 
-        finished.store(true, Ordering::Relaxed);
-        trace!("[#{}] Handler execution finished", id);
+        Ok(())
     }
 
     pub fn joineable(&self) -> bool {

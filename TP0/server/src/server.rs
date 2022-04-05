@@ -34,8 +34,8 @@ impl Server {
     pub fn run(&mut self) -> Result<(), Box<dyn Error>> {
         trace!("Starting server...");
 
+        info!("Listening to connections on port {}", self.port);
         loop {
-            info!("Listening to connections on port {}", self.port);
             let connection = self.listener.accept();
 
             match connection {
