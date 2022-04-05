@@ -11,4 +11,4 @@ RUN echo "fn main() {}" > dummy.rs && \
 
 COPY . .
 RUN cargo build --release
-CMD ["target/release/app"]
+ENTRYPOINT ["/bin/sh"]
