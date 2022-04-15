@@ -48,7 +48,7 @@ gen-docker-compose-n-clients:
 .PHONY: gen-docker-compose-n-clients
 
 netcat-test:
-	docker build -t "test:latest" ./test
+	docker build -t "test:latest" ./scripts/test
 	docker run -e HOST=server -e PORT=12345 --network=tp0_testing_net test
 .PHONY: netcat-test
 
