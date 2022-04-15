@@ -1,5 +1,7 @@
 # TP0: Docker Compose Init
 
+[![TP0 CI](https://github.com/mauro7x/distribuidos/actions/workflows/tp0-ci.yaml/badge.svg)](https://github.com/mauro7x/distribuidos/actions/workflows/tp0-ci.yaml)
+
 Trabajo práctico introductorio, cuyo objetivo principal es familiarizarse con la automatización de un proyecto mediante las herramientas **Docker** y **Docker Compose**.
 
 ## Enunciado
