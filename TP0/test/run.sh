@@ -6,7 +6,7 @@ PORT="${PORT:-12345}"
 
 # Test case
 MSG="Hello World"
-EXPECTED="Your Message has been received: Hello World"
+EXPECTED="Hello World"
 
 # Run netcat test
 OUTPUT=$(echo $MSG | nc $HOST $PORT)
