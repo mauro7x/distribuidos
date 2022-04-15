@@ -11,15 +11,13 @@ services:
       - ./server/config:/usr/app/config:ro
     networks:
       - testing_net
-
-  client1:
-    container_name: client1
+{% for n in range(1, n_clients + 1) %}
+  client{{n}}:
+    container_name: client{{n}}
     image: client:latest
     entrypoint: /client
-    volumes:
-      - ./client/config.yaml:/config.yaml:ro
     environment:
-      - CLI_ID=1
+      - CLI_ID={{n}}
       - CLI_SERVER_ADDRESS=server:12345
       - CLI_LOOP_LAPSE=1m2s
       - CLI_LOG_LEVEL=DEBUG
@@ -27,7 +25,7 @@ services:
       - testing_net
     depends_on:
       - server
-
+{% endfor %}
 networks:
   testing_net:
     ipam:

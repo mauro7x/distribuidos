@@ -11,7 +11,7 @@ on:
       - TP0/**/*
 
 jobs:
-  server:
+  lint:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -23,3 +23,14 @@ jobs:
         run: cargo check
       - name: Cargo clippy
         run: cargo clippy
+
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./TP0
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Run server integration tests
+        run: make test
