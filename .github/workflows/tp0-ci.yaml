@@ -1,9 +1,6 @@
 name: TP0 CI
 
 on:
-  push:
-    paths:
-      - TP0/**/*
   pull_request:
     branches:
       - main
@@ -11,6 +8,19 @@ on:
       - TP0/**/*
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./TP0/server
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Cargo check
+        run: cargo check
+      - name: Cargo clippy
+        run: cargo clippy
+
   test:
     runs-on: ubuntu-latest
     defaults:

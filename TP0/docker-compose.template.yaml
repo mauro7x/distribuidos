@@ -3,12 +3,12 @@ services:
   server:
     container_name: server
     image: server:latest
-    entrypoint: python3 /main.py
+    entrypoint: target/release/app
     environment:
-      - PYTHONUNBUFFERED=1
       - SERVER_PORT=12345
-      - SERVER_LISTEN_BACKLOG=7
-      - LOGGING_LEVEL=DEBUG
+      - RUST_LOG=trace
+    volumes:
+      - ./server/config:/usr/app/config:ro
     networks:
       - testing_net
 {% for n in range(1, n_clients + 1) %}
