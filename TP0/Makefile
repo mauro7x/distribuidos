@@ -37,3 +37,11 @@ docker-compose-down:
 docker-compose-logs:
 	docker-compose -f docker-compose-dev.yaml logs -f
 .PHONY: docker-compose-logs
+
+netcat-test:
+	docker build -t "test:latest" ./test
+	docker run -e HOST=server -e PORT=12345 --network=tp0_testing_net test
+.PHONY: netcat-test
+
+test: docker-compose-up netcat-test docker-compose-down
+.PHONY: test
