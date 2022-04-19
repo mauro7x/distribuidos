@@ -1,9 +1,7 @@
 name: TP0 CI
 
 on:
-  pull_request:
-    branches:
-      - main
+  push:
     paths:
       - TP0/**/*
 
