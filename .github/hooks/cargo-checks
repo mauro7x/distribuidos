@@ -4,11 +4,11 @@
 set -e
 
 # Config
-dirs=("TP0" "TP1")
+dirs=("TP1")
 cmds=(
-    "cargo check,cargo check --color always"
-    "cargo clippy,cargo clippy --color always -- -D warnings"
-    "cargo fmt,cargo fmt --check"
+    "cargo check,make cargo-check"
+    "cargo clippy,make cargo-clippy"
+    "cargo fmt,make cargo-fmt"
 )
 
 # Colors
