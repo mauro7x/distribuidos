@@ -1,0 +1,20 @@
+name: TP1 CI
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - TP1/**/*
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./TP1
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Make lint
+        run: make lint
