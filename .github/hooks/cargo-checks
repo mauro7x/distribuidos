@@ -53,7 +53,7 @@ function run_for_dir {
 
     echo -n -e "Checking $1..."
 
-    if [ -z "$(git status --porcelain .)" ]; then
+    if [ -z "$(git diff --name-only --staged .)" ]; then
         echo -e " ${GREY}no changes.${NC}"
         cd ..
         return 0
