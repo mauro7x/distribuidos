@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  server:
+    container_name: tp1_server
+    image: tp1_server:latest
+    build: ./services/server
+    entrypoint: target/release/server
+    networks:
+      - internal
+      - external
+
+  app:
+    container_name: tp1_app
+    image: tp1_app:latest
+    build: ./services/app
+    entrypoint: target/release/app
+    networks:
+      - internal
+
+  client:
+    container_name: tp1_client
+    image: tp1_client:latest
+    build: ./services/client
+    entrypoint: target/release/client
+    networks:
+      - external
+
+networks:
+  internal:
+    driver: bridge
+  external:
+    driver: bridge
