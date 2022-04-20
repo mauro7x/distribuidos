@@ -1,4 +1,4 @@
-name: example_package
+name: 'Deploy package: example_package'
 
 on:
   push:
