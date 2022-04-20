@@ -1,5 +1,3 @@
-name: 'Lint package: example_package'
-
 on:
   pull_request:
     branches:
