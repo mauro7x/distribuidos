@@ -4,24 +4,27 @@ const NAME_REGEX = /name = "(?<name>.*)"/;
 const VERSION_REGEX = /.*"(?<version>.*)".*/;
 
 const { MAJOR_VERSION: majorStr, MINOR_VERSION: minorStr } = process.env;
-const CARGO_TOML_FILEPATH = `${
-  process.env.CARGO_TOML_DIRPATH || '.'
-}/Cargo.toml`;
-const cargoTomlFile = fs.readFileSync(CARGO_TOML_FILEPATH, 'utf-8');
+const cargoTomlFilepath = `${process.env.CARGO_TOML_DIRPATH || '.'}/Cargo.toml`;
+const cargoTomlFile = fs.readFileSync(cargoTomlFilepath, 'utf-8');
 const packageNameLine = cargoTomlFile.split('\n')[1];
 const packageName = NAME_REGEX.exec(packageNameLine).groups?.name;
 
+console.log('Invoked with:', {
+  cargoTomlFilepath,
+  packageName,
+  majorStr,
+  minorStr,
+});
+
 if (!packageName || !majorStr || !minorStr) {
   console.error(
-    'Missing environment values. Required values are: PKG_NAME, MAJOR_VERSION and MINOR_VERSION.'
+    'Missing environment values. Required values are: MAJOR_VERSION and MINOR_VERSION.'
   );
   process.exit(1);
 }
 
 const major = parseInt(majorStr);
 const minor = parseInt(minorStr);
-
-console.info('Running script with values:', { packageName, major, minor });
 
 const searchOutput = execSync(`cargo search ${packageName} --limit 1`, {
   encoding: 'utf-8',
