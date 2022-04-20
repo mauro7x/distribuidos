@@ -21,7 +21,7 @@ runs:
       run: |
         export $(cat "${{ inputs.packagePath }}/version" | xargs) &&
         export CARGO_TOML_DIRPATH="${{ inputs.packagePath }}" &&
-        node scripts/calculate_version.js
+        node scripts/generate_cargo_version.js
         echo "::set-output name=version::$(cat version.out)"
 
     - name: Replace version in Cargo.toml
