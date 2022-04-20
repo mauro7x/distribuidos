@@ -1,0 +1,31 @@
+name: 'Deploy package: example_package'
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - packages/example_package/**/*
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+      - name: Lint
+        uses: ./.github/actions/cargo_lint
+        with:
+          packagePath: packages/example_package
+
+  publish:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+      - name: Publish crate
+        uses: ./.github/actions/cargo_publish
+        with:
+          packagePath: packages/example_package
+          cargoToken: ${{ secrets.CRATES_TOKEN }}
