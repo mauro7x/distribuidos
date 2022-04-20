@@ -18,7 +18,7 @@ console.log('Invoked with:', {
 
 if (!packageName || !majorStr || !minorStr) {
   console.error(
-    'Missing environment values. Required values are: PKG_NAME, MAJOR_VERSION and MINOR_VERSION.'
+    'Missing environment values. Required values are: MAJOR_VERSION and MINOR_VERSION.'
   );
   process.exit(1);
 }
