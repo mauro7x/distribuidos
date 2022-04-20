@@ -4,8 +4,8 @@ on:
   pull_request:
     branches:
       - main
-    # paths:
-    #   - packages/example_package/**/*
+    paths:
+      - packages/example_package/**/*
 
 jobs:
   lint:
@@ -17,15 +17,3 @@ jobs:
         uses: ./.github/actions/cargo_lint
         with:
           packagePath: packages/example_package
-
-  publish:
-    needs: lint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout sources
-        uses: actions/checkout@v2
-      - name: Publish crate
-        uses: ./.github/actions/cargo_publish
-        with:
-          packagePath: packages/example_package
-          cargoToken: ${{ secrets.CARGO_REGISTRY_TOKEN }}
