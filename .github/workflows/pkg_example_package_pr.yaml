@@ -4,8 +4,8 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - packages/example_package/**/*
+    # paths:
+    #   - packages/example_package/**/*
 
 jobs:
   lint:
