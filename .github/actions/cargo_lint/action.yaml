@@ -1,0 +1,21 @@
+name: Cargo lint
+description: Run cargo fmt, check and clippy
+
+inputs:
+  packagePath:
+    description: 'Path to package root cargo directory'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout sources
+      uses: actions/checkout@v2
+
+    - name: Run lint commands
+      working-directory: ${{ inputs.packagePath }}
+      shell: bash
+      run: |
+        cargo check --color always
+        cargo clippy --color always -- -D warnings
+        cargo fmt --check

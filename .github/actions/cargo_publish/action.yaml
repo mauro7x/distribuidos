@@ -1,0 +1,46 @@
+name: Cargo publish
+description: Publish crate to crates.io generating next version
+
+inputs:
+  packagePath:
+    description: 'Path to package root cargo directory'
+    required: true
+  cargoToken:
+    description: 'Cargo token for publishing to crates.io'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout sources
+      uses: actions/checkout@v2
+
+    - name: Generate next version
+      shell: bash
+      id: generate_version
+      run: |
+        export $(cat "${{ inputs.packagePath }}/version" | xargs) &&
+        export CARGO_TOML_DIRPATH="${{ inputs.packagePath }}" &&
+        node scripts/calculate_version.js
+        echo "::set-output name=version::$(cat version.out)"
+
+    - name: Replace version in Cargo.toml
+      working-directory: ${{ inputs.packagePath }}
+      shell: bash
+      run: |
+        export version="${{ steps.generate_version.outputs.version }}"
+        sed -i -e "s/.*version = \"0.0.0\".*/version = \"${version}\"/" Cargo.toml
+
+    - name: Install stable toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+
+    - name: Publish to crates.io
+      working-directory: ${{ inputs.packagePath }}
+      shell: bash
+      run: |
+        cargo publish --allow-dirty --token ${{ inputs.cargoToken }}
+        echo "Version ${{ steps.generate_version.outputs.version }} published!"
