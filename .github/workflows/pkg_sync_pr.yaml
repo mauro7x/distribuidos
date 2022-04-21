@@ -1,11 +1,11 @@
-name: 'Lint package: example_package'
+name: 'Lint package: sync'
 
 on:
   pull_request:
     branches:
       - main
     paths:
-      - packages/example_package/**/*
+      - packages/sync/**/*
 
 jobs:
   lint:
@@ -16,4 +16,4 @@ jobs:
       - name: Lint
         uses: ./.github/actions/cargo_lint
         with:
-          packagePath: packages/example_package
+          packagePath: packages/sync

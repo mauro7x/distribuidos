@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "distribuidos_example_package"
+name = "distribuidos_sync"
 version = "0.0.0"

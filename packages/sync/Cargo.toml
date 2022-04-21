@@ -1,9 +1,9 @@
 [package]
-name = "distribuidos_example_package"
+name = "distribuidos_sync"
 version = "0.0.0"
 edition = "2021"
 license = "MIT"
-description = "Example package"
+description = "Sync common utils using standard library"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
