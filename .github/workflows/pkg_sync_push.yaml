@@ -1,11 +1,11 @@
-name: 'Deploy package: example_package'
+name: 'Deploy package: sync'
 
 on:
   push:
     branches:
       - main
     paths:
-      - packages/example_package/**/*
+      - packages/sync/**/*
   workflow_dispatch:
 
 jobs:
@@ -17,7 +17,7 @@ jobs:
       - name: Lint
         uses: ./.github/actions/cargo_lint
         with:
-          packagePath: packages/example_package
+          packagePath: packages/sync
 
   publish:
     needs: lint
@@ -28,5 +28,5 @@ jobs:
       - name: Publish crate
         uses: ./.github/actions/cargo_publish
         with:
-          packagePath: packages/example_package
+          packagePath: packages/sync
           cargoToken: ${{ secrets.CARGO_REGISTRY_TOKEN }}
