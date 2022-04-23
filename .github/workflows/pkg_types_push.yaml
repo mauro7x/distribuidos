@@ -1,0 +1,32 @@
+name: 'Deploy package: types'
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - packages/types/**/*
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+      - name: Lint
+        uses: ./.github/actions/cargo_lint
+        with:
+          packagePath: packages/types
+
+  publish:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+      - name: Publish crate
+        uses: ./.github/actions/cargo_publish
+        with:
+          packagePath: packages/types
+          cargoToken: ${{ secrets.CARGO_REGISTRY_TOKEN }}
