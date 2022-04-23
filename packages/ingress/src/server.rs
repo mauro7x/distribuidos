@@ -9,6 +9,7 @@ use std::{
 use distribuidos_sync::BoundedThreadPool;
 use distribuidos_tp1_protocols::common::CLOSE;
 use distribuidos_types::BoxResult;
+use log::{debug, info, trace, warn};
 
 pub struct Server {
     listener: TcpListener,
@@ -18,6 +19,7 @@ pub struct Server {
 
 impl Server {
     pub fn new() -> BoxResult<Server> {
+        trace!("Creating Server...");
         let Config {
             host,
             port,
@@ -25,6 +27,7 @@ impl Server {
             queue_size,
         } = Config::new()?;
         let listener_addr = format!("{}:{}", host, port);
+        trace!("Binding TcpListener...");
         let listener = TcpListener::bind(listener_addr)?;
         let local_addr = listener.local_addr()?;
 
@@ -33,6 +36,7 @@ impl Server {
             handler_pool: BoundedThreadPool::new(thread_pool_size, queue_size),
             stop_signal_receiver: Server::set_stop_signal_handler(local_addr)?,
         };
+        trace!("Server created: {:?}", server);
 
         Ok(server)
     }
@@ -41,16 +45,23 @@ impl Server {
     where
         F: Fn(TcpStream) + Send + Copy + 'static,
     {
+        trace!("Running Server...");
+
+        info!("Listening on {}", self.listener.local_addr()?);
         for connection in self.listener.incoming() {
             if self.stopped()? {
+                trace!("Server has received stop signal");
                 break;
             }
 
             let stream = connection?;
+            debug!("New connection established: {:?}", stream);
             self.handler_pool.execute(move || f(stream)).unwrap();
         }
 
+        trace!("Joining Server's handler thread pool...");
         self.handler_pool.join();
+        trace!("Server exited gracefully");
 
         Ok(())
     }
@@ -70,17 +81,19 @@ impl Server {
     fn set_stop_signal_handler(addr: SocketAddr) -> BoxResult<Receiver<()>> {
         let (tx, rx) = mpsc::channel();
         ctrlc::set_handler(move || {
+            trace!("(Ctrl-C) Signal received");
             tx.send(())
                 .expect("Could not send signal on stop-signal channel.");
+            trace!("(Ctrl-C) Stop message sent in channel");
 
             match TcpStream::connect(addr) {
                 Ok(mut stream) => {
                     if stream.write_all(&CLOSE).is_err() {
-                        println!("Failed writing in the stream")
+                        warn!("(Ctrl-C) Failed to send CLOSE message to acceptor socket");
                     };
                 }
                 Err(_) => {
-                    println!("Server is not accepting connections")
+                    warn!("(Ctrl-C) Could not establish connection with Server")
                 }
             }
         })?;
