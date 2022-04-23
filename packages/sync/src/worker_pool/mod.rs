@@ -1,9 +1,9 @@
-mod traits;
-mod types;
+pub mod types;
 mod worker;
 
+pub use self::types::MessageSender;
 use self::{
-    types::{ExecuteError, Message, MessageSender},
+    types::{ExecuteError, Message},
     worker::Worker,
 };
 use std::sync::{
@@ -13,23 +13,21 @@ use std::sync::{
 
 use log::{error, trace};
 
-pub struct ThreadPool {
+pub struct WorkerPool<T: Send> {
     workers: Vec<Worker>,
-    sender: MessageSender,
+    sender: MessageSender<T>,
 }
 
-/// Static thread pool to execute tasks with a fixed number of threads.
-impl ThreadPool {
-    /// Create a new ThreadPool.
-    ///
-    /// ## Arguments
-    /// * `size`: number of threads in the pool.
-    /// * `max_jobs_queue`: max number of jobs waiting to be executed.
-    ///
-    /// ## Panics
-    /// Function will panic if any parameter is zero.
-    pub fn new(size: usize, max_jobs_queue: usize) -> ThreadPool {
-        trace!("Creating ThreadPool...");
+impl<T> WorkerPool<T>
+where
+    T: 'static + Send,
+{
+    pub fn new<C, F>(size: usize, max_jobs_queue: usize, context: C, handler: F) -> WorkerPool<T>
+    where
+        C: Clone + Send + 'static,
+        F: Fn(usize, &mut C, T) + Copy + Send + 'static,
+    {
+        trace!("Creating WorkerPool...");
         assert!(size > 0);
         assert!(max_jobs_queue > 0);
 
@@ -37,23 +35,22 @@ impl ThreadPool {
         let receiver = Arc::new(Mutex::new(receiver));
         let mut workers = Vec::with_capacity(size);
 
-        trace!("Creating ThreadPool with size {}...", size);
+        trace!("Creating WorkerPool with size {}...", size);
         for id in 0..size {
-            workers.push(Worker::new(id, Arc::clone(&receiver)));
+            let worker = Worker::new(id, Arc::clone(&receiver), context.clone(), handler);
+            workers.push(worker);
         }
-        trace!("ThreadPool created");
+        trace!("WorkerPool created");
 
-        ThreadPool { workers, sender }
+        Self { workers, sender }
     }
 
-    /// Queues a task for execution in the ThreadPool.
-    pub fn execute<F>(&self, f: F) -> Result<(), ExecuteError>
-    where
-        F: FnOnce() + Send + 'static,
-    {
-        let job = Box::new(f);
+    pub fn execute(&self, job: T) -> Result<(), ExecuteError> {
+        Self::send(&self.sender, job)
+    }
 
-        match self.sender.try_send(Message::NewJob(job)) {
+    pub fn send(sender: &MessageSender<T>, job: T) -> Result<(), ExecuteError> {
+        match sender.try_send(Message::NewJob(job)) {
             Ok(()) => {
                 trace!("Job added to the queue");
                 Ok(())
@@ -67,10 +64,10 @@ impl ThreadPool {
         }
     }
 
-    /// Joins every worker gracefully, waiting for them to finish their work.
-    ///
-    /// ## Blocking operation
-    /// This will block the invoking thread to wait every task to be completed.
+    pub fn clone_sender(&self) -> MessageSender<T> {
+        self.sender.clone()
+    }
+
     pub fn join(&mut self) {
         trace!("Joining workers...");
         for _ in &mut self.workers {
