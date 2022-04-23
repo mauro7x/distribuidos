@@ -44,15 +44,19 @@ dependencies = [
  "distribuidos_sync",
  "distribuidos_tp1_protocols",
  "distribuidos_types",
+ "log",
  "serde",
  "serde_json",
 ]
 
 [[package]]
 name = "distribuidos_sync"
-version = "1.0.0"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "460d8cd76a5233894b4189a9dab77f0781f0534de9a43364c165c2f3a170e427"
+checksum = "09f4512d4ad02b65f5a389c5ac885e50da5b32edd9f849f925ba9ab7452103af"
+dependencies = [
+ "log",
+]
 
 [[package]]
 name = "distribuidos_tp1_protocols"
@@ -77,6 +81,15 @@ name = "libc"
 version = "0.2.124"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "21a41fed9d98f27ab1c6d161da622a4fa35e8a54a8adc24bbf3ddd0ef70b0e50"
+
+[[package]]
+name = "log"
+version = "0.4.16"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6389c490849ff5bc16be905ae24bc913a9c8892e19b2341dbc175e14c341c2b8"
+dependencies = [
+ "cfg-if",
+]
 
 [[package]]
 name = "memoffset"

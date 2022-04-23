@@ -4,6 +4,7 @@ use super::constants::{
 };
 use std::{env::var, error::Error};
 
+use log::{trace, warn};
 use serde::Deserialize;
 
 /// Config to be parsed from config file.
@@ -40,8 +41,10 @@ impl Config {
     /// Reads configuration file and then overrides values present in
     /// environment variables.
     pub fn new() -> Result<Config, Box<dyn Error>> {
+        trace!("Creating Config...");
         let file_config = Config::get_file_config();
         let config = Config::override_with_envvars(file_config)?;
+        trace!("Config created: {:?}", config);
 
         Ok(config)
     }
@@ -49,12 +52,15 @@ impl Config {
     fn get_file_config() -> FileConfig {
         match Config::read_config_file() {
             Ok(file) => file,
-            Err(_) => FileConfig {
-                host: None,
-                port: None,
-                thread_pool_size: None,
-                queue_size: None,
-            },
+            Err(_) => {
+                warn!("Config file not found, using env vars or default values.");
+                FileConfig {
+                    host: None,
+                    port: None,
+                    thread_pool_size: None,
+                    queue_size: None,
+                }
+            }
         }
     }
 
