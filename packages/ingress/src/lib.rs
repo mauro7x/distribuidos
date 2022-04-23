@@ -1,5 +1,5 @@
 mod config;
 mod constants;
-mod listener;
+mod server;
 
-pub use listener::new_listener;
+pub use self::server::Server;
