@@ -1,14 +1,47 @@
 version: '3'
 
 services:
-  server:
-    container_name: tp1_server
-    image: tp1_server:latest
-    build: ./services/server
-    entrypoint: target/release/server
+  event_receiver:
+    container_name: tp1_event_receiver
+    image: tp1_event_receiver:latest
+    build: ./services/event_receiver
+    entrypoint: target/release/event_receiver
+    networks:
+      - external_apps
+      - internal
+
+  query_receiver:
+    container_name: tp1_query_receiver
+    image: tp1_query_receiver:latest
+    build: ./services/query_receiver
+    entrypoint: target/release/query_receiver
+    networks:
+      - external_users
+      - internal
+
+  alert_service:
+    container_name: tp1_alert_service
+    image: tp1_alert_service:latest
+    build: ./services/alert_service
+    entrypoint: target/release/alert_service
     networks:
       - internal
-      - external
+
+  database:
+    container_name: tp1_database
+    image: tp1_database:latest
+    build: ./services/database
+    entrypoint: target/release/database
+    networks:
+      - internal
+
+  logging_service:
+    container_name: tp1_logging_service
+    image: tp1_logging_service:latest
+    build: ./services/logging_service
+    entrypoint: target/release/logging_service
+    networks:
+      - internal
 
   app:
     container_name: tp1_app
@@ -16,7 +49,7 @@ services:
     build: ./services/app
     entrypoint: target/release/app
     networks:
-      - internal
+      - external_apps
 
   client:
     container_name: tp1_client
@@ -24,10 +57,12 @@ services:
     build: ./services/client
     entrypoint: target/release/client
     networks:
-      - external
+      - external_users
 
 networks:
-  internal:
+  external_apps:
     driver: bridge
-  external:
+  external_users:
+    driver: bridge
+  internal:
     driver: bridge
