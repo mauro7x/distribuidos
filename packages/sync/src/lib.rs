@@ -1,4 +1,5 @@
 mod thread_pool;
+mod worker_pool;
 
-pub use self::thread_pool::bounded::BoundedThreadPool;
-pub use self::thread_pool::infinite::ThreadPool;
+pub use self::thread_pool::ThreadPool;
+pub use self::worker_pool::{MessageSender, WorkerPool};
