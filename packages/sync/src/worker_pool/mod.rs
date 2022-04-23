@@ -25,7 +25,7 @@ where
     pub fn new<C, F>(size: usize, max_jobs_queue: usize, context: C, handler: F) -> WorkerPool<T>
     where
         C: Clone + Send + 'static,
-        F: Fn(usize, &mut C, T) + Copy + Send + 'static,
+        F: Fn(&mut C, T) + Copy + Send + 'static,
     {
         trace!("Creating WorkerPool...");
         assert!(size > 0);
