@@ -12,6 +12,6 @@ log = "0.4"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 ctrlc = "3.2.1"
-distribuidos_sync = "1.1.0"
+distribuidos_sync = "1.1.1"
 distribuidos_types = "0.1.0"
 distribuidos_tp1_protocols = "0.1.0"

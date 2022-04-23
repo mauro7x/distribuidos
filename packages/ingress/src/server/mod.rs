@@ -24,7 +24,7 @@ impl Server {
     pub fn new<C, F>(context: C, handler: F) -> BoxResult<Server>
     where
         C: Clone + Send + 'static,
-        F: Fn(usize, &mut C, TcpStream) + Copy + Send + 'static,
+        F: Fn(&mut C, TcpStream) + Copy + Send + 'static,
     {
         trace!("Creating Server...");
         let Config {

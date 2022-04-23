@@ -51,9 +51,9 @@ dependencies = [
 
 [[package]]
 name = "distribuidos_sync"
-version = "1.1.0"
+version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dfe9115347531ff513f5090880a63b4426f42be84cb4c90345bfb0631a2dccee"
+checksum = "444c2af01257ef7843f93d0e5e85b4d5ff7409eae6253184c30df27c317fdd15"
 dependencies = [
  "log",
 ]
