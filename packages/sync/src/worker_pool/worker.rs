@@ -17,7 +17,7 @@ impl Worker {
     ) -> Worker
     where
         C: Send + 'static,
-        H: Fn(usize, &mut C, T) + Send + 'static,
+        H: Fn(&mut C, T) + Send + 'static,
         T: Send + 'static,
     {
         let thread = thread::spawn(move || Self::run(id, receiver, context, handler));
@@ -30,7 +30,7 @@ impl Worker {
 
     fn run<C, H, T>(id: usize, receiver: SharedMessageReceiver<T>, mut context: C, handler: H)
     where
-        H: Fn(usize, &mut C, T) + Send + 'static,
+        H: Fn(&mut C, T) + Send + 'static,
         T: Send + 'static,
     {
         loop {
@@ -39,7 +39,7 @@ impl Worker {
             match message {
                 Message::NewJob(job) => {
                     trace!("Worker #{} received job", id);
-                    handler(id, &mut context, job);
+                    handler(&mut context, job);
                 }
                 Message::Terminate => {
                     trace!("Worker #{} was told to terminate", id);
