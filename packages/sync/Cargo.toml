@@ -8,3 +8,4 @@ description = "Sync common utils using standard library"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+log = "0.4"
