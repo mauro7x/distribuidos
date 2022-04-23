@@ -3,7 +3,7 @@ name: TP1 CI
 on:
   push:
     paths:
-      - TP1/**/*
+      - TP1/**/*.rs
 
 jobs:
   lint:
