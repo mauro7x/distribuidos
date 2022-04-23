@@ -2,9 +2,13 @@
 pub const CONFIG_FILE_PATH: &str = "config/ingress.json";
 
 // Env vars
-pub const HOST_ENV: &str = "HOST";
-pub const PORT_ENV: &str = "PORT";
+pub const HOST_ENV: &str = "INGRESS_HOST";
+pub const PORT_ENV: &str = "INGRESS_PORT";
+pub const THREAD_POOL_SIZE_ENV: &str = "ACCEPTOR_THREAD_POOL_SIZE";
+pub const QUEUE_SIZE_ENV: &str = "ACCEPTOR_QUEUE_SIZE";
 
 // Defaults
 pub const DEFAULT_HOST: &str = "0.0.0.0";
 pub const DEFAULT_PORT: u16 = 3000;
+pub const DEFAULT_THREAD_POOL_SIZE: usize = 3;
+pub const DEFAULT_QUEUE_SIZE: usize = 10;
