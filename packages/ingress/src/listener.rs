@@ -1,11 +1,11 @@
-use super::{config::Config, types::InitError};
-use std::net::TcpListener;
+use super::config::Config;
+use std::{error::Error, net::TcpListener};
 
-pub fn new_listener() -> Result<TcpListener, InitError> {
-    let Config { host, port } = Config::new().map_err(|_| InitError::ConfigError)?;
+pub fn new_listener() -> Result<TcpListener, Box<dyn Error>> {
+    let Config { host, port } = Config::new()?;
 
     let listener_addr = format!("{}:{}", host, port);
-    let listener = TcpListener::bind(listener_addr).map_err(|_| InitError::BindError)?;
+    let listener = TcpListener::bind(listener_addr)?;
 
     Ok(listener)
 }
