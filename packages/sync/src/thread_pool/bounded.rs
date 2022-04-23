@@ -7,6 +7,8 @@ use std::sync::{
     Arc, Mutex,
 };
 
+use log::{error, trace};
+
 pub struct BoundedThreadPool {
     workers: Vec<Worker>,
     sender: MessageSyncSender,
@@ -23,6 +25,7 @@ impl BoundedThreadPool {
     /// ## Panics
     /// Function will panic if any parameter is zero.
     pub fn new(size: usize, max_jobs_queue: usize) -> BoundedThreadPool {
+        trace!("Creating BoundedThreadPool...");
         assert!(size > 0);
         assert!(max_jobs_queue > 0);
 
@@ -30,9 +33,11 @@ impl BoundedThreadPool {
         let receiver = Arc::new(Mutex::new(receiver));
         let mut workers = Vec::with_capacity(size);
 
+        trace!("Creating BoundedThreadPool with size {}...", size);
         for id in 0..size {
             workers.push(Worker::new(id, Arc::clone(&receiver)));
         }
+        trace!("BoundedThreadPool created");
 
         BoundedThreadPool { workers, sender }
     }
@@ -45,9 +50,16 @@ impl BoundedThreadPool {
         let job = Box::new(f);
 
         match self.sender.try_send(Message::NewJob(job)) {
-            Ok(()) => Ok(()),
+            Ok(()) => {
+                trace!("Job added to the queue");
+                Ok(())
+            }
             Err(TrySendError::Full(_)) => Err(ExecuteError::Full),
-            Err(TrySendError::Disconnected(_)) => panic!("Channel closed by receivers."),
+            Err(TrySendError::Disconnected(_)) => {
+                let msg = "Channel closed by receivers";
+                error!("{}", msg);
+                panic!("{}", msg);
+            }
         }
     }
 
@@ -56,14 +68,18 @@ impl BoundedThreadPool {
     /// ## Blocking operation
     /// This will block the invoking thread to wait every task to be completed.
     pub fn join(&mut self) {
+        trace!("Joining workers...");
         for _ in &mut self.workers {
             self.sender.send(Message::Terminate).unwrap();
         }
+        trace!("Terminate message sent to all workers");
 
         for worker in &mut self.workers {
             if let Some(thread) = worker.thread.take() {
                 thread.join().unwrap();
+                trace!("Worker #{} joined", worker.id);
             }
         }
+        trace!("Workers joined");
     }
 }
