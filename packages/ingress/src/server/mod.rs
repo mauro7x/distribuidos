@@ -1,4 +1,7 @@
-use super::config::Config;
+mod config;
+mod constants;
+
+use self::config::Config;
 use std::{
     fmt::{self, Debug},
     io::Write,
@@ -6,7 +9,7 @@ use std::{
     sync::mpsc::{self, Receiver, TryRecvError},
 };
 
-use distribuidos_sync::BoundedThreadPool;
+use distribuidos_sync::WorkerPool;
 use distribuidos_tp1_protocols::common::CLOSE;
 use distribuidos_types::BoxResult;
 use log::{debug, info, trace, warn};
@@ -14,11 +17,15 @@ use log::{debug, info, trace, warn};
 pub struct Server {
     listener: TcpListener,
     stop_signal_receiver: Receiver<()>,
-    handler_pool: BoundedThreadPool,
+    handler_pool: WorkerPool<TcpStream>,
 }
 
 impl Server {
-    pub fn new() -> BoxResult<Server> {
+    pub fn new<C, F>(context: C, handler: F) -> BoxResult<Server>
+    where
+        C: Clone + Send + 'static,
+        F: Fn(usize, &mut C, TcpStream) + Copy + Send + 'static,
+    {
         trace!("Creating Server...");
         let Config {
             host,
@@ -33,7 +40,7 @@ impl Server {
 
         let server = Server {
             listener,
-            handler_pool: BoundedThreadPool::new(thread_pool_size, queue_size),
+            handler_pool: WorkerPool::new(thread_pool_size, queue_size, context, handler),
             stop_signal_receiver: Server::set_stop_signal_handler(local_addr)?,
         };
         trace!("Server created: {:?}", server);
@@ -41,10 +48,7 @@ impl Server {
         Ok(server)
     }
 
-    pub fn run<F>(&mut self, f: F) -> BoxResult<()>
-    where
-        F: Fn(TcpStream) + Send + Copy + 'static,
-    {
+    pub fn run(&mut self) -> BoxResult<()> {
         trace!("Running Server...");
 
         info!("Listening on {}", self.listener.local_addr()?);
@@ -56,7 +60,7 @@ impl Server {
 
             let stream = connection?;
             debug!("New connection established: {:?}", stream);
-            self.handler_pool.execute(move || f(stream)).unwrap();
+            self.handler_pool.execute(stream).unwrap();
         }
 
         trace!("Joining Server's handler thread pool...");
