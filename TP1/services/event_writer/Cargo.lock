@@ -51,19 +51,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b9853b43d268610bee53b8078004dbaa6660736bb278ec3b11bac2f67a64b53c"
 dependencies = [
  "ctrlc",
- "distribuidos_sync 1.1.3",
+ "distribuidos_sync",
  "distribuidos_tp1_protocols",
  "distribuidos_types",
  "log",
  "serde",
  "serde_json",
-]
-
-[[package]]
-name = "distribuidos_sync"
-version = "0.0.0"
-dependencies = [
- "log",
 ]
 
 [[package]]
@@ -115,7 +108,7 @@ name = "event_writer"
 version = "0.1.0"
 dependencies = [
  "distribuidos_ingress",
- "distribuidos_sync 0.0.0",
+ "distribuidos_sync",
  "distribuidos_tp1_protocols",
  "distribuidos_types",
  "log",
