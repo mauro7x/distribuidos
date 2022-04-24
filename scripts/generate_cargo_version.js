@@ -48,7 +48,7 @@ const [lastMajor, lastMinor, lastPatch] = lastVersionString
 
 if (major < lastMajor || (major === lastMajor && minor < lastMinor)) {
   console.error(
-    `Invalid major/minor requested. Last version published is: ${lastVersion}`
+    `Invalid major/minor requested. Last version published is: ${lastVersionString}`
   );
   process.exit(3);
 }
