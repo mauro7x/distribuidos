@@ -1,11 +1,8 @@
 pub mod types;
 mod worker;
 
-pub use self::types::MessageSender;
-use self::{
-    types::{ExecuteError, Message},
-    worker::Worker,
-};
+pub use self::types::{MessageSender, QueueError};
+use self::{types::Message, worker::Worker};
 use std::sync::{
     mpsc::{self, TrySendError},
     Arc, Mutex,
@@ -45,17 +42,20 @@ where
         Self { workers, sender }
     }
 
-    pub fn execute(&self, job: T) -> Result<(), ExecuteError> {
+    pub fn execute(&self, job: T) -> Result<(), QueueError<T>> {
         Self::send(&self.sender, job)
     }
 
-    pub fn send(sender: &MessageSender<T>, job: T) -> Result<(), ExecuteError> {
+    pub fn send(sender: &MessageSender<T>, job: T) -> Result<(), QueueError<T>> {
         match sender.try_send(Message::NewJob(job)) {
             Ok(()) => {
                 trace!("Job added to the queue");
                 Ok(())
             }
-            Err(TrySendError::Full(_)) => Err(ExecuteError::Full),
+            Err(TrySendError::Full(t)) => match t {
+                Message::NewJob(job) => Err(QueueError::Full(job)),
+                Message::Terminate => panic!("Should never get here"),
+            },
             Err(TrySendError::Disconnected(_)) => {
                 let msg = "Channel closed by receivers";
                 error!("{}", msg);
