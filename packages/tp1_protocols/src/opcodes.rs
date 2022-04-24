@@ -17,3 +17,4 @@ pub const OP_INVALID_FORMAT: Opcode = 130;
 
 // 5XX
 pub const OP_SERVER_AT_CAPACITY: Opcode = 131;
+pub const OP_INTERNAL_SERVER_ERROR: Opcode = 132;
