@@ -1,16 +1,46 @@
-use super::Event;
+use std::io::Error;
 
 #[derive(Debug)]
 pub enum RecvError {
     Terminated,
     Invalid,
+    IOError(Error),
 }
-pub type RecvResult = Result<Event, RecvError>;
+
+impl From<SendError> for RecvError {
+    fn from(e: SendError) -> RecvError {
+        match e {
+            SendError::IOError(e) => RecvError::IOError(e),
+            _ => unreachable!(),
+        }
+    }
+}
+
+impl From<Error> for RecvError {
+    fn from(e: Error) -> RecvError {
+        RecvError::IOError(e)
+    }
+}
 
 #[derive(Debug)]
 pub enum SendError {
     Invalid,
     ServerAtCapacity,
     InternalServerError,
+    IOError(Error),
 }
-pub type SendResult = Result<(), SendError>;
+
+impl From<RecvError> for SendError {
+    fn from(e: RecvError) -> SendError {
+        match e {
+            RecvError::IOError(e) => SendError::IOError(e),
+            _ => unreachable!(),
+        }
+    }
+}
+
+impl From<Error> for SendError {
+    fn from(e: Error) -> SendError {
+        SendError::IOError(e)
+    }
+}
