@@ -7,7 +7,7 @@ use std::{env::var, error::Error};
 use log::{trace, warn};
 use serde::Deserialize;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Default)]
 struct FileConfig {
     host: Option<String>,
     port: Option<u16>,
@@ -40,12 +40,7 @@ impl Config {
             Ok(file) => file,
             Err(_) => {
                 warn!("Config file not found, using env vars or default values.");
-                FileConfig {
-                    host: None,
-                    port: None,
-                    thread_pool_size: None,
-                    queue_size: None,
-                }
+                FileConfig::default()
             }
         }
     }
