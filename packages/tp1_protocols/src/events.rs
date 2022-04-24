@@ -32,6 +32,7 @@ pub fn send(stream: &TcpStream, event: Event) -> BoxResult<SendResult> {
                 OP_EVENT_RECEIVED => Ok(()),
                 OP_INVALID_FORMAT => Err(SendError::Invalid),
                 OP_SERVER_AT_CAPACITY => Err(SendError::ServerAtCapacity),
+                OP_INTERNAL_SERVER_ERROR => Err(SendError::InternalServerError),
                 op => panic!("Received unexpected opcode: {:?}", op),
             };
 

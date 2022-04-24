@@ -11,5 +11,6 @@ pub type RecvResult = Result<Event, RecvError>;
 pub enum SendError {
     Invalid,
     ServerAtCapacity,
+    InternalServerError,
 }
 pub type SendResult = Result<(), SendError>;
