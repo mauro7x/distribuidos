@@ -2,16 +2,15 @@ mod config;
 mod constants;
 
 use self::config::Config;
+use distribuidos_sync::WorkerPool;
+use distribuidos_tp1_protocols::requests;
+use distribuidos_types::BoxResult;
+use log::{debug, info, trace, warn};
 use std::{
     fmt::{self, Debug},
     net::{SocketAddr, TcpListener, TcpStream},
     sync::mpsc::{self, Receiver, TryRecvError},
 };
-
-use distribuidos_sync::WorkerPool;
-use distribuidos_tp1_protocols::requests::send_close_req;
-use distribuidos_types::BoxResult;
-use log::{debug, info, trace, warn};
 
 pub struct Server {
     listener: TcpListener,
@@ -91,7 +90,7 @@ impl Server {
 
             match TcpStream::connect(addr) {
                 Ok(mut stream) => {
-                    if let Err(err) = send_close_req(&mut stream) {
+                    if let Err(err) = requests::send_close(&mut stream) {
                         warn!("(Ctrl-C) Could not send terminate request - {:?}", err)
                     }
                 }
