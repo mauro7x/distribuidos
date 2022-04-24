@@ -51,24 +51,34 @@ dependencies = [
 
 [[package]]
 name = "distribuidos_sync"
-version = "1.1.1"
+version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "444c2af01257ef7843f93d0e5e85b4d5ff7409eae6253184c30df27c317fdd15"
+checksum = "bb653055b157921114e4b3d89cad131158724fafd1bf371d0933c4b4f487b18c"
 dependencies = [
  "log",
 ]
 
 [[package]]
 name = "distribuidos_tp1_protocols"
-version = "0.1.0"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "67dac51991983857a6856612bc1e26be2ed614b685b98a274ed421ddbcb7f3bb"
+checksum = "7d26b9c1bde9e798aa6711ccf6eeda8b5bc86d171b8c6394026dc38218b986c9"
+dependencies = [
+ "distribuidos_types",
+ "distribuidos_utils",
+]
 
 [[package]]
 name = "distribuidos_types"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a896f29112c91d7e5a8ae64b2cc9e8b7463a4bb0acbd13ed97228a513072a39d"
+
+[[package]]
+name = "distribuidos_utils"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "97426bdec6ba54b37b679f1339e51fd0189545d5a20e711cff13449661f06e24"
 
 [[package]]
 name = "itoa"
