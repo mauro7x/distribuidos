@@ -1,2 +1,6 @@
-pub mod common;
+mod opcodes;
+
+pub mod events;
+pub mod requests;
+pub mod responses;
 pub mod types;
