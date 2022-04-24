@@ -9,8 +9,8 @@ where
 }
 
 #[derive(Debug)]
-pub enum ExecuteError {
-    Full,
+pub enum QueueError<T> {
+    Full(T),
 }
 
 pub type MessageSender<T> = mpsc::SyncSender<Message<T>>;

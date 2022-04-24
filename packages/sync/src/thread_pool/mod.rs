@@ -2,8 +2,9 @@ mod traits;
 mod types;
 mod worker;
 
+pub use self::types::ExecuteError;
 use self::{
-    types::{ExecuteError, Message, MessageSender},
+    types::{Message, MessageSender},
     worker::Worker,
 };
 use std::sync::{
