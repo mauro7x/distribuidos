@@ -1,7 +1,4 @@
-use distribuidos_tp1_protocols::{
-    events::send,
-    types::{errors::SendError, Event},
-};
+use distribuidos_tp1_protocols::{events::send, types::Event};
 use distribuidos_types::BoxResult;
 use std::{
     io::{self, Write},
@@ -62,8 +59,7 @@ fn send_event(event: Event) -> BoxResult<()> {
 
     match send(&stream, event)? {
         Ok(_) => info!("Event sent successfully"),
-        Err(SendError::Invalid) => error!("Invalid format received from Server"),
-        Err(SendError::ServerAtCapacity) => error!("Server is at capacity"),
+        Err(err) => error!("Error received from server: {:?}", err),
     };
 
     Ok(())

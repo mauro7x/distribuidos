@@ -6,10 +6,11 @@ use log::*;
 extern crate pretty_env_logger;
 
 fn run() -> BoxResult<()> {
-    let event_dispatcher = EventDispatcher::new()?;
+    let mut event_dispatcher = EventDispatcher::new()?;
     let dispatcher = event_dispatcher.clone_dispatcher();
     let mut server = server::new(dispatcher)?;
     server.run()?;
+    event_dispatcher.join();
 
     Ok(())
 }
