@@ -7,14 +7,6 @@ use std::{env::var, error::Error};
 use log::{trace, warn};
 use serde::Deserialize;
 
-/// Config to be parsed from config file.
-/// All parameters are optional since they may not be present in the file.
-///
-/// ## Arguments
-///
-/// * `server_ip` (self-descriptive).
-/// * `server_port`: (self-descriptive).
-/// * `server_listen_backlog`: size of the backlog listening queue.
 #[derive(Debug, Deserialize)]
 struct FileConfig {
     host: Option<String>,
@@ -23,12 +15,6 @@ struct FileConfig {
     queue_size: Option<usize>,
 }
 
-/// ## Arguments
-///
-/// * `host` (self-descriptive).
-/// * `port`: (self-descriptive).
-/// * `listen_backlog`: size of the backlog listening queue.
-/// * `accept_sleep_time_ms`: time to sleep when there are no connections to accept.
 #[derive(Debug, Deserialize)]
 pub struct Config {
     pub host: String,
