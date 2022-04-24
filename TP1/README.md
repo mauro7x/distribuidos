@@ -4,4 +4,4 @@ Desarrollo de un sistema distribuido que brinda servicios para el reporte de eve
 
 **Temas:** Concurrencia y Comunicaciones.
 
-![Architecture](./docs/diagrams/robustness)
+![Architecture](./docs/diagrams/robustness.png)
