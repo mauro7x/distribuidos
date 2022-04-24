@@ -29,13 +29,29 @@ services:
     networks:
       - internal
 
-  database:
-    container_name: tp1_database
-    image: tp1_database:latest
-    build: ./services/database
-    entrypoint: target/release/database
+  db_aggregator:
+    container_name: tp1_db_aggregator
+    image: tp1_db_aggregator:latest
+    build: ./services/db_aggregator
+    entrypoint: target/release/db_aggregator
+    environment:
+      - RUST_LOG=debug
     networks:
       - internal
+    volumes:
+      - database:/events:ro
+
+  db_event_writer:
+    container_name: tp1_db_event_writer
+    image: tp1_db_event_writer:latest
+    build: ./services/db_event_writer
+    entrypoint: target/release/db_event_writer
+    environment:
+      - RUST_LOG=debug
+    networks:
+      - internal
+    volumes:
+      - database:/events:rw
 
   logging_service:
     container_name: tp1_logging_service
@@ -70,3 +86,6 @@ networks:
     driver: bridge
   internal:
     driver: bridge
+
+volumes:
+  database:
