@@ -5,14 +5,18 @@ use std::env::var;
 use log::*;
 use serde::Deserialize;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Default)]
 struct FileConfig {
+    db_host: Option<String>,
+    db_port: Option<u16>,
     thread_pool_size: Option<usize>,
     queue_size: Option<usize>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
+    pub db_host: String,
+    pub db_port: u16,
     pub thread_pool_size: usize,
     pub queue_size: usize,
 }
@@ -34,10 +38,7 @@ impl Config {
             Ok(file) => file,
             Err(_) => {
                 warn!("Config file not found, using env vars or default values.");
-                FileConfig {
-                    thread_pool_size: None,
-                    queue_size: None,
-                }
+                FileConfig::default()
             }
         }
     }
@@ -54,6 +55,15 @@ impl Config {
     /// present in either place.
     fn override_with_envvars(file_config: FileConfig) -> BoxResult<Config> {
         let config = Config {
+            db_host: var(DB_HOST_ENV).unwrap_or_else(|_| {
+                file_config
+                    .db_host
+                    .unwrap_or_else(|| DB_HOST_DEFAULT.to_string())
+            }),
+            db_port: var(DB_PORT_ENV)
+                .unwrap_or_else(|_| file_config.db_port.unwrap_or(DB_PORT_DEFAULT).to_string())
+                .parse()?,
+
             thread_pool_size: var(THREAD_POOL_SIZE_ENV)
                 .unwrap_or_else(|_| {
                     file_config

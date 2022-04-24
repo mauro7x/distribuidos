@@ -70,9 +70,9 @@ dependencies = [
 
 [[package]]
 name = "distribuidos_tp1_protocols"
-version = "1.0.0"
+version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7d26b9c1bde9e798aa6711ccf6eeda8b5bc86d171b8c6394026dc38218b986c9"
+checksum = "ac1b66195341564d16375bedcbb659001706b3d5f4bffeb0cda5665a4e3518de"
 dependencies = [
  "distribuidos_types",
  "distribuidos_utils",
