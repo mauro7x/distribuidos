@@ -1,7 +1,8 @@
 const fs = require('fs');
 const execSync = require('child_process').execSync;
 const NAME_REGEX = /name = "(?<name>.*)"/;
-const VERSION_REGEX = /.*"(?<version>.*)".*/;
+const versionRegexFactory = (packageName) =>
+  new RegExp(`${packageName} = "(?<version>.*)".*`);
 
 const { MAJOR_VERSION: majorStr, MINOR_VERSION: minorStr } = process.env;
 const cargoTomlFilepath = `${process.env.CARGO_TOML_DIRPATH || '.'}/Cargo.toml`;
@@ -13,7 +14,7 @@ console.log('Invoked with:', {
   cargoTomlFilepath,
   packageName,
   majorStr,
-  minorStr,
+  minorStr
 });
 
 if (!packageName || !majorStr || !minorStr) {
@@ -27,9 +28,10 @@ const major = parseInt(majorStr);
 const minor = parseInt(minorStr);
 
 const searchOutput = execSync(`cargo search ${packageName} --limit 1`, {
-  encoding: 'utf-8',
+  encoding: 'utf-8'
 });
 const packageData = searchOutput.split('\n', 1)[0];
+const VERSION_REGEX = versionRegexFactory(packageName);
 const match = VERSION_REGEX.exec(packageData);
 const lastVersionString = match?.groups?.version;
 
