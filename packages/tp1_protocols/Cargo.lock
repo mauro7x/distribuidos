@@ -5,3 +5,17 @@ version = 3
 [[package]]
 name = "distribuidos_tp1_protocols"
 version = "0.0.0"
+dependencies = [
+ "distribuidos_types",
+ "distribuidos_utils",
+]
+
+[[package]]
+name = "distribuidos_types"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a896f29112c91d7e5a8ae64b2cc9e8b7463a4bb0acbd13ed97228a513072a39d"
+
+[[package]]
+name = "distribuidos_utils"
+version = "0.0.0"
