@@ -1,5 +1,5 @@
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Event {
-    pub id: String,
+    pub metric_id: String,
     pub value: f32,
 }

@@ -8,5 +8,5 @@ description = "Communication protocols defined for TP1"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+chrono = "0.4"
 distribuidos_types = "0.1.0"
-distribuidos_utils = "0.1.0"
