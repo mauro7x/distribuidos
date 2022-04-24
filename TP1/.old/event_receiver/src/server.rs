@@ -49,7 +49,7 @@ fn dispatch_event(dispatcher: &Dispatcher, stream: TcpStream, event: Event) -> B
             trace!("Event dispatched");
         }
         Err(QueueError::Full(mut req)) => {
-            warn!("Event rejected: dispatcher at capacity");
+            warn!("Event rejected: server at capacity");
             responses::send_server_at_capacity_res(&mut req.stream)?
         }
     };

@@ -1,25 +1,43 @@
 version: '3'
 
 services:
-  event_receiver:
-    container_name: tp1_event_receiver
-    image: tp1_event_receiver:latest
-    build: ./services/event_receiver
-    entrypoint: target/release/event_receiver
+  event_writer:
+    container_name: tp1_event_writer
+    image: tp1_event_writer:latest
+    build: ./services/event_writer
+    entrypoint: target/release/event_writer
     environment:
       - RUST_LOG=debug
     networks:
       - external_apps
       - internal
+    volumes:
+      - database:/events:rw
 
-  query_receiver:
-    container_name: tp1_query_receiver
-    image: tp1_query_receiver:latest
-    build: ./services/query_receiver
-    entrypoint: target/release/query_receiver
+  public_aggregator:
+    container_name: tp1_public_aggregator
+    image: tp1_aggregator:latest
+    build: ./services/aggregator
+    entrypoint: target/release/aggregator
+    environment:
+      - RUST_LOG=debug
     networks:
       - external_users
       - internal
+    volumes:
+      - database:/events:ro
+
+  internal_aggregator:
+    container_name: tp1_internal_aggregator
+    image: tp1_aggregator:latest
+    build: ./services/aggregator
+    entrypoint: target/release/aggregator
+    environment:
+      - RUST_LOG=debug
+    networks:
+      - internal
+    volumes:
+      - database:/events:ro
 
   alert_service:
     container_name: tp1_alert_service
@@ -28,30 +46,6 @@ services:
     entrypoint: target/release/alert_service
     networks:
       - internal
-
-  db_aggregator:
-    container_name: tp1_db_aggregator
-    image: tp1_db_aggregator:latest
-    build: ./services/db_aggregator
-    entrypoint: target/release/db_aggregator
-    environment:
-      - RUST_LOG=debug
-    networks:
-      - internal
-    volumes:
-      - database:/events:ro
-
-  db_event_writer:
-    container_name: tp1_db_event_writer
-    image: tp1_db_event_writer:latest
-    build: ./services/db_event_writer
-    entrypoint: target/release/db_event_writer
-    environment:
-      - RUST_LOG=debug
-    networks:
-      - internal
-    volumes:
-      - database:/events:rw
 
   logging_service:
     container_name: tp1_logging_service

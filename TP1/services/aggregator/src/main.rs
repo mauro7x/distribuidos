@@ -1,4 +1,4 @@
-use db_event_writer::server;
+use aggregator::server;
 use distribuidos_types::BoxResult;
 use std::process::exit;
 
