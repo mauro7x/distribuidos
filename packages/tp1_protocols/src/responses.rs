@@ -19,3 +19,9 @@ pub fn send_server_at_capacity_res(stream: &mut TcpStream) -> BoxResult<()> {
 
     Ok(())
 }
+
+pub fn send_internal_server_error_res(stream: &mut TcpStream) -> BoxResult<()> {
+    stream.write_all(&[OP_INTERNAL_SERVER_ERROR])?;
+
+    Ok(())
+}
