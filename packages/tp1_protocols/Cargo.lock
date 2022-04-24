@@ -18,4 +18,6 @@ checksum = "a896f29112c91d7e5a8ae64b2cc9e8b7463a4bb0acbd13ed97228a513072a39d"
 
 [[package]]
 name = "distribuidos_utils"
-version = "0.0.0"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ea178712753c3afeeffcab78febf8078d0c0e6f20c81826eb2eac4eff9671b6e"
