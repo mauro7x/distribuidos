@@ -10,3 +10,9 @@ name = "client"
 path = "src/main.rs"
 
 [dependencies]
+log = "0.4"
+pretty_env_logger = "0.4"
+csv = "1.1"
+serde = { version = "1", features = ["derive"] }
+distribuidos_tp1_protocols = "1.0.0"
+distribuidos_types = "0.1.0"
