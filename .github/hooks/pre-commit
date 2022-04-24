@@ -1,14 +1,16 @@
 #!/bin/sh
 
+set -e
+
 # Run CI pre-commit hook only on staged files
 
-git diff --full-index --binary > /tmp/stash.$$
-git stash -q --keep-index
+# git diff --full-index --binary > /tmp/stash.$$
+# git stash -q --keep-index
 
 .github/hooks/cargo-checks
-RESULT=$?
+# RESULT=$?
 
-git apply --whitespace=nowarn < /tmp/stash.$$ &> /dev/null && git stash drop -q
-rm /tmp/stash.$$
+# git apply --whitespace=nowarn < /tmp/stash.$$ &> /dev/null && git stash drop -q
+# rm /tmp/stash.$$
 
-exit $RESULT
+# exit $RESULT
