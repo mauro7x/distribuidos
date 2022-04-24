@@ -6,6 +6,8 @@ services:
     image: tp1_event_receiver:latest
     build: ./services/event_receiver
     entrypoint: target/release/event_receiver
+    environment:
+      - RUST_LOG=debug
     networks:
       - external_apps
       - internal
@@ -56,6 +58,8 @@ services:
     image: tp1_client:latest
     build: ./services/client
     entrypoint: target/release/client
+    environment:
+      - RUST_LOG=debug
     networks:
       - external_users
 
