@@ -1,3 +1,24 @@
+use distribuidos_types::BoxResult;
+use std::process::exit;
+
+use event_receiver::{server, EventDispatcher};
+use log::*;
+extern crate pretty_env_logger;
+
+fn run() -> BoxResult<()> {
+    let event_dispatcher = EventDispatcher::new()?;
+    let dispatcher = event_dispatcher.clone_dispatcher();
+    let mut server = server::new(dispatcher)?;
+    server.run()?;
+
+    Ok(())
+}
+
 fn main() {
-    println!("Hello World from event_receiver!");
+    pretty_env_logger::init();
+
+    if let Err(err) = run() {
+        error!("Failed - {}", err);
+        exit(1);
+    }
 }

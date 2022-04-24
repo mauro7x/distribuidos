@@ -1,0 +1,4 @@
+{
+  "thread_pool_size": 3,
+  "queue_size": 10
+}
