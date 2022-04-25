@@ -72,7 +72,7 @@ impl WriteWorkerPool {
 
     pub fn dispatch(dispatchers: &EventDispatchers, event: Event) -> Result<(), QueueError<Event>> {
         let mut hasher = DefaultHasher::new();
-        event.id.hash(&mut hasher);
+        event.metric_id.hash(&mut hasher);
         let hashed_event_id = hasher.finish() as usize;
         let n_workers = dispatchers.len();
         let worker_id = hashed_event_id % n_workers;

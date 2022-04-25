@@ -1,6 +1,0 @@
-{
-  "thread_pool_size": 3,
-  "queue_size": 10,
-  "db_host": "db_event_writer",
-  "db_port": 3000
-}
