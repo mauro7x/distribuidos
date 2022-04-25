@@ -1,0 +1,5 @@
+{
+  "flush_timeout_ms": 100,
+  "thread_pool_size": 3,
+  "queue_size": 10
+}

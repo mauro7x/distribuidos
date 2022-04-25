@@ -22,6 +22,15 @@ fn connection_handler(_context: &mut Context, stream: TcpStream) {
 
 fn inner_connection_handler(stream: TcpStream) -> BoxResult<()> {
     trace!("Handling connection from {:?}", stream);
+    // match events::recv(&mut stream)? {
+    //     _ => todo!()
+    //     // Ok(event) => dispatch_event(dispatchers, stream, event),
+    //     // Err(RecvError::Invalid) => {
+    //     //     warn!("Invalid format while receiving event");
+    //     //     responses::send_invalid_format_res(&mut stream)
+    //     // }
+    //     // Err(RecvError::Terminated) => Ok(()),
+    // }
 
     Ok(())
 }
