@@ -9,6 +9,3 @@ description = "Common utils defined for TP1"
 
 [dependencies]
 chrono = "0.4"
-log = "0.4"
-fs2 = "0.4.3"
-distribuidos_tp1_protocols = "1.1.2"
