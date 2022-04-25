@@ -22,7 +22,7 @@ where
     pub fn new<C, F>(max_jobs_queue: usize, context: C, handler: F) -> SingleWorker<T>
     where
         C: Send + 'static,
-        F: Fn(&mut C, Option<T>) + Send + 'static,
+        F: Fn(&mut C, T) + Send + 'static,
     {
         trace!("Creating WorkerPool...");
         assert!(max_jobs_queue > 0);
@@ -79,7 +79,7 @@ where
     fn run<C, F>(receiver: MessageReceiver<T>, mut context: C, handler: F)
     where
         C: Send + 'static,
-        F: Fn(&mut C, Option<T>) + Send + 'static,
+        F: Fn(&mut C, T) + Send + 'static,
     {
         loop {
             let message = receiver.recv().expect("Channel closed unexpectedly");
@@ -87,7 +87,7 @@ where
             match message {
                 Message::NewJob(job) => {
                     trace!("SingleWorker received job");
-                    handler(&mut context, Some(job));
+                    handler(&mut context, job);
                 }
                 Message::Terminate => {
                     trace!("SingleWorker was told to terminate");

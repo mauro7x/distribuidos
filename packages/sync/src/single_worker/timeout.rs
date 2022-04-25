@@ -11,12 +11,12 @@ use std::{
 
 use log::{error, trace, warn};
 
-pub struct SingleWorker<T: Send> {
+pub struct SingleWorkerTimeout<T: Send> {
     thread: Option<thread::JoinHandle<()>>,
     sender: MessageSender<T>,
 }
 
-impl<T> SingleWorker<T>
+impl<T> SingleWorkerTimeout<T>
 where
     T: 'static + Send,
 {
@@ -25,7 +25,7 @@ where
         context: C,
         handler: F,
         timeout: Duration,
-    ) -> SingleWorker<T>
+    ) -> SingleWorkerTimeout<T>
     where
         C: Send + 'static,
         F: Fn(&mut C, Option<T>) + Send + 'static,
@@ -34,11 +34,12 @@ where
         assert!(max_jobs_queue > 0);
 
         let (sender, receiver) = mpsc::sync_channel(max_jobs_queue);
-        let worker = thread::spawn(move || SingleWorker::run(receiver, context, handler, timeout));
+        let worker =
+            thread::spawn(move || SingleWorkerTimeout::run(receiver, context, handler, timeout));
 
-        trace!("SingleWorker created");
+        trace!("SingleWorkerTimeout created");
 
-        SingleWorker {
+        SingleWorkerTimeout {
             thread: Some(worker),
             sender,
         }
@@ -70,7 +71,7 @@ where
     }
 
     pub fn join(&mut self) {
-        trace!("Joining SingleWorker...");
+        trace!("Joining SingleWorkerTimeout...");
         match self.thread.take() {
             Some(joiner) => match joiner.join() {
                 Ok(_) => trace!("Worker joined"),
@@ -92,11 +93,11 @@ where
 
             match message {
                 Ok(Message::NewJob(job)) => {
-                    trace!("SingleWorker received job");
+                    trace!("SingleWorkerTimeout received job");
                     handler(&mut context, Some(job));
                 }
                 Ok(Message::Terminate) => {
-                    trace!("SingleWorker was told to terminate");
+                    trace!("SingleWorkerTimeout was told to terminate");
                     break;
                 }
                 Err(_) => {
