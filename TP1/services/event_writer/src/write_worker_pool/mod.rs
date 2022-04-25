@@ -1,21 +1,19 @@
 mod config;
 mod constants;
 
+use distribuidos_tp1_utils::{database::EventWriter, hash};
+
 use self::config::Config;
 use distribuidos_sync::{MessageSender, QueueError, SingleWorkerTimeout};
 use distribuidos_tp1_protocols::types::Event;
 use distribuidos_types::BoxResult;
-use std::{
-    collections::hash_map::DefaultHasher,
-    hash::{Hash, Hasher},
-    time::Duration,
-};
+use std::{io::Error, time::Duration};
 
 use log::*;
 
-#[derive(Clone)]
 struct Context {
     id: usize,
+    file_manager: EventWriter,
 }
 
 pub type EventDispatcher = MessageSender<Event>;
@@ -34,17 +32,23 @@ impl WriteWorkerPool {
             flush_timeout_ms,
             worker_pool_size,
             worker_queue_size,
+            partition_secs,
+            database_path,
         } = config;
+
         let mut workers = Vec::with_capacity(worker_pool_size);
         for id in 0..worker_pool_size {
+            let file_manager = EventWriter::new(database_path.clone(), partition_secs);
+            let context = Context { id, file_manager };
             let worker = SingleWorkerTimeout::<Event>::new(
                 worker_queue_size,
-                Context { id },
+                context,
                 WriteWorkerPool::worker_handler,
                 Duration::from_millis(flush_timeout_ms),
             );
             workers.push(worker);
         }
+
         let pool = WriteWorkerPool { workers };
         trace!("WriteWorkerPool created");
 
@@ -71,35 +75,28 @@ impl WriteWorkerPool {
     }
 
     pub fn dispatch(dispatchers: &EventDispatchers, event: Event) -> Result<(), QueueError<Event>> {
-        let mut hasher = DefaultHasher::new();
-        event.metric_id.hash(&mut hasher);
-        let hashed_event_id = hasher.finish() as usize;
-        let n_workers = dispatchers.len();
-        let worker_id = hashed_event_id % n_workers;
+        let worker_id = hash::assign_worker(&event.metric_id, dispatchers.len());
         let dispatcher = &dispatchers[worker_id];
 
         SingleWorkerTimeout::send(dispatcher, event)
     }
 
-    fn worker_handler(Context { id }: &mut Context, job: Option<Event>) {
-        if let Err(err) = WriteWorkerPool::inner_handler(*id, job) {
-            warn!("Write Worker failed - {}", err);
+    fn worker_handler(context: &mut Context, job: Option<Event>) {
+        if let Err(err) = WriteWorkerPool::inner_handler(context, job) {
+            warn!("[WriteWorker #{}] Failed - {}", context.id, err);
         }
     }
 
-    fn inner_handler(id: usize, job: Option<Event>) -> BoxResult<()> {
+    fn inner_handler(
+        Context { id, file_manager }: &mut Context,
+        job: Option<Event>,
+    ) -> Result<(), Error> {
         match job {
-            Some(event) => WriteWorkerPool::handle_event(id, event),
-            None => WriteWorkerPool::handle_timeout(),
+            Some(event) => {
+                debug!("[WriteWorker #{}] Received event: {:?}", id, event);
+                file_manager.write(event)
+            }
+            None => file_manager.handle_timeout(),
         }
-    }
-
-    fn handle_event(id: usize, event: Event) -> BoxResult<()> {
-        debug!("[WriteWorker #{}] Received event: {:?}", id, event);
-        Ok(())
-    }
-
-    fn handle_timeout() -> BoxResult<()> {
-        Ok(())
     }
 }
