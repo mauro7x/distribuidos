@@ -1,11 +1,12 @@
 mod config;
 mod constants;
+mod event_writer;
+mod metric_file;
 
-use distribuidos_tp1_utils::{database::EventWriter, hash};
-
-use self::config::Config;
+use self::{config::Config, event_writer::EventWriter};
 use distribuidos_sync::{MessageSender, QueueError, SingleWorkerTimeout};
 use distribuidos_tp1_protocols::types::Event;
+use distribuidos_tp1_utils::hash;
 use distribuidos_types::BoxResult;
 use std::{io::Error, time::Duration};
 
@@ -13,7 +14,7 @@ use log::*;
 
 struct Context {
     id: usize,
-    file_manager: EventWriter,
+    event_writer: EventWriter,
 }
 
 pub type EventDispatcher = MessageSender<Event>;
@@ -38,8 +39,8 @@ impl WriteWorkerPool {
 
         let mut workers = Vec::with_capacity(worker_pool_size);
         for id in 0..worker_pool_size {
-            let file_manager = EventWriter::new(database_path.clone(), partition_secs);
-            let context = Context { id, file_manager };
+            let event_writer = EventWriter::new(database_path.clone(), partition_secs);
+            let context = Context { id, event_writer };
             let worker = SingleWorkerTimeout::<Event>::new(
                 worker_queue_size,
                 context,
@@ -88,15 +89,15 @@ impl WriteWorkerPool {
     }
 
     fn inner_handler(
-        Context { id, file_manager }: &mut Context,
+        Context { id, event_writer }: &mut Context,
         job: Option<Event>,
     ) -> Result<(), Error> {
         match job {
             Some(event) => {
                 debug!("[WriteWorker #{}] Received event: {:?}", id, event);
-                file_manager.write(event)
+                event_writer.write(event)
             }
-            None => file_manager.handle_timeout(),
+            None => event_writer.handle_timeout(),
         }
     }
 }
