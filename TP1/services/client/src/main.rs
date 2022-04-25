@@ -1,4 +1,7 @@
-use distribuidos_tp1_protocols::{events::send, types::Event};
+use distribuidos_tp1_protocols::{
+    requests, responses,
+    types::{errors::SendError, Event},
+};
 use distribuidos_types::BoxResult;
 use std::{
     io::{self, Write},
@@ -14,14 +17,14 @@ const EXPECTED_FORMAT: &str = "metric,value";
 
 #[derive(Debug, Deserialize)]
 struct Row {
-    id: String,
+    metric_id: String,
     value: f32,
 }
 
 impl From<Row> for Event {
     fn from(row: Row) -> Event {
         Event {
-            id: row.id,
+            metric_id: row.metric_id,
             value: row.value,
         }
     }
@@ -57,12 +60,22 @@ fn send_event(event: Event) -> BoxResult<()> {
     let addr = "0.0.0.0:3000";
     let stream = TcpStream::connect(addr)?;
 
-    match send(&stream, event)? {
-        Ok(_) => info!("Event sent successfully"),
-        Err(err) => error!("Error received from server: {:?}", err),
+    if let Err(err) = requests::send_event(&stream, event) {
+        let msg = format!("Failed to send event - {:?}", err);
+        return Err(msg.into());
     };
 
-    Ok(())
+    match responses::recv_event_ack(&stream) {
+        Ok(_) => {
+            info!("Event sent successfully");
+            Ok(())
+        }
+        Err(SendError::IOError(e)) => Err(e.into()),
+        Err(err) => {
+            error!("Error received from server: {:?}", err);
+            Ok(())
+        }
+    }
 }
 
 fn main() {
