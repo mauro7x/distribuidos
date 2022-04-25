@@ -86,11 +86,14 @@ impl Writer<'_> {
     }
 
     pub fn range(&mut self, range: Option<DateTimeRange>) -> WriterResult {
-        if let Some(range) = range {
-            self.datetime(range.from)?;
-            self.datetime(range.to)?;
+        match range {
+            Some(range) => {
+                self.opcode(INCLUDES_RANGE)?;
+                self.datetime(range.from)?;
+                self.datetime(range.to)
+            }
+            None => self.opcode(DOES_NOT_INCLUDE_RANGE),
         }
-        Ok(())
     }
 
     pub fn datetime(&mut self, datetime: DateTime) -> WriterResult {
@@ -102,9 +105,12 @@ impl Writer<'_> {
     }
 
     pub fn aggr_window(&mut self, aggr_window: Option<f32>) -> WriterResult {
-        if let Some(aggr_window) = aggr_window {
-            self.f32(aggr_window)?;
+        match aggr_window {
+            Some(aggr_window) => {
+                self.opcode(INCLUDES_AGGR_WINDOW)?;
+                self.f32(aggr_window)
+            }
+            None => self.opcode(DOES_NOT_INCLUDE_AGGR_WINDOW),
         }
-        Ok(())
     }
 }

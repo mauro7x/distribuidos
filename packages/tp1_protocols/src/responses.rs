@@ -12,6 +12,12 @@ pub fn send_event_received(stream: &mut TcpStream) -> Result<(), Error> {
     Ok(())
 }
 
+pub fn send_query_accepted(stream: &mut TcpStream) -> Result<(), Error> {
+    stream.write_all(&[OP_QUERY_ACCEPTED])?;
+
+    Ok(())
+}
+
 pub fn send_invalid_format(stream: &mut TcpStream) -> Result<(), Error> {
     stream.write_all(&[OP_INVALID_FORMAT])?;
 
