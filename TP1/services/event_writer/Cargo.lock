@@ -80,9 +80,9 @@ dependencies = [
 
 [[package]]
 name = "distribuidos_sync"
-version = "1.1.4"
+version = "1.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f657dcd10c331cfb4aaea808ff286b1b17c7e1442854f47b302518391f28a77d"
+checksum = "c6c6d091a0732c219643c0f2717c6d58c68558ce227f5d8f6bb240c7cbde9c16"
 dependencies = [
  "log",
 ]
@@ -95,6 +95,18 @@ checksum = "e6def5f639cba670d243576b7d58829492c3918cbb9ebce78a2248430ca20c4f"
 dependencies = [
  "chrono",
  "distribuidos_types",
+]
+
+[[package]]
+name = "distribuidos_tp1_utils"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8a5651343c4cd58e91481ea404d426815f2f59ae7d01dd116fa4821b097776a5"
+dependencies = [
+ "chrono",
+ "distribuidos_tp1_protocols",
+ "fs2",
+ "log",
 ]
 
 [[package]]
@@ -120,14 +132,27 @@ dependencies = [
 name = "event_writer"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "distribuidos_ingress",
  "distribuidos_sync",
  "distribuidos_tp1_protocols",
+ "distribuidos_tp1_utils",
  "distribuidos_types",
+ "fs2",
  "log",
  "pretty_env_logger",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "fs2"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9564fc758e15025b46aa6643b1b77d047d1a56a1aea6e01002ac0c7026876213"
+dependencies = [
+ "libc",
+ "winapi",
 ]
 
 [[package]]

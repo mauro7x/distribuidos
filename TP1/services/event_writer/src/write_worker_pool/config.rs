@@ -10,6 +10,8 @@ struct FileConfig {
     flush_timeout_ms: Option<u64>,
     worker_pool_size: Option<usize>,
     worker_queue_size: Option<usize>,
+    partition_secs: Option<u32>,
+    database_path: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -17,6 +19,8 @@ pub struct Config {
     pub flush_timeout_ms: u64,
     pub worker_pool_size: usize,
     pub worker_queue_size: usize,
+    pub partition_secs: u32,
+    pub database_path: String,
 }
 
 impl Config {
@@ -77,6 +81,19 @@ impl Config {
                         .to_string()
                 })
                 .parse()?,
+            partition_secs: var(PARTITION_SECS_ENV)
+                .unwrap_or_else(|_| {
+                    file_config
+                        .partition_secs
+                        .unwrap_or(DEFAULT_PARTITION_SECS)
+                        .to_string()
+                })
+                .parse()?,
+            database_path: var(DATABASE_PATH_ENV).unwrap_or_else(|_| {
+                file_config
+                    .database_path
+                    .unwrap_or_else(|| DEFAULT_DATABASE_PATH.to_string())
+            }),
         };
 
         Ok(config)
