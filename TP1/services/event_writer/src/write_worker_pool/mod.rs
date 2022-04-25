@@ -2,7 +2,7 @@ mod config;
 mod constants;
 
 use self::config::Config;
-use distribuidos_sync::{MessageSender, QueueError, SingleWorker};
+use distribuidos_sync::{MessageSender, QueueError, SingleWorkerTimeout};
 use distribuidos_tp1_protocols::types::Event;
 use distribuidos_types::BoxResult;
 use std::{
@@ -22,7 +22,7 @@ pub type EventDispatcher = MessageSender<Event>;
 pub type EventDispatchers = Vec<EventDispatcher>;
 
 pub struct WriteWorkerPool {
-    workers: Vec<SingleWorker<Event>>,
+    workers: Vec<SingleWorkerTimeout<Event>>,
 }
 
 impl WriteWorkerPool {
@@ -37,7 +37,7 @@ impl WriteWorkerPool {
         } = config;
         let mut workers = Vec::with_capacity(worker_pool_size);
         for id in 0..worker_pool_size {
-            let worker = SingleWorker::<Event>::new(
+            let worker = SingleWorkerTimeout::<Event>::new(
                 worker_queue_size,
                 Context { id },
                 WriteWorkerPool::worker_handler,
@@ -78,7 +78,7 @@ impl WriteWorkerPool {
         let worker_id = hashed_event_id % n_workers;
         let dispatcher = &dispatchers[worker_id];
 
-        SingleWorker::send(dispatcher, event)
+        SingleWorkerTimeout::send(dispatcher, event)
     }
 
     fn worker_handler(Context { id }: &mut Context, job: Option<Event>) {
