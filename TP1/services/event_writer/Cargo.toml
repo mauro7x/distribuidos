@@ -16,5 +16,5 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1.0"
 distribuidos_ingress = "1.1.4"
 distribuidos_sync = "1.1.4"
-distribuidos_tp1_protocols = "1.1.1"
+distribuidos_tp1_protocols = "1.1.2"
 distribuidos_types = "0.1.0"

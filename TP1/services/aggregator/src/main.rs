@@ -1,4 +1,8 @@
-use aggregator::server;
+use aggregator::{
+    forker::{self, Forker},
+    server,
+};
+
 use distribuidos_types::BoxResult;
 use std::process::exit;
 
@@ -6,8 +10,11 @@ use log::*;
 extern crate pretty_env_logger;
 
 fn run() -> BoxResult<()> {
-    let mut server = server::new()?;
+    let mut forker: Forker = forker::new()?;
+    let mut server = server::new(&forker)?;
     server.run()?;
+    forker.stop();
+    forker.join();
 
     Ok(())
 }
