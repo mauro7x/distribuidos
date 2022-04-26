@@ -15,10 +15,13 @@ pub const OP_QUERY_ACCEPTED: Opcode = 129;
 
 // 4XX
 pub const OP_INVALID_FORMAT: Opcode = 130;
+pub const OP_INVALID_RANGE: Opcode = 131;
+pub const OP_INVALID_AGGR_WINDOW: Opcode = 132;
+pub const OP_METRIC_NOT_FOUND: Opcode = 133;
 
 // 5XX
-pub const OP_SERVER_AT_CAPACITY: Opcode = 131;
-pub const OP_INTERNAL_SERVER_ERROR: Opcode = 132;
+pub const OP_SERVER_AT_CAPACITY: Opcode = 134;
+pub const OP_INTERNAL_SERVER_ERROR: Opcode = 135;
 
 // Queries
 

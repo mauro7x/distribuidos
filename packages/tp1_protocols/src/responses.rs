@@ -1,4 +1,8 @@
-use crate::{opcodes::*, reader::Reader, types::errors::SendError};
+use crate::{
+    opcodes::*,
+    reader::Reader,
+    types::{errors::SendError, QueryResult},
+};
 use std::{
     io::{Error, Write},
     net::TcpStream,
@@ -36,6 +40,33 @@ pub fn send_internal_server_error(stream: &mut TcpStream) -> Result<(), Error> {
     Ok(())
 }
 
+pub fn send_metric_not_found(stream: &mut TcpStream) -> Result<(), Error> {
+    stream.write_all(&[OP_METRIC_NOT_FOUND])?;
+
+    Ok(())
+}
+
+pub fn send_invalid_range(stream: &mut TcpStream) -> Result<(), Error> {
+    stream.write_all(&[OP_INVALID_RANGE])?;
+
+    Ok(())
+}
+
+pub fn send_invalid_aggr_window(stream: &mut TcpStream) -> Result<(), Error> {
+    stream.write_all(&[OP_INVALID_AGGR_WINDOW])?;
+
+    Ok(())
+}
+
+pub fn send_query_response(
+    _stream: &mut TcpStream,
+    _query_result: QueryResult,
+) -> Result<(), Error> {
+    todo!();
+
+    // Ok(())
+}
+
 // Receive
 
 pub fn recv_event_ack(stream: &TcpStream) -> Result<(), SendError> {
@@ -60,4 +91,10 @@ pub fn recv_query_ack(stream: &TcpStream) -> Result<(), SendError> {
         OP_INTERNAL_SERVER_ERROR => Err(SendError::InternalServerError),
         op => panic!("Received unexpected opcode: {:?}", op),
     }
+}
+
+pub fn recv_query_response(_stream: &mut TcpStream) -> Result<QueryResult, Error> {
+    todo!();
+
+    // Ok(())
 }

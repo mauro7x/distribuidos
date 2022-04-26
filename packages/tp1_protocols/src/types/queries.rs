@@ -2,7 +2,7 @@ use chrono::{DateTime as DateTimeT, Utc};
 
 pub type DateTime = DateTimeT<Utc>;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 #[repr(u8)]
 pub enum AggregationOpcode {
     AVG = 0,
@@ -24,3 +24,5 @@ pub struct Query {
     pub aggregation: AggregationOpcode,
     pub aggregation_window_secs: Option<f32>,
 }
+
+pub type QueryResult = Vec<Option<f32>>;
