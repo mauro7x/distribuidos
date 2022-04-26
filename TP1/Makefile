@@ -9,7 +9,6 @@ build:
 	docker build -t "tp1_alert_service:latest" ./services/alert_service
 	docker build -t "tp1_aggregator:latest" ./services/aggregator
 	docker build -t "tp1_event_writer:latest" ./services/event_writer
-	docker build -t "tp1_logging_service:latest" ./services/logging_service
 .PHONY: build
 
 up:

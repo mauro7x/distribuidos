@@ -47,14 +47,6 @@ services:
     networks:
       - internal
 
-  logging_service:
-    container_name: tp1_logging_service
-    image: tp1_logging_service:latest
-    build: ./services/logging_service
-    entrypoint: target/release/logging_service
-    networks:
-      - internal
-
   app:
     container_name: tp1_app
     image: tp1_app:latest
