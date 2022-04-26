@@ -20,6 +20,24 @@ logs:
 	docker-compose logs -f
 .PHONY: logs
 
+manual-app:
+	docker run -it \
+		-e RUST_LOG=debug \
+		-e SERVER_HOST=event_writer \
+		--network tp1_external_apps \
+		--entrypoint target/release/manual \
+		tp1_app
+.PHONY: manual-app
+
+manual-client:
+	docker run -it \
+		-e RUST_LOG=debug \
+		-e SERVER_HOST=public_aggregator \
+		--network tp1_external_clients \
+		--entrypoint target/release/manual \
+		tp1_client
+.PHONY: manual-client
+
 cargo-check:
 	./scripts/run_for_services.sh "cargo check --color always"
 .PHONY: cargo-check

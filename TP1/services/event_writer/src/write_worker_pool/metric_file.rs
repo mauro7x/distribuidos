@@ -77,12 +77,14 @@ impl MetricFile {
     // Private
 
     fn flush(&mut self, partition: i64) -> Result<(), Error> {
+        trace!("Flushing partition...");
         let new_file = MetricFile::create_file(&self.dirpath, partition)?;
         self._flush()?;
 
         // Swap internal state
         self.file = new_file;
         self.partition = partition;
+        trace!("Partition flushed");
 
         Ok(())
     }

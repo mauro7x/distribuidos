@@ -95,7 +95,9 @@ impl WriteWorkerPool {
         match job {
             Some(event) => {
                 debug!("[WriteWorker #{}] Received event: {:?}", id, event);
-                event_writer.write(event)
+                event_writer.write(event)?;
+                debug!("[WriteWorker #{}] Event written to database", id);
+                Ok(())
             }
             None => event_writer.handle_timeout(),
         }
