@@ -5,7 +5,7 @@ services:
     container_name: tp1_event_writer
     image: tp1_event_writer:latest
     build: ./services/event_writer
-    entrypoint: target/release/event_writer
+    entrypoint: target/release/main
     environment:
       - RUST_LOG=debug
     networks:
@@ -13,62 +13,65 @@ services:
       - internal
     volumes:
       - database:/events:rw
+      - ./config/event_writer:/usr/app/config:ro
 
   public_aggregator:
     container_name: tp1_public_aggregator
     image: tp1_aggregator:latest
     build: ./services/aggregator
-    entrypoint: target/release/aggregator
+    entrypoint: target/release/main
     environment:
       - RUST_LOG=debug
     networks:
-      - external_users
+      - external_clients
       - internal
     volumes:
       - database:/events:ro
+      - ./config/public_aggregator:/usr/app/config:ro
 
   internal_aggregator:
     container_name: tp1_internal_aggregator
     image: tp1_aggregator:latest
     build: ./services/aggregator
-    entrypoint: target/release/aggregator
+    entrypoint: target/release/main
     environment:
       - RUST_LOG=debug
     networks:
       - internal
     volumes:
       - database:/events:ro
+      - ./config/internal_aggregator:/usr/app/config:ro
 
-  alert_service:
-    container_name: tp1_alert_service
-    image: tp1_alert_service:latest
-    build: ./services/alert_service
-    entrypoint: target/release/alert_service
-    networks:
-      - internal
+  # alert_service:
+  #   container_name: tp1_alert_service
+  #   image: tp1_alert_service:latest
+  #   build: ./services/alert_service
+  #   entrypoint: target/release/alert_service
+  #   networks:
+  #     - internal
 
-  app:
-    container_name: tp1_app
-    image: tp1_app:latest
-    build: ./services/app
-    entrypoint: target/release/app
-    networks:
-      - external_apps
+  # app:
+  #   container_name: tp1_app
+  #   image: tp1_app:latest
+  #   build: ./services/app
+  #   entrypoint: target/release/app
+  #   networks:
+  #     - external_apps
 
-  client:
-    container_name: tp1_client
-    image: tp1_client:latest
-    build: ./services/client
-    entrypoint: target/release/client
-    environment:
-      - RUST_LOG=debug
-    networks:
-      - external_users
+  # client:
+  #   container_name: tp1_client
+  #   image: tp1_client:latest
+  #   build: ./services/client
+  #   entrypoint: target/release/client
+  #   environment:
+  #     - RUST_LOG=debug
+  #   networks:
+  #     - external_clients
 
 networks:
   external_apps:
     driver: bridge
-  external_users:
+  external_clients:
     driver: bridge
   internal:
     driver: bridge

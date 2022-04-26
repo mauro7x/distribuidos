@@ -4,11 +4,7 @@ PWD := $(shell pwd)
 default: build
 
 build:
-	docker build -t "tp1_client:latest" ./services/client
-	docker build -t "tp1_app:latest" ./services/app
-	docker build -t "tp1_alert_service:latest" ./services/alert_service
-	docker build -t "tp1_aggregator:latest" ./services/aggregator
-	docker build -t "tp1_event_writer:latest" ./services/event_writer
+	VERBOSE="${VERBOSE}" ./scripts/build.sh
 .PHONY: build
 
 up:

@@ -74,7 +74,7 @@ pub fn run() -> BoxResult<()> {
 }
 
 fn send_query(query: Query) -> BoxResult<()> {
-    let addr = "0.0.0.0:3000";
+    let addr = "public_aggregator:3000";
     let stream = TcpStream::connect(addr)?;
 
     if let Err(err) = requests::send_query(&stream, query) {

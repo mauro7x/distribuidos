@@ -57,7 +57,7 @@ pub fn run() -> BoxResult<()> {
 }
 
 fn send_event(event: Event) -> BoxResult<()> {
-    let addr = "0.0.0.0:3000";
+    let addr = "event_writer:3000";
     let stream = TcpStream::connect(addr)?;
 
     if let Err(err) = requests::send_event(&stream, event) {
