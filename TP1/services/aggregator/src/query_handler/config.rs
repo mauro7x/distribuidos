@@ -7,12 +7,18 @@ use serde::Deserialize;
 
 #[derive(Debug, Deserialize, Default)]
 struct FileConfig {
-    forker_queue_size: Option<usize>,
+    thread_pool_size: Option<usize>,
+    queue_size: Option<usize>,
+    partition_secs: Option<i64>,
+    database_path: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
-    pub forker_queue_size: usize,
+    pub thread_pool_size: usize,
+    pub queue_size: usize,
+    pub partition_secs: i64,
+    pub database_path: String,
 }
 
 impl Config {
@@ -49,14 +55,35 @@ impl Config {
     /// present in either place.
     fn override_with_envvars(file_config: FileConfig) -> BoxResult<Config> {
         let config = Config {
-            forker_queue_size: var(FORKER_QUEUE_SIZE_ENV)
+            thread_pool_size: var(THREAD_POOL_SIZE_ENV)
                 .unwrap_or_else(|_| {
                     file_config
-                        .forker_queue_size
-                        .unwrap_or(DEFAULT_FORKER_QUEUE_SIZE)
+                        .thread_pool_size
+                        .unwrap_or(DEFAULT_THREAD_POOL_SIZE)
                         .to_string()
                 })
                 .parse()?,
+            queue_size: var(QUEUE_SIZE_ENV)
+                .unwrap_or_else(|_| {
+                    file_config
+                        .queue_size
+                        .unwrap_or(DEFAULT_QUEUE_SIZE)
+                        .to_string()
+                })
+                .parse()?,
+            partition_secs: var(PARTITION_SECS_ENV)
+                .unwrap_or_else(|_| {
+                    file_config
+                        .partition_secs
+                        .unwrap_or(DEFAULT_PARTITION_SECS)
+                        .to_string()
+                })
+                .parse()?,
+            database_path: var(DATABASE_PATH_ENV).unwrap_or_else(|_| {
+                file_config
+                    .database_path
+                    .unwrap_or_else(|| DEFAULT_DATABASE_PATH.to_string())
+            }),
         };
 
         Ok(config)
