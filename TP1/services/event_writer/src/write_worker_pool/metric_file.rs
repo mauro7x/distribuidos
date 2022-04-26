@@ -1,5 +1,5 @@
 use distribuidos_tp1_protocols::types::Event;
-use distribuidos_tp1_utils::file_utils;
+use distribuidos_tp1_utils::{constants::METRIC_FIRST_PARTITION_FILE, file_utils};
 use std::{
     fs::{self, File},
     io::{Error, Write},
@@ -27,6 +27,12 @@ impl MetricFile {
         let now = Utc::now().timestamp();
         let partition = now / partition_secs;
         let dirpath = file_utils::dirpath(metric_id, database_path);
+
+        // Init dirpath
+        fs::create_dir_all(&dirpath)?;
+
+        // Metadata for optimizing read queries
+        MetricFile::write_first_partition_metadata(&dirpath, partition)?;
 
         // If file exists in RO mode, we switch it back to RW
         MetricFile::restore_if_exists(&dirpath, partition)?;
@@ -115,7 +121,6 @@ impl MetricFile {
     }
 
     fn create_file(dirpath: &String, partition: i64) -> Result<File, Error> {
-        fs::create_dir_all(&dirpath)?;
         let filepath = file_utils::filepath(dirpath, partition, false);
 
         fs::OpenOptions::new()
@@ -123,6 +128,26 @@ impl MetricFile {
             .write(true)
             .append(true)
             .open(filepath)
+    }
+
+    fn write_first_partition_metadata(dirpath: &String, partition: i64) -> Result<(), Error> {
+        let final_filepath = format!("{}/{}", dirpath, METRIC_FIRST_PARTITION_FILE);
+        if Path::new(&final_filepath).exists() {
+            return Ok(());
+        }
+
+        let tmp_filepath = format!("{}.w", final_filepath);
+        {
+            let mut tmp_file = fs::OpenOptions::new()
+                .create_new(true)
+                .write(true)
+                .open(&tmp_filepath)?;
+            tmp_file.write_all(&partition.to_le_bytes())?;
+        }
+
+        fs::rename(tmp_filepath, final_filepath)?;
+
+        Ok(())
     }
 }
 

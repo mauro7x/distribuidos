@@ -99,9 +99,9 @@ dependencies = [
 
 [[package]]
 name = "distribuidos_tp1_utils"
-version = "1.0.0"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "beaf6bf85cfc8e902df4135729ca232863c75680d7d6594c9531c8cbbb9876e4"
+checksum = "bf787d27bc5baa3481e0a9713f205552dcc8a37ec33504a0ee505b9e0d7e5816"
 dependencies = [
  "chrono",
 ]
