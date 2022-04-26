@@ -1,7 +1,9 @@
-use chrono::Utc;
+// use chrono::Utc;
 use distribuidos_tp1_protocols::{
-    requests, responses,
-    types::{errors::SendError, AggregationOpcode, DateTimeRange, Query},
+    requests,
+    responses,
+    types::{errors::SendError, AggregationOpcode, Query},
+    // types::{DateTimeRange},
 };
 use distribuidos_types::BoxResult;
 use std::{
@@ -56,14 +58,14 @@ pub fn run() -> BoxResult<()> {
 
     let query = Query {
         metric_id: "hola".to_string(),
-        // range: None,
-        range: Some(DateTimeRange {
-            from: Utc::now(),
-            to: Utc::now(),
-        }),
-        aggregation: AggregationOpcode::AVG,
+        range: None,
+        // range: Some(DateTimeRange {
+        //     from: Utc::now(),
+        //     to: Utc::now(),
+        // }),
+        aggregation: AggregationOpcode::COUNT,
         // aggregation_window_secs: None,
-        aggregation_window_secs: Some(20.0),
+        aggregation_window_secs: Some(0.0),
     };
 
     send_query(query)?;

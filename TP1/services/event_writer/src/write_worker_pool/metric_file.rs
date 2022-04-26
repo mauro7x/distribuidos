@@ -78,7 +78,7 @@ impl MetricFile {
 
     fn flush(&mut self, partition: i64) -> Result<(), Error> {
         let new_file = MetricFile::create_file(&self.dirpath, partition)?;
-        self.safe_flush()?;
+        self._flush()?;
 
         // Swap internal state
         self.file = new_file;
@@ -87,16 +87,13 @@ impl MetricFile {
         Ok(())
     }
 
-    fn safe_flush(&self) -> Result<(), Error> {
-        self.file.lock_exclusive()?;
+    fn _flush(&self) -> Result<(), Error> {
         let from = file_utils::filepath(&self.dirpath, self.partition, false);
         let to = file_utils::filepath(&self.dirpath, self.partition, true);
 
         if let Err(err) = fs::rename(from, to) {
             error!("Failed to rename MetricFile - {}", err);
         };
-
-        self.file.unlock()?;
 
         Ok(())
     }
@@ -153,7 +150,7 @@ impl MetricFile {
 
 impl Drop for MetricFile {
     fn drop(&mut self) {
-        if let Err(e) = self.safe_flush() {
+        if let Err(e) = self._flush() {
             error!("Metric file could not be flushed when exiting - {}", e)
         }
     }

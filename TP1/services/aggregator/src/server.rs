@@ -1,5 +1,6 @@
+use crate::{types::QueryRequest, QueryHandler};
 use distribuidos_ingress::Server;
-use distribuidos_sync::{MessageSender, QueueError, SingleWorker};
+use distribuidos_sync::{MessageSender, QueueError, WorkerPool};
 use distribuidos_tp1_protocols::{
     requests, responses,
     types::{errors::RecvError, Query},
@@ -9,8 +10,6 @@ use std::net::TcpStream;
 
 use log::*;
 
-use crate::{forker::Forker, types::QueryRequest};
-
 type Dispatcher = MessageSender<QueryRequest>;
 
 #[derive(Clone)]
@@ -18,9 +17,9 @@ pub struct Context {
     dispatcher: Dispatcher,
 }
 
-pub fn new(forker: &Forker) -> BoxResult<Server> {
+pub fn new(query_handler: &QueryHandler) -> BoxResult<Server> {
     let server_context = Context {
-        dispatcher: forker.clone_sender(),
+        dispatcher: query_handler.clone_sender(),
     };
     let server = Server::new(server_context, connection_handler)?;
 
@@ -53,18 +52,21 @@ fn dispatch_query(dispatcher: &Dispatcher, mut stream: TcpStream, query: Query) 
     let cloned_stream = stream.try_clone().unwrap();
 
     let query_request = QueryRequest {
-        from: cloned_stream,
+        stream: cloned_stream,
         query,
     };
 
-    match SingleWorker::send(dispatcher, query_request) {
+    match WorkerPool::send(dispatcher, query_request) {
         Ok(()) => {
             trace!("Query dispatched");
             responses::send_query_accepted(&mut stream)?
         }
-        Err(QueueError::Full(QueryRequest { mut from, query: _ })) => {
+        Err(QueueError::Full(QueryRequest {
+            mut stream,
+            query: _,
+        })) => {
             warn!("Event rejected: server at capacity");
-            responses::send_server_at_capacity(&mut from)?
+            responses::send_server_at_capacity(&mut stream)?
         }
     };
 
