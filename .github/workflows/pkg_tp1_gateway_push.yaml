@@ -1,0 +1,32 @@
+name: 'Deploy package: tp1_gateway'
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - packages/tp1_gateway/**/*
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+      - name: Lint
+        uses: ./.github/actions/cargo_lint
+        with:
+          packagePath: packages/tp1_gateway
+
+  publish:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+      - name: Publish crate
+        uses: ./.github/actions/cargo_publish
+        with:
+          packagePath: packages/tp1_gateway
+          cargoToken: ${{ secrets.CARGO_REGISTRY_TOKEN }}

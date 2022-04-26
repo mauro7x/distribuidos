@@ -7,7 +7,7 @@ set -e
 # git diff --full-index --binary > /tmp/stash.$$
 # git stash -q --keep-index
 
-.github/hooks/cargo-checks
+# .github/hooks/cargo-checks
 # RESULT=$?
 
 # git apply --whitespace=nowarn < /tmp/stash.$$ &> /dev/null && git stash drop -q
