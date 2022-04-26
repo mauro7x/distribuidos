@@ -1,5 +1,5 @@
 // Paths
-pub const CONFIG_FILE_PATH: &str = "config/ingress.json";
+pub const CONFIG_FILE_PATH: &str = "/config/ingress.json";
 
 // Env vars
 pub const HOST_ENV: &str = "INGRESS_HOST";
