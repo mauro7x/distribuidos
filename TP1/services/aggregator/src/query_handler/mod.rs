@@ -82,8 +82,8 @@ impl QueryHandler {
 
         match event_reader.resolve(query) {
             Ok(query_result) => {
-                debug!("Query resolved: {:?}", query_result);
-                responses::send_query_response(&mut stream, query_result)
+                info!("Query resolved: {:?}", query_result);
+                responses::send_query_result(&mut stream, query_result)
             }
             Err(QueryError::MetricNotFound) => {
                 debug!("Metric not found");
