@@ -1,9 +1,11 @@
 use crate::{
     opcodes::*,
-    types::{errors::SendError, AggregationOpcode, DateTime, DateTimeRange, Event, Query},
+    types::{
+        errors::SendError, AggregationOpcode, DateTime, DateTimeRange, Event, Query, QueryResult,
+    },
 };
 use std::{
-    io::{BufWriter, Write},
+    io::{BufWriter, Error, Write},
     net::TcpStream,
 };
 
@@ -53,6 +55,25 @@ impl Writer<'_> {
         self.flush()?;
 
         Ok(())
+    }
+
+    pub fn query_result(&mut self, query_result: QueryResult) -> Result<(), Error> {
+        for value in query_result {
+            self.query_result_value(value)?;
+        }
+        self.writer.write_all(&[EOF])?;
+
+        Ok(())
+    }
+
+    fn query_result_value(&mut self, value: Option<f32>) -> Result<(), Error> {
+        match value {
+            Some(value) => {
+                self.writer.write_all(&[SOME])?;
+                self.writer.write_all(&value.to_le_bytes())
+            }
+            None => self.writer.write_all(&[NONE]),
+        }
     }
 
     // Generic

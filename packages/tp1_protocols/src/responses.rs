@@ -2,6 +2,7 @@ use crate::{
     opcodes::*,
     reader::Reader,
     types::{errors::SendError, QueryResult},
+    writer::Writer,
 };
 use std::{
     io::{Error, Write},
@@ -58,13 +59,11 @@ pub fn send_invalid_aggr_window(stream: &mut TcpStream) -> Result<(), Error> {
     Ok(())
 }
 
-pub fn send_query_response(
-    _stream: &mut TcpStream,
-    _query_result: QueryResult,
-) -> Result<(), Error> {
-    todo!();
+pub fn send_query_result(stream: &mut TcpStream, query_result: QueryResult) -> Result<(), Error> {
+    let mut writer = Writer::new(stream);
+    writer.query_result(query_result)?;
 
-    // Ok(())
+    Ok(())
 }
 
 // Receive
@@ -93,8 +92,7 @@ pub fn recv_query_ack(stream: &TcpStream) -> Result<(), SendError> {
     }
 }
 
-pub fn recv_query_response(_stream: &mut TcpStream) -> Result<QueryResult, Error> {
-    todo!();
-
-    // Ok(())
+pub fn recv_query_result(stream: &TcpStream) -> Result<QueryResult, SendError> {
+    let mut reader = Reader::new(stream);
+    reader.query_result()
 }

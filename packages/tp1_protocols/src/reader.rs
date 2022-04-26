@@ -3,7 +3,10 @@ use chrono::Utc;
 use crate::{
     constants::*,
     opcodes::*,
-    types::{errors::RecvError, AggregationOpcode, DateTime, DateTimeRange, Event, Query},
+    types::{
+        errors::{RecvError, SendError},
+        AggregationOpcode, DateTime, DateTimeRange, Event, Query, QueryResult,
+    },
 };
 use std::{
     io::{BufReader, Read},
@@ -57,6 +60,28 @@ impl Reader<'_> {
         let event = Event { metric_id, value };
 
         Ok(event)
+    }
+
+    pub fn query_result(&mut self) -> Result<QueryResult, SendError> {
+        let mut result = vec![];
+        let mut opcode_buf = [0u8; 1];
+        let mut value_buf = [0u8; size_of::<f32>()];
+
+        loop {
+            self.reader.read_exact(&mut opcode_buf)?;
+            match opcode_buf[0] {
+                SOME => {
+                    self.reader.read_exact(&mut value_buf)?;
+                    let value = f32::from_le_bytes(value_buf);
+                    result.push(Some(value))
+                }
+                NONE => result.push(None),
+                EOF => break,
+                _ => return Err(SendError::InternalServerError),
+            }
+        }
+
+        Ok(result)
     }
 
     // Static

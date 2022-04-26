@@ -23,9 +23,15 @@ pub const OP_METRIC_NOT_FOUND: Opcode = 133;
 pub const OP_SERVER_AT_CAPACITY: Opcode = 134;
 pub const OP_INTERNAL_SERVER_ERROR: Opcode = 135;
 
-// Queries
+// More
 
+// Query request
 pub const INCLUDES_RANGE: Opcode = 0;
 pub const DOES_NOT_INCLUDE_RANGE: Opcode = 1;
 pub const INCLUDES_AGGR_WINDOW: Opcode = 0;
 pub const DOES_NOT_INCLUDE_AGGR_WINDOW: Opcode = 1;
+
+// Query response
+pub const NONE: Opcode = 0;
+pub const SOME: Opcode = 1;
+pub const EOF: Opcode = 2;
