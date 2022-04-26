@@ -65,9 +65,9 @@ dependencies = [
 
 [[package]]
 name = "distribuidos_ingress"
-version = "1.1.8"
+version = "1.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6f32f9c4aa520e5f468350336ee536f482303a14de78e672a99079e30529d59c"
+checksum = "67d650eae55bf4184875dadce70fd974ed924120ae075f70fc3f167f5bfd647a"
 dependencies = [
  "ctrlc",
  "distribuidos_sync",
