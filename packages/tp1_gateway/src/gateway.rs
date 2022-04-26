@@ -46,7 +46,7 @@ impl Gateway {
         debug!("Query sent, waiting ACK...");
         responses::recv_query_ack(&stream)?;
         debug!("ACK received, waiting query response...");
-        let result = responses::recv_query_response(&stream)?;
+        let result = responses::recv_query_result(&stream)?;
         debug!("Query response received successfully");
 
         Ok(result)
