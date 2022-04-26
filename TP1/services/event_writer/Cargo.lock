@@ -89,9 +89,9 @@ dependencies = [
 
 [[package]]
 name = "distribuidos_tp1_protocols"
-version = "1.1.2"
+version = "1.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e6def5f639cba670d243576b7d58829492c3918cbb9ebce78a2248430ca20c4f"
+checksum = "c61f972cb230ab803e4add238e5781b0422d0771c67af0bc8fd3cf2e40c24abe"
 dependencies = [
  "chrono",
  "distribuidos_types",
@@ -99,11 +99,11 @@ dependencies = [
 
 [[package]]
 name = "distribuidos_tp1_utils"
-version = "1.0.1"
+version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bf787d27bc5baa3481e0a9713f205552dcc8a37ec33504a0ee505b9e0d7e5816"
+checksum = "b010dfc0be4e100f5412de4432afbf994b954b144cd215ce9eb1a7c0f2ec5b07"
 dependencies = [
- "chrono",
+ "serde",
 ]
 
 [[package]]
