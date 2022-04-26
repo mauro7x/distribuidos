@@ -41,7 +41,7 @@ impl Server {
             handler_pool: WorkerPool::new(thread_pool_size, queue_size, context, handler),
             stop_signal_receiver: Server::set_stop_signal_handler(local_addr)?,
         };
-        trace!("Server created: {:?}", server);
+        debug!("Server created: {:#?}", server);
 
         Ok(server)
     }
