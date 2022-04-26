@@ -10,7 +10,7 @@ struct FileConfig {
     flush_timeout_ms: Option<u64>,
     worker_pool_size: Option<usize>,
     worker_queue_size: Option<usize>,
-    partition_secs: Option<u32>,
+    partition_secs: Option<i64>,
     database_path: Option<String>,
 }
 
@@ -19,7 +19,7 @@ pub struct Config {
     pub flush_timeout_ms: u64,
     pub worker_pool_size: usize,
     pub worker_queue_size: usize,
-    pub partition_secs: u32,
+    pub partition_secs: i64,
     pub database_path: String,
 }
 

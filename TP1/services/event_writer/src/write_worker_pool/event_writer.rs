@@ -5,12 +5,12 @@ use super::metric_file::MetricFile;
 
 pub struct EventWriter {
     database_path: String,
-    partition_secs: u32,
+    partition_secs: i64,
     file_map: HashMap<String, MetricFile>,
 }
 
 impl EventWriter {
-    pub fn new(database_path: String, partition_secs: u32) -> EventWriter {
+    pub fn new(database_path: String, partition_secs: i64) -> EventWriter {
         EventWriter {
             database_path,
             partition_secs,
@@ -23,7 +23,7 @@ impl EventWriter {
             Some(file) => file,
             None => {
                 let file =
-                    MetricFile::new(self.partition_secs, &event.metric_id, &self.database_path)?;
+                    MetricFile::new(&event.metric_id, &self.database_path, self.partition_secs)?;
                 self.file_map.insert(event.metric_id.clone(), file);
                 self.file_map.get_mut(&event.metric_id).unwrap()
             }

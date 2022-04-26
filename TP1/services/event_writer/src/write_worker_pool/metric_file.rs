@@ -1,48 +1,57 @@
-use distribuidos_tp1_protocols::types::{DateTime, Event};
+use distribuidos_tp1_protocols::types::Event;
 use distribuidos_tp1_utils::file_utils;
 use std::{
     fs::{self, File},
     io::{Error, Write},
+    path::Path,
 };
 
-use chrono::{Timelike, Utc};
+use chrono::Utc;
 use fs2::FileExt;
 use log::*;
 
 #[derive(Debug)]
 pub struct MetricFile {
-    metric_id: String,
-    database_path: String,
-    partition_secs: u32,
+    dirpath: String,
+    partition_secs: i64,
+    partition: i64,
     file: File,
-    datetime: DateTime,
 }
 
 impl MetricFile {
     pub fn new(
-        partition_secs: u32,
         metric_id: &String,
         database_path: &String,
+        partition_secs: i64,
     ) -> Result<MetricFile, Error> {
-        let datetime = Utc::now();
-        let file = MetricFile::create_file(&datetime, partition_secs, metric_id, database_path)?;
+        let now = Utc::now().timestamp();
+        let partition = now / partition_secs;
+        let dirpath = file_utils::dirpath(metric_id, database_path);
+
+        // If file exists in RO mode, we switch it back to RW
+        MetricFile::restore_if_exists(&dirpath, partition)?;
+        let file = MetricFile::create_file(&dirpath, partition)?;
 
         Ok(MetricFile {
-            metric_id: metric_id.clone(),
-            database_path: database_path.clone(),
+            dirpath,
             partition_secs,
+            partition,
             file,
-            datetime,
         })
     }
 
     pub fn write(&mut self, event: Event) -> Result<(), Error> {
-        let secs = self.flush_if_needed()?;
-        let secs_rem = secs % self.partition_secs;
+        let now_millis = Utc::now().timestamp_millis();
+        let now_secs = now_millis / 1000;
+        let partition = now_secs / self.partition_secs;
+        let ms_rem = now_millis - (partition * self.partition_secs * 1000);
+        if partition != self.partition {
+            self.flush(partition)?;
+        };
 
         // CRITICAL SECTION
         self.file.lock_exclusive()?;
-        if let Err(e) = writeln!(self.file, "{},{}", secs_rem, event.value) {
+        if let Err(e) = writeln!(self.file, "{},{}", ms_rem, event.value) {
             error!("Couldn't write to file: {}", e);
         }
         self.file.unlock()?;
@@ -50,63 +59,64 @@ impl MetricFile {
         Ok(())
     }
 
-    pub fn flush_if_needed(&mut self) -> Result<u32, Error> {
-        let now = Utc::now();
-        let new_abs_part_number = file_utils::abs_partition_number(&now, self.partition_secs);
-        let current_abs_part_number =
-            file_utils::abs_partition_number(&self.datetime, self.partition_secs);
-        let secs = now.num_seconds_from_midnight();
-
-        if new_abs_part_number != current_abs_part_number {
-            self.flush(now)?;
+    pub fn flush_if_needed(&mut self) -> Result<(), Error> {
+        let partition = Utc::now().timestamp() / self.partition_secs;
+        if partition != self.partition {
+            self.flush(partition)?;
         };
-
-        Ok(secs)
-    }
-
-    fn flush(&mut self, now: DateTime) -> Result<(), Error> {
-        let new_file = MetricFile::create_file(
-            &now,
-            self.partition_secs,
-            &self.metric_id,
-            &self.database_path,
-        )?;
-
-        self._safe_flush()?;
-
-        // Swap
-        self.file = new_file;
-        self.datetime = now;
 
         Ok(())
     }
 
-    fn _safe_flush(&mut self) -> Result<(), Error> {
+    // Private
+
+    fn flush(&mut self, partition: i64) -> Result<(), Error> {
+        let new_file = MetricFile::create_file(&self.dirpath, partition)?;
+        self.safe_flush()?;
+
+        // Swap internal state
+        self.file = new_file;
+        self.partition = partition;
+
+        Ok(())
+    }
+
+    fn safe_flush(&self) -> Result<(), Error> {
         self.file.lock_exclusive()?;
-        let partition_number = file_utils::partition_number(&self.datetime, self.partition_secs);
-        let dirpath =
-            file_utils::dirpath(&self.datetime.date(), &self.database_path, &self.metric_id);
-        let from = file_utils::filepath(&dirpath, partition_number, false);
-        let to = file_utils::filepath(&dirpath, partition_number, true);
+        let from = file_utils::filepath(&self.dirpath, self.partition, false);
+        let to = file_utils::filepath(&self.dirpath, self.partition, true);
+
         if let Err(err) = fs::rename(from, to) {
             error!("Failed to rename MetricFile - {}", err);
         };
+
         self.file.unlock()?;
 
         Ok(())
     }
 
-    fn create_file(
-        datetime: &DateTime,
-        partition_secs: u32,
-        metric_id: &String,
-        database_path: &String,
-    ) -> Result<File, Error> {
-        let partition_number = file_utils::partition_number(datetime, partition_secs);
-        let dirpath = file_utils::dirpath(&datetime.date(), database_path, metric_id);
-        let filepath = file_utils::filepath(&dirpath, partition_number, false);
+    // Static
 
+    fn restore_if_exists(dirpath: &String, partition: i64) -> Result<(), Error> {
+        let ro_filepath = file_utils::filepath(dirpath, partition, true);
+        if Path::new(&ro_filepath).exists() {
+            let ro_file = fs::OpenOptions::new()
+                .write(true)
+                .append(true)
+                .open(&ro_filepath)?;
+
+            ro_file.lock_exclusive()?;
+            let rw_filepath = file_utils::filepath(dirpath, partition, false);
+            fs::rename(ro_filepath, rw_filepath)?;
+            ro_file.unlock()?;
+        };
+
+        Ok(())
+    }
+
+    fn create_file(dirpath: &String, partition: i64) -> Result<File, Error> {
         fs::create_dir_all(&dirpath)?;
+        let filepath = file_utils::filepath(dirpath, partition, false);
 
         fs::OpenOptions::new()
             .create(true)
@@ -118,11 +128,8 @@ impl MetricFile {
 
 impl Drop for MetricFile {
     fn drop(&mut self) {
-        if let Err(e) = self._safe_flush() {
-            error!(
-                "Metric file for {} could not be flushed when exiting - {}",
-                self.metric_id, e
-            )
+        if let Err(e) = self.safe_flush() {
+            error!("Metric file could not be flushed when exiting - {}", e)
         }
     }
 }

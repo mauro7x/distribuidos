@@ -12,5 +12,5 @@ pub const DATABASE_PATH_ENV: &str = "DATABASE_PATH";
 pub const DEFAULT_FLUSH_TIMEOUT_MS: u64 = 100;
 pub const DEFAULT_WORKER_POOL_SIZE: usize = 3;
 pub const DEFAULT_WORKER_QUEUE_SIZE: usize = 10;
-pub const DEFAULT_PARTITION_SECS: u32 = 600; // 10 min
+pub const DEFAULT_PARTITION_SECS: i64 = 600; // 10 min
 pub const DEFAULT_DATABASE_PATH: &str = "/events";
