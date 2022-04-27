@@ -47,15 +47,28 @@ impl From<Error> for SendError {
 
 #[derive(Debug)]
 pub enum QueryError {
+    Invalid,
+    ServerAtCapacity,
+    InternalServerError,
     MetricNotFound,
     InvalidRange,
     InvalidAggrWindow,
-    InternalServerError,
     IOError(Error),
 }
 
+impl From<SendError> for QueryError {
+    fn from(error: SendError) -> QueryError {
+        match error {
+            SendError::Invalid => QueryError::Invalid,
+            SendError::ServerAtCapacity => QueryError::ServerAtCapacity,
+            SendError::InternalServerError => QueryError::InternalServerError,
+            SendError::IOError(e) => QueryError::IOError(e),
+        }
+    }
+}
+
 impl From<Error> for QueryError {
-    fn from(e: Error) -> QueryError {
-        QueryError::IOError(e)
+    fn from(error: Error) -> QueryError {
+        QueryError::IOError(error)
     }
 }
