@@ -169,15 +169,12 @@ impl Reader<'_> {
     }
 
     fn datetime(&mut self) -> ReaderResult<DateTime> {
-        let mut buf = [0; RFC3339_LENGTH];
-        self.read_exact(&mut buf)?;
+        let date_string = self.string(None)?;
+        let date = chrono::DateTime::parse_from_rfc3339(&date_string)
+            .map_err(|_| RecvError::Invalid)?
+            .with_timezone(&Utc);
 
-        match std::str::from_utf8(&buf) {
-            Ok(parsed_str) => Ok(chrono::DateTime::parse_from_rfc3339(parsed_str)
-                .map_err(|_| RecvError::Invalid)?
-                .with_timezone(&Utc)),
-            Err(_) => Err(RecvError::Invalid),
-        }
+        Ok(date)
     }
 
     fn aggregation(&mut self) -> ReaderResult<AggregationOpcode> {

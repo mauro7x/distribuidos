@@ -111,7 +111,7 @@ impl Writer<'_> {
     }
 
     fn datetime(&mut self, datetime: DateTime) -> WriterResult {
-        self.write_all(datetime.to_rfc3339().as_bytes())
+        self.string(datetime.to_rfc3339())
     }
 
     fn aggregation(&mut self, aggregation: AggregationOpcode) -> WriterResult {
