@@ -97,9 +97,9 @@ dependencies = [
 
 [[package]]
 name = "distribuidos_tp1_gateway"
-version = "0.1.1"
+version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3582aff143da504ccf32c9b47826fdfdf406fd533669a9ef08c9e685644dbe0f"
+checksum = "d6467f83591102fb56fd2e230d30c9496bbcef55f4474a84aaaa2a6dae5ac29b"
 dependencies = [
  "distribuidos_tp1_protocols",
  "distribuidos_types",
@@ -110,9 +110,9 @@ dependencies = [
 
 [[package]]
 name = "distribuidos_tp1_protocols"
-version = "1.2.1"
+version = "1.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3b52d11e263d1971737366cc54c541d9924ea60e244f8a017804109f1ed2b0f3"
+checksum = "52dac7999c7c335922f106eba4528483ab5e02a85615d4a81f97843491f1ed4c"
 dependencies = [
  "chrono",
  "distribuidos_types",

@@ -6,7 +6,7 @@ mod window;
 
 use crate::{query_handler::config::Config, types::QueryRequest};
 use distribuidos_sync::{MessageSender, QueueError, WorkerPool};
-use distribuidos_tp1_protocols::responses;
+use distribuidos_tp1_protocols::{responses, types::errors::QueryError};
 use distribuidos_types::BoxResult;
 use std::io::Error;
 
@@ -82,10 +82,10 @@ impl QueryHandler {
                 info!("Query resolved: {:?}", query_result);
                 responses::send_query_result(&mut stream, query_result)
             }
-            // Err(QueryError::IOError(e)) => {
-            //     responses::send_invalid_aggr_window(&mut stream)?;
-            //     Err(e)
-            // },
+            Err(QueryError::IOError(e)) => {
+                responses::send_query_error(&mut stream, QueryError::InternalServerError)?;
+                Err(e)
+            }
             Err(e) => responses::send_query_error(&mut stream, e),
         }
     }

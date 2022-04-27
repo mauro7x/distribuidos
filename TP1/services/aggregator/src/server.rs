@@ -45,21 +45,14 @@ fn inner_connection_handler(dispatcher: &Dispatcher, mut stream: TcpStream) -> B
     }
 }
 
-fn dispatch_query(dispatcher: &Dispatcher, mut stream: TcpStream, query: Query) -> BoxResult<()> {
+fn dispatch_query(dispatcher: &Dispatcher, stream: TcpStream, query: Query) -> BoxResult<()> {
     debug!("Query received: {:?}", query);
 
-    // We could avoid this if we do not send ACK
-    let cloned_stream = stream.try_clone().unwrap();
-
-    let query_request = QueryRequest {
-        stream: cloned_stream,
-        query,
-    };
+    let query_request = QueryRequest { stream, query };
 
     match WorkerPool::send(dispatcher, query_request) {
         Ok(()) => {
             trace!("Query dispatched");
-            responses::send_query_accepted(&mut stream)?
         }
         Err(QueueError::Full(QueryRequest {
             mut stream,
