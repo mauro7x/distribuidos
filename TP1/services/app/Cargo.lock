@@ -97,9 +97,9 @@ dependencies = [
 
 [[package]]
 name = "distribuidos_tp1_gateway"
-version = "0.1.1"
+version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3582aff143da504ccf32c9b47826fdfdf406fd533669a9ef08c9e685644dbe0f"
+checksum = "191dd91f87a00ec71b6714d926c1d735d4211353cb0c6707142184cc5405d97d"
 dependencies = [
  "distribuidos_tp1_protocols",
  "distribuidos_types",
