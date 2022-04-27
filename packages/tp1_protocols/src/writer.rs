@@ -58,6 +58,8 @@ impl Writer<'_> {
     }
 
     pub fn query_result(&mut self, query_result: QueryResult) -> Result<(), Error> {
+        self.writer.write_all(&[OP_QUERY_RESPONSE])?;
+
         for value in query_result {
             self.query_result_value(value)?;
         }
@@ -66,27 +68,21 @@ impl Writer<'_> {
         Ok(())
     }
 
-    fn query_result_value(&mut self, value: Option<f32>) -> Result<(), Error> {
-        match value {
-            Some(value) => {
-                self.writer.write_all(&[SOME])?;
-                self.writer.write_all(&value.to_le_bytes())
-            }
-            None => self.writer.write_all(&[NONE]),
-        }
+    pub fn opcode(&mut self, opcode: Opcode) -> WriterResult {
+        self.u8(opcode)
     }
 
     // Generic
 
-    pub fn u8(&mut self, value: u8) -> WriterResult {
+    fn u8(&mut self, value: u8) -> WriterResult {
         self.write_all(&[value])
     }
 
-    pub fn f32(&mut self, value: f32) -> WriterResult {
+    fn f32(&mut self, value: f32) -> WriterResult {
         self.write_all(&value.to_le_bytes())
     }
 
-    pub fn string(&mut self, string: String) -> WriterResult {
+    fn string(&mut self, string: String) -> WriterResult {
         let length = string.len().try_into().map_err(|_| SendError::Invalid)?;
         self.write_all(&[length])?;
         self.write_all(string.as_bytes())
@@ -94,19 +90,15 @@ impl Writer<'_> {
 
     // Wrappers
 
-    pub fn opcode(&mut self, opcode: Opcode) -> WriterResult {
-        self.u8(opcode)
-    }
-
-    pub fn metric_id(&mut self, metric_id: String) -> WriterResult {
+    fn metric_id(&mut self, metric_id: String) -> WriterResult {
         self.string(metric_id)
     }
 
-    pub fn metric_value(&mut self, metric_value: f32) -> WriterResult {
+    fn metric_value(&mut self, metric_value: f32) -> WriterResult {
         self.f32(metric_value)
     }
 
-    pub fn range(&mut self, range: Option<DateTimeRange>) -> WriterResult {
+    fn range(&mut self, range: Option<DateTimeRange>) -> WriterResult {
         match range {
             Some(range) => {
                 self.opcode(INCLUDES_RANGE)?;
@@ -117,21 +109,31 @@ impl Writer<'_> {
         }
     }
 
-    pub fn datetime(&mut self, datetime: DateTime) -> WriterResult {
+    fn datetime(&mut self, datetime: DateTime) -> WriterResult {
         self.write_all(datetime.to_rfc3339().as_bytes())
     }
 
-    pub fn aggregation(&mut self, aggregation: AggregationOpcode) -> WriterResult {
+    fn aggregation(&mut self, aggregation: AggregationOpcode) -> WriterResult {
         self.u8(aggregation as u8)
     }
 
-    pub fn aggr_window(&mut self, aggr_window: Option<f32>) -> WriterResult {
+    fn aggr_window(&mut self, aggr_window: Option<f32>) -> WriterResult {
         match aggr_window {
             Some(aggr_window) => {
                 self.opcode(INCLUDES_AGGR_WINDOW)?;
                 self.f32(aggr_window)
             }
             None => self.opcode(DOES_NOT_INCLUDE_AGGR_WINDOW),
+        }
+    }
+
+    fn query_result_value(&mut self, value: Option<f32>) -> Result<(), Error> {
+        match value {
+            Some(value) => {
+                self.writer.write_all(&[SOME])?;
+                self.writer.write_all(&value.to_le_bytes())
+            }
+            None => self.writer.write_all(&[NONE]),
         }
     }
 }

@@ -44,3 +44,18 @@ impl From<Error> for SendError {
         SendError::IOError(e)
     }
 }
+
+#[derive(Debug)]
+pub enum QueryError {
+    MetricNotFound,
+    InvalidRange,
+    InvalidAggrWindow,
+    InternalServerError,
+    IOError(Error),
+}
+
+impl From<Error> for QueryError {
+    fn from(e: Error) -> QueryError {
+        QueryError::IOError(e)
+    }
+}
