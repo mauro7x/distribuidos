@@ -65,9 +65,9 @@ dependencies = [
 
 [[package]]
 name = "distribuidos_ingress"
-version = "1.1.12"
+version = "1.1.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "08a18f0c0bf15f1ed0df6dc33040f991b47b7cdee28f91576ed5b4197bd70476"
+checksum = "7ab43b71dbc71fdc05f735aad1bb10cede0f045a54c921a62015f3893f0555b1"
 dependencies = [
  "ctrlc",
  "distribuidos_sync",
@@ -89,9 +89,9 @@ dependencies = [
 
 [[package]]
 name = "distribuidos_tp1_protocols"
-version = "1.2.3"
+version = "1.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "52dac7999c7c335922f106eba4528483ab5e02a85615d4a81f97843491f1ed4c"
+checksum = "0b92c38254699bd837c0c9e82d4f834c1f268fed433b2cfc266e773d76e2f0a3"
 dependencies = [
  "chrono",
  "distribuidos_types",
