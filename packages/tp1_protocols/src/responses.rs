@@ -1,7 +1,10 @@
 use crate::{
     opcodes::*,
     reader::Reader,
-    types::{errors::SendError, QueryResult},
+    types::{
+        errors::{QueryError, SendError},
+        QueryResult,
+    },
     writer::Writer,
 };
 use std::{
@@ -35,26 +38,14 @@ pub fn send_server_at_capacity(stream: &mut TcpStream) -> Result<(), Error> {
     Ok(())
 }
 
-pub fn send_internal_server_error(stream: &mut TcpStream) -> Result<(), Error> {
-    stream.write_all(&[OP_INTERNAL_SERVER_ERROR])?;
-
-    Ok(())
-}
-
-pub fn send_metric_not_found(stream: &mut TcpStream) -> Result<(), Error> {
-    stream.write_all(&[OP_METRIC_NOT_FOUND])?;
-
-    Ok(())
-}
-
-pub fn send_invalid_range(stream: &mut TcpStream) -> Result<(), Error> {
-    stream.write_all(&[OP_INVALID_RANGE])?;
-
-    Ok(())
-}
-
-pub fn send_invalid_aggr_window(stream: &mut TcpStream) -> Result<(), Error> {
-    stream.write_all(&[OP_INVALID_AGGR_WINDOW])?;
+pub fn send_query_error(stream: &mut TcpStream, error: QueryError) -> Result<(), Error> {
+    let opcode = match error {
+        QueryError::MetricNotFound => OP_METRIC_NOT_FOUND,
+        QueryError::InvalidRange => OP_INVALID_RANGE,
+        QueryError::InvalidAggrWindow => OP_INVALID_AGGR_WINDOW,
+        QueryError::IOError(_) | QueryError::InternalServerError => OP_INTERNAL_SERVER_ERROR,
+    };
+    stream.write_all(&[opcode])?;
 
     Ok(())
 }
@@ -92,7 +83,7 @@ pub fn recv_query_ack(stream: &TcpStream) -> Result<(), SendError> {
     }
 }
 
-pub fn recv_query_result(stream: &TcpStream) -> Result<QueryResult, SendError> {
+pub fn recv_query_result(stream: &TcpStream) -> Result<QueryResult, QueryError> {
     let mut reader = Reader::new(stream);
     reader.query_result()
 }

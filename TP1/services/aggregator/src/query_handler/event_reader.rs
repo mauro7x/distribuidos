@@ -1,10 +1,9 @@
-use super::{
-    types::{ConcreteQuery, QueryError},
-    window::Window,
-};
+use super::{types::ConcreteQuery, window::Window};
 use chrono::Utc;
 use csv::ReaderBuilder;
-use distribuidos_tp1_protocols::types::{AggregationOpcode, DateTimeRange, Query, QueryResult};
+use distribuidos_tp1_protocols::types::{
+    errors::QueryError, AggregationOpcode, DateTimeRange, Query, QueryResult,
+};
 use distribuidos_tp1_utils::{constants::METRIC_FIRST_PARTITION_FILE, types::PartitionRow};
 use fs2::FileExt;
 use std::{

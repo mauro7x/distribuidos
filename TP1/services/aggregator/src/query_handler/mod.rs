@@ -4,10 +4,7 @@ mod event_reader;
 mod types;
 mod window;
 
-use crate::{
-    query_handler::{config::Config, types::QueryError},
-    types::QueryRequest,
-};
+use crate::{query_handler::config::Config, types::QueryRequest};
 use distribuidos_sync::{MessageSender, QueueError, WorkerPool};
 use distribuidos_tp1_protocols::responses;
 use distribuidos_types::BoxResult;
@@ -85,19 +82,11 @@ impl QueryHandler {
                 info!("Query resolved: {:?}", query_result);
                 responses::send_query_result(&mut stream, query_result)
             }
-            Err(QueryError::MetricNotFound) => {
-                debug!("Metric not found");
-                responses::send_metric_not_found(&mut stream)
-            }
-            Err(QueryError::InvalidRange) => {
-                debug!("Invalid range");
-                responses::send_invalid_range(&mut stream)
-            }
-            Err(QueryError::InvalidAggrWindow) => {
-                debug!("Invalid aggr window");
-                responses::send_invalid_aggr_window(&mut stream)
-            }
-            Err(QueryError::IOError(e)) => Err(e),
+            // Err(QueryError::IOError(e)) => {
+            //     responses::send_invalid_aggr_window(&mut stream)?;
+            //     Err(e)
+            // },
+            Err(e) => responses::send_query_error(&mut stream, e),
         }
     }
 }

@@ -4,7 +4,7 @@ use crate::{
     constants::*,
     opcodes::*,
     types::{
-        errors::{RecvError, SendError},
+        errors::{QueryError, RecvError},
         AggregationOpcode, DateTime, DateTimeRange, Event, Query, QueryResult,
     },
 };
@@ -62,26 +62,21 @@ impl Reader<'_> {
         Ok(event)
     }
 
-    pub fn query_result(&mut self) -> Result<QueryResult, SendError> {
-        let mut result = vec![];
+    pub fn query_result(&mut self) -> Result<QueryResult, QueryError> {
         let mut opcode_buf = [0u8; 1];
-        let mut value_buf = [0u8; size_of::<f32>()];
+        self.reader.read_exact(&mut opcode_buf)?;
 
-        loop {
-            self.reader.read_exact(&mut opcode_buf)?;
-            match opcode_buf[0] {
-                SOME => {
-                    self.reader.read_exact(&mut value_buf)?;
-                    let value = f32::from_le_bytes(value_buf);
-                    result.push(Some(value))
-                }
-                NONE => result.push(None),
-                EOF => break,
-                _ => return Err(SendError::InternalServerError),
-            }
+        match opcode_buf[0] {
+            OP_QUERY_RESPONSE => self.query_result_values(),
+            OP_METRIC_NOT_FOUND => Err(QueryError::MetricNotFound),
+            OP_INVALID_RANGE => Err(QueryError::InvalidRange),
+            OP_INVALID_AGGR_WINDOW => Err(QueryError::InvalidAggrWindow),
+            _ => Err(QueryError::InternalServerError),
         }
+    }
 
-        Ok(result)
+    pub fn opcode(&mut self) -> ReaderResult<Opcode> {
+        self.u8()
     }
 
     // Static
@@ -100,25 +95,25 @@ impl Reader<'_> {
 
     // Generic
 
-    pub fn read_n(&mut self, bytes_to_read: usize) -> ReaderResult<Vec<u8>> {
+    fn read_n(&mut self, bytes_to_read: usize) -> ReaderResult<Vec<u8>> {
         Ok(Reader::_read_n(&mut self.reader, bytes_to_read)?)
     }
 
-    pub fn u8(&mut self) -> ReaderResult<u8> {
+    fn u8(&mut self) -> ReaderResult<u8> {
         let mut buf = [0; 1];
         self.read_exact(&mut buf)?;
 
         Ok(buf[0])
     }
 
-    pub fn f32(&mut self) -> ReaderResult<f32> {
+    fn f32(&mut self) -> ReaderResult<f32> {
         let mut value_buf = [0; size_of::<f32>()];
         self.read_exact(&mut value_buf)?;
 
         Ok(f32::from_le_bytes(value_buf))
     }
 
-    pub fn string(&mut self, max_length: Option<u8>) -> ReaderResult<String> {
+    fn string(&mut self, max_length: Option<u8>) -> ReaderResult<String> {
         let length = self.u8()?;
         if length == 0 {
             return Err(RecvError::Invalid);
@@ -140,11 +135,7 @@ impl Reader<'_> {
 
     // Wrappers
 
-    pub fn opcode(&mut self) -> ReaderResult<Opcode> {
-        self.u8()
-    }
-
-    pub fn particular_opcode(&mut self, expected: Opcode) -> ReaderResult<()> {
+    fn particular_opcode(&mut self, expected: Opcode) -> ReaderResult<()> {
         match self.opcode()? {
             opcode if opcode == expected => Ok(()),
             OP_TERMINATE => Err(RecvError::Terminated),
@@ -152,15 +143,15 @@ impl Reader<'_> {
         }
     }
 
-    pub fn metric_id(&mut self) -> ReaderResult<String> {
+    fn metric_id(&mut self) -> ReaderResult<String> {
         self.string(Some(MAX_EVENT_ID_LENGTH))
     }
 
-    pub fn metric_value(&mut self) -> ReaderResult<f32> {
+    fn metric_value(&mut self) -> ReaderResult<f32> {
         self.f32()
     }
 
-    pub fn range(&mut self) -> ReaderResult<Option<DateTimeRange>> {
+    fn range(&mut self) -> ReaderResult<Option<DateTimeRange>> {
         match self.opcode()? {
             INCLUDES_RANGE => {
                 let from = self.datetime()?;
@@ -174,7 +165,7 @@ impl Reader<'_> {
         }
     }
 
-    pub fn datetime(&mut self) -> ReaderResult<DateTime> {
+    fn datetime(&mut self) -> ReaderResult<DateTime> {
         let mut buf = [0; RFC3339_LENGTH];
         self.read_exact(&mut buf)?;
 
@@ -186,7 +177,7 @@ impl Reader<'_> {
         }
     }
 
-    pub fn aggregation(&mut self) -> ReaderResult<AggregationOpcode> {
+    fn aggregation(&mut self) -> ReaderResult<AggregationOpcode> {
         match self.u8()? {
             0 => Ok(AggregationOpcode::AVG),
             1 => Ok(AggregationOpcode::MIN),
@@ -196,11 +187,33 @@ impl Reader<'_> {
         }
     }
 
-    pub fn aggr_window(&mut self) -> ReaderResult<Option<f32>> {
+    fn aggr_window(&mut self) -> ReaderResult<Option<f32>> {
         match self.opcode()? {
             INCLUDES_AGGR_WINDOW => Ok(Some(self.f32()?)),
             DOES_NOT_INCLUDE_AGGR_WINDOW => Ok(None),
             _ => Err(RecvError::Invalid),
         }
+    }
+
+    fn query_result_values(&mut self) -> Result<QueryResult, QueryError> {
+        let mut result = vec![];
+        let mut opcode_buf = [0u8; 1];
+        let mut value_buf = [0u8; size_of::<f32>()];
+
+        loop {
+            self.reader.read_exact(&mut opcode_buf)?;
+            match opcode_buf[0] {
+                SOME => {
+                    self.reader.read_exact(&mut value_buf)?;
+                    let value = f32::from_le_bytes(value_buf);
+                    result.push(Some(value))
+                }
+                NONE => result.push(None),
+                EOF => break,
+                _ => return Err(QueryError::InternalServerError),
+            }
+        }
+
+        Ok(result)
     }
 }
