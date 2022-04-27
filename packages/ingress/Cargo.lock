@@ -73,9 +73,9 @@ dependencies = [
 
 [[package]]
 name = "distribuidos_tp1_protocols"
-version = "1.1.1"
+version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "87111d1fd7ae2914e33a5efbfb072b0f1440ea5ec2cbf196ab19a6b05407f669"
+checksum = "3b52d11e263d1971737366cc54c541d9924ea60e244f8a017804109f1ed2b0f3"
 dependencies = [
  "chrono",
  "distribuidos_types",
