@@ -59,11 +59,12 @@ impl Writer<'_> {
 
     pub fn query_result(&mut self, query_result: QueryResult) -> Result<(), Error> {
         self.writer.write_all(&[OP_QUERY_RESPONSE])?;
-
         for value in query_result {
             self.query_result_value(value)?;
         }
         self.writer.write_all(&[EOF])?;
+
+        self.writer.flush()?;
 
         Ok(())
     }
