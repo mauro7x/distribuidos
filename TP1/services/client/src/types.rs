@@ -6,5 +6,12 @@ pub struct Row {
     pub from: Option<String>,
     pub to: Option<String>,
     pub aggr_window_secs: Option<f32>,
-    pub aggregation: u8,
+    pub aggregation: String,
+}
+
+pub enum InputError {
+    InvalidCSV,
+    OnlyOneRange,
+    InvalidDateTime,
+    InvalidAggr,
 }
