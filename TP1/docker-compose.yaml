@@ -12,7 +12,7 @@ services:
       - external_apps
       - internal
     volumes:
-      - database:/events:rw
+      - database:/usr/app/events:rw
       - ./config/event_writer:/usr/app/config:ro
 
   public_aggregator:
@@ -26,7 +26,7 @@ services:
       - external_clients
       - internal
     volumes:
-      - database:/events:ro
+      - database:/usr/app/events:ro
       - ./config/public_aggregator:/usr/app/config:ro
 
   internal_aggregator:
@@ -39,7 +39,7 @@ services:
     networks:
       - internal
     volumes:
-      - database:/events:ro
+      - database:/usr/app/events:ro
       - ./config/internal_aggregator:/usr/app/config:ro
 
   # alert_service:
