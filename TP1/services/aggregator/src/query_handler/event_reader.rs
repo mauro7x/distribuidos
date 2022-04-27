@@ -227,7 +227,19 @@ impl EventReader {
 
     fn read_first_timestamp_from(&self, metric_id: &String, partition: i64) -> Result<i64, Error> {
         let filepath = format!("{}/{}/{}.csv", &self.database_path, metric_id, partition);
-        let file = fs::File::open(filepath)?;
+
+        match self.open_file_ro(&filepath) {
+            OpenFileResult::ReadOnly(file) => self.read_first_timestamp_from_file(&file, partition),
+            OpenFileResult::RWLocked(file) => {
+                let timestamp = self.read_first_timestamp_from_file(&file, partition)?;
+                file.unlock().unwrap();
+                Ok(timestamp)
+            }
+            OpenFileResult::Inexistent => unreachable!(),
+        }
+    }
+
+    fn read_first_timestamp_from_file(&self, file: &File, partition: i64) -> Result<i64, Error> {
         let mut rdr = ReaderBuilder::new().has_headers(false).from_reader(file);
         let PartitionRow { ms_rem, value: _ } = rdr
             .deserialize::<PartitionRow>()
