@@ -1,7 +1,10 @@
-use crate::{config::Config, errors::SendQueryError};
+use crate::config::Config;
 use distribuidos_tp1_protocols::{
     requests, responses,
-    types::{errors::SendError, Event, Query, QueryResult},
+    types::{
+        errors::{QueryError, SendError},
+        Event, Query, QueryResult,
+    },
 };
 use distribuidos_types::BoxResult;
 use std::net::TcpStream;
@@ -39,13 +42,11 @@ impl Gateway {
         Ok(())
     }
 
-    pub fn send_query(&self, query: Query) -> Result<QueryResult, SendQueryError> {
+    pub fn send_query(&self, query: Query) -> Result<QueryResult, QueryError> {
         let stream = TcpStream::connect(&self.addr)?;
         debug!("Sending query...");
         requests::send_query(&stream, query)?;
-        debug!("Query sent, waiting ACK...");
-        responses::recv_query_ack(&stream)?;
-        debug!("ACK received, waiting query response...");
+        debug!("Query sent, waiting response...");
         let result = responses::recv_query_result(&stream)?;
         debug!("Query response received successfully");
 

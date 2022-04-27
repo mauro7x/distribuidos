@@ -7,9 +7,9 @@ edition = "2021"
 
 [dependencies]
 chrono = "0.4"
-distribuidos_ingress = "1.1.11"
+distribuidos_ingress = "1.1.12"
 distribuidos_sync = "1.1.5"
-distribuidos_tp1_protocols = "1.2.1"
+distribuidos_tp1_protocols = "1.2.3"
 distribuidos_tp1_utils = "1.0.2"
 distribuidos_types = "0.1.0"
 fs2 = "0.4.3"

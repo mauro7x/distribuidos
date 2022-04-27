@@ -68,10 +68,13 @@ impl Reader<'_> {
 
         match opcode_buf[0] {
             OP_QUERY_RESPONSE => self.query_result_values(),
+            OP_INVALID_FORMAT => Err(QueryError::Invalid),
+            OP_SERVER_AT_CAPACITY => Err(QueryError::ServerAtCapacity),
+            OP_INTERNAL_SERVER_ERROR => Err(QueryError::InternalServerError),
             OP_METRIC_NOT_FOUND => Err(QueryError::MetricNotFound),
             OP_INVALID_RANGE => Err(QueryError::InvalidRange),
             OP_INVALID_AGGR_WINDOW => Err(QueryError::InvalidAggrWindow),
-            _ => Err(QueryError::InternalServerError),
+            op => panic!("Received unexpected opcode: {:?}", op),
         }
     }
 

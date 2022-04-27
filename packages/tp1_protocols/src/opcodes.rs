@@ -10,8 +10,7 @@ pub const OP_QUERY: Opcode = 2;
 
 // 2XX
 pub const OP_EVENT_RECEIVED: Opcode = 128;
-pub const OP_QUERY_ACCEPTED: Opcode = 129;
-pub const OP_QUERY_RESPONSE: Opcode = 130;
+pub const OP_QUERY_RESPONSE: Opcode = 129;
 
 // 4XX
 pub const OP_INVALID_FORMAT: Opcode = 130;
