@@ -18,7 +18,6 @@ fn send_event_from_row(gateway: &Gateway, row: Row) -> BoxResult<()> {
     let event = Event::from(row);
     match gateway.send_event(event) {
         Ok(()) => info!("Event sent successfully"),
-
         Err(SendError::Invalid) => warn!("Server responded: Invalid Format (404)"),
         Err(SendError::ServerAtCapacity) => error!("Server responded: Server At Capacity (503)"),
         Err(SendError::InternalServerError) => {
