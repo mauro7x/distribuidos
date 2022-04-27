@@ -1,4 +1,4 @@
-use crate::config::Config;
+use crate::{config::Config, errors::SendQueryError};
 use distribuidos_tp1_protocols::{
     requests, responses,
     types::{errors::SendError, Event, Query, QueryResult},
@@ -39,7 +39,7 @@ impl Gateway {
         Ok(())
     }
 
-    pub fn send_query(&self, query: Query) -> Result<QueryResult, SendError> {
+    pub fn send_query(&self, query: Query) -> Result<QueryResult, SendQueryError> {
         let stream = TcpStream::connect(&self.addr)?;
         debug!("Sending query...");
         requests::send_query(&stream, query)?;
