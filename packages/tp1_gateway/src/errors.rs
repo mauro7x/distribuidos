@@ -4,25 +4,40 @@ use distribuidos_tp1_protocols::types::errors::{QueryError, SendError};
 
 #[derive(Debug)]
 pub enum SendQueryError {
-    Send(SendError),
-    Query(QueryError),
-    IO(Error),
+    Invalid,
+    ServerAtCapacity,
+    MetricNotFound,
+    InvalidRange,
+    InvalidAggrWindow,
+    InternalServerError,
+    IOError(Error),
 }
 
 impl From<SendError> for SendQueryError {
     fn from(error: SendError) -> SendQueryError {
-        SendQueryError::Send(error)
+        match error {
+            SendError::Invalid => SendQueryError::Invalid,
+            SendError::ServerAtCapacity => SendQueryError::ServerAtCapacity,
+            SendError::InternalServerError => SendQueryError::InternalServerError,
+            SendError::IOError(e) => SendQueryError::IOError(e),
+        }
     }
 }
 
 impl From<QueryError> for SendQueryError {
     fn from(error: QueryError) -> SendQueryError {
-        SendQueryError::Query(error)
+        match error {
+            QueryError::MetricNotFound => SendQueryError::MetricNotFound,
+            QueryError::InvalidRange => SendQueryError::InvalidRange,
+            QueryError::InvalidAggrWindow => SendQueryError::InvalidAggrWindow,
+            QueryError::InternalServerError => SendQueryError::InternalServerError,
+            QueryError::IOError(e) => SendQueryError::IOError(e),
+        }
     }
 }
 
 impl From<Error> for SendQueryError {
     fn from(error: Error) -> SendQueryError {
-        SendQueryError::IO(error)
+        SendQueryError::IOError(error)
     }
 }
