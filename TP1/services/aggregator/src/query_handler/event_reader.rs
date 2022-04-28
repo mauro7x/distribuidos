@@ -115,7 +115,10 @@ impl EventReader {
         for partition_row in rdr.deserialize::<PartitionRow>() {
             let PartitionRow { ms_rem, value } = partition_row?;
             let timestamp = (partition * self.partition_secs * 1000) + ms_rem;
-            let assigned_window_idx = ((timestamp - from) / window_size) as usize;
+            if timestamp < from {
+                continue;
+            }
+            let assigned_window_idx = ((timestamp - from) / window_size) as usize
             results[assigned_window_idx].push(value);
         }
 
