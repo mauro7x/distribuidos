@@ -46,7 +46,7 @@ services:
     container_name: tp1_alert_service
     image: tp1_alert_service:latest
     build: ./services/alert_service
-    entrypoint: target/release/alert_service
+    entrypoint: target/release/main
     environment:
       - RUST_LOG=debug
     networks:
