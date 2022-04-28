@@ -10,12 +10,14 @@ use std::{
     fmt::{self, Debug},
     net::{SocketAddr, TcpListener, TcpStream},
     sync::mpsc::{self, Receiver, TryRecvError},
+    time::Duration,
 };
 
 pub struct Server {
     listener: TcpListener,
     stop_signal_receiver: Receiver<()>,
     handler_pool: WorkerPool<TcpStream>,
+    read_timeout: Duration,
 }
 
 impl Server {
@@ -30,6 +32,7 @@ impl Server {
             port,
             thread_pool_size,
             queue_size,
+            read_timeout_ms,
         } = Config::new()?;
         let listener_addr = format!("{}:{}", host, port);
         trace!("Binding TcpListener...");
@@ -40,6 +43,7 @@ impl Server {
             listener,
             handler_pool: WorkerPool::new(thread_pool_size, queue_size, context, handler),
             stop_signal_receiver: Server::set_stop_signal_handler(local_addr)?,
+            read_timeout: Duration::from_millis(read_timeout_ms),
         };
         debug!("Server created: {:#?}", server);
 
@@ -57,8 +61,10 @@ impl Server {
             }
 
             let stream = connection?;
-            debug!("New connection established: {:?}", stream);
-            self.handler_pool.execute(stream).unwrap();
+            if stream.set_read_timeout(Some(self.read_timeout)).is_ok() {
+                debug!("New connection established: {:?}", stream);
+                self.handler_pool.execute(stream).unwrap();
+            }
         }
 
         trace!("Joining Server's handler thread pool...");

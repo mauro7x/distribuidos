@@ -1,7 +1,4 @@
-use super::constants::{
-    CONFIG_FILE_PATH, DEFAULT_HOST, DEFAULT_PORT, DEFAULT_QUEUE_SIZE, DEFAULT_THREAD_POOL_SIZE,
-    HOST_ENV, PORT_ENV, QUEUE_SIZE_ENV, THREAD_POOL_SIZE_ENV,
-};
+use super::constants::*;
 use std::{env::var, error::Error};
 
 use log::{trace, warn};
@@ -13,6 +10,7 @@ struct FileConfig {
     port: Option<u16>,
     thread_pool_size: Option<usize>,
     queue_size: Option<usize>,
+    read_timeout_ms: Option<u64>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -21,6 +19,7 @@ pub struct Config {
     pub port: u16,
     pub thread_pool_size: usize,
     pub queue_size: usize,
+    pub read_timeout_ms: u64,
 }
 
 impl Config {
@@ -75,6 +74,14 @@ impl Config {
                     file_config
                         .queue_size
                         .unwrap_or(DEFAULT_QUEUE_SIZE)
+                        .to_string()
+                })
+                .parse()?,
+            read_timeout_ms: var(READ_TIMEOUT_MS_ENV)
+                .unwrap_or_else(|_| {
+                    file_config
+                        .read_timeout_ms
+                        .unwrap_or(DEFAULT_READ_TIMEOUT_MS)
                         .to_string()
                 })
                 .parse()?,
