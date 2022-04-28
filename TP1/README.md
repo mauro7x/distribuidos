@@ -4,4 +4,17 @@ Desarrollo de un sistema distribuido que brinda servicios para el reporte de eve
 
 **Temas:** Concurrencia y Comunicaciones.
 
+## Uso
+
+Se provee de un `Makefile` para poder levantar el sistema, con sus principales comandos:
+
+- `make build` para buildear las imágenes de docker.
+- `make up` para iniciar el sistema.
+- `make down` para destruirlo.
+- `make logs` para attachearse a los logs de todos los containers.
+- `make manual-app` **(con el servidor levantado)** para conectarse a una app simulada que recibe eventos por standard input.
+- `make manual-client` **(con el servidor levantado)** para conectarse a un cliente simulado que recibe queries por standard input.
+
+## Arquitectura (Diagrama de Robustez)
+
 ![Architecture](./docs/diagrams/robustness.png)
