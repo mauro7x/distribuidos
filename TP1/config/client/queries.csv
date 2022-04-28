@@ -1,0 +1,4 @@
+metric_1,0,0,30,10,AVG
+metric_2,0,0,10,,MIN
+metric_2,0,0,10,,MAX
+metric_3,0,1,0,30,COUNT

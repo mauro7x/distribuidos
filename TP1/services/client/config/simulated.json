@@ -1,0 +1,5 @@
+{
+  "thread_pool_size": 5,
+  "repeat_every_ms": 0,
+  "between_requests_ms": 0
+}

@@ -3,17 +3,7 @@ use crate::{
     types::{InputError, Row},
 };
 use chrono::{LocalResult, NaiveDateTime, TimeZone, Utc};
-use distribuidos_tp1_protocols::types::{AggregationOpcode, DateTime, DateTimeRange, Query};
-
-fn parse_aggr(aggregation: String) -> Result<AggregationOpcode, InputError> {
-    match aggregation.to_lowercase().as_str() {
-        "avg" => Ok(AggregationOpcode::AVG),
-        "min" => Ok(AggregationOpcode::MIN),
-        "max" => Ok(AggregationOpcode::MAX),
-        "count" => Ok(AggregationOpcode::COUNT),
-        _ => Err(InputError::InvalidAggr),
-    }
-}
+use distribuidos_tp1_protocols::types::{DateTime, DateTimeRange, Query};
 
 fn parse_datetime(date: &str) -> Result<DateTime, InputError> {
     let naive = NaiveDateTime::parse_from_str(date, DATETIME_FORMAT)
@@ -43,7 +33,7 @@ pub fn parse_row(row: Row) -> Result<Query, InputError> {
     let query = Query {
         metric_id: row.metric_id,
         range: parse_range(row.from, row.to)?,
-        aggregation: parse_aggr(row.aggregation)?,
+        aggregation: row.aggregation,
         aggregation_window_secs: row.aggr_window_secs,
     };
 

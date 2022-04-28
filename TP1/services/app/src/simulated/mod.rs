@@ -80,8 +80,8 @@ fn handler(Context { gateway }: &mut Context, EventWithId { id, event }: EventWi
     match gateway.send_event(event) {
         Ok(_) => info!("[Event #{}] Accepted by server", id),
         Err(SendError::Invalid) => error!("[Event #{}] Received invalid format", id),
-        Err(SendError::ServerAtCapacity) => warn!("[Event #{}] Accepted by server", id),
-        Err(SendError::InternalServerError) => error!("[Event #{}] Accepted by server", id),
+        Err(SendError::ServerAtCapacity) => warn!("[Event #{}] Server at capacity", id),
+        Err(SendError::InternalServerError) => error!("[Event #{}] Internal Server Error", id),
         Err(SendError::IOError(e)) => error!("[Event #{}] IOError: {}", id, e),
     };
 }

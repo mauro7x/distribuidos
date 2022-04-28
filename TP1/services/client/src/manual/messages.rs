@@ -5,7 +5,7 @@ use log::*;
 
 pub fn print_expected() {
     println!(
-        "Expected format: {}\n  - Leave blank for optional args (example: metric_id,,,,aggregation)\n  - DateTime format: {} (example: {})\n  - Aggregation options: avg, min, max, count",
+        "Expected format: {}\n  - Leave blank for optional args (example: metric_id,,,,aggregation)\n  - DateTime format: {} (example: {})\n  - Aggregation options: AVG, MIN, MAX, COUNT",
         EXPECTED_QUERY_FORMAT, DATETIME_FORMAT, DATETIME_FORMAT_EXAMPLE
     )
 }
@@ -20,7 +20,6 @@ pub fn invalid_input(error: InputError) {
         InputError::InvalidCSV => error!("Client input error: invalid csv line"),
         InputError::OnlyOneRange => error!("Client input error: 1 datetime found (expected 0 or 2"),
         InputError::InvalidDateTime => error!("Client input error: invalid datetime"),
-        InputError::InvalidAggr => error!("Client input error: invalid aggregation"),
     };
     print_expected();
 }

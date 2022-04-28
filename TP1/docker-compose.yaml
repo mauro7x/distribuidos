@@ -52,6 +52,8 @@ services:
       - internal
     volumes:
       - ./config/alert_service:/usr/app/config:ro
+    depends_on:
+      - internal_aggregator
 
   app:
     image: tp1_app:latest
@@ -63,16 +65,21 @@ services:
       - external_apps
     volumes:
       - ./config/app:/usr/app/config:ro
+    depends_on:
+      - event_writer
 
-  # client:
-  #   container_name: tp1_client
-  #   image: tp1_client:latest
-  #   build: ./services/client
-  #   entrypoint: target/release/client
-  #   environment:
-  #     - RUST_LOG=debug
-  #   networks:
-  #     - external_clients
+  client:
+    image: tp1_client:latest
+    build: ./services/client
+    entrypoint: target/release/simulated
+    environment:
+      - RUST_LOG=info
+    networks:
+      - external_clients
+    volumes:
+      - ./config/client:/usr/app/config:ro
+    depends_on:
+      - public_aggregator
 
 networks:
   external_apps:
