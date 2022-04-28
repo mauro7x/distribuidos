@@ -1,4 +1,4 @@
-pub fn filepath(dirpath: &String, partition: i64, ro: bool) -> String {
+pub fn filepath(dirpath: &str, partition: i64, ro: bool) -> String {
     let suffix = match ro {
         true => "",
         false => ".w",
@@ -7,6 +7,6 @@ pub fn filepath(dirpath: &String, partition: i64, ro: bool) -> String {
     format!("{}/{}.csv{}", &dirpath, partition, suffix)
 }
 
-pub fn dirpath(metric_id: &String, database_path: &String) -> String {
+pub fn dirpath(metric_id: &str, database_path: &str) -> String {
     format!("{}/{}", database_path, metric_id)
 }
