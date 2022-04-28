@@ -1,4 +1,4 @@
 {
-  "server_host": "0.0.0.0",
+  "server_host": "event_writer",
   "server_port": 3000
 }

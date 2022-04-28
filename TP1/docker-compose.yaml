@@ -6,13 +6,13 @@ services:
     build: ./services/event_writer
     entrypoint: target/release/main
     environment:
-      - RUST_LOG=debug
+      - RUST_LOG=info
     networks:
       - external_apps
       - internal
     volumes:
       # - database:/usr/app/events:rw
-      - ./database:/usr/app/events:rw
+      - ./events:/usr/app/events:rw
       - ./config/event_writer:/usr/app/config:ro
 
   public_aggregator:
@@ -20,13 +20,13 @@ services:
     build: ./services/aggregator
     entrypoint: target/release/main
     environment:
-      - RUST_LOG=debug
+      - RUST_LOG=info
     networks:
       - external_clients
       - internal
     volumes:
       # - database:/usr/app/events:ro
-      - ./database:/usr/app/events:ro
+      - ./events:/usr/app/events:ro
       - ./config/public_aggregator:/usr/app/config:ro
 
   internal_aggregator:
@@ -34,33 +34,35 @@ services:
     build: ./services/aggregator
     entrypoint: target/release/main
     environment:
-      - RUST_LOG=debug
+      - RUST_LOG=info
     networks:
       - internal
     volumes:
       # - database:/usr/app/events:ro
-      - ./database:/usr/app/events:ro
+      - ./events:/usr/app/events:ro
       - ./config/internal_aggregator:/usr/app/config:ro
 
   alert_service:
-    container_name: tp1_alert_service
     image: tp1_alert_service:latest
     build: ./services/alert_service
     entrypoint: target/release/main
     environment:
-      - RUST_LOG=debug
+      - RUST_LOG=info
     networks:
       - internal
     volumes:
       - ./config/alert_service:/usr/app/config:ro
 
-  # app:
-  #   container_name: tp1_app
-  #   image: tp1_app:latest
-  #   build: ./services/app
-  #   entrypoint: target/release/app
-  #   networks:
-  #     - external_apps
+  app:
+    image: tp1_app:latest
+    build: ./services/app
+    entrypoint: target/release/simulated
+    environment:
+      - RUST_LOG=info
+    networks:
+      - external_apps
+    volumes:
+      - ./config/app:/usr/app/config:ro
 
   # client:
   #   container_name: tp1_client
