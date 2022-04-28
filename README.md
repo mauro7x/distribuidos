@@ -7,6 +7,7 @@ Trabajos prácticos de la materia [**Sistemas Distribuidos I** (75.74)](https://
 - [TP0: Docker, Docker Compose](./TP0)
   - [Documentación en la Wiki](https://github.com/mauro7x/distribuidos/wiki)
 - [TP1: Concurrencia y Comunicaciones](./TP1)
+  - [Informe](./TP1/docs/Informe.pdf)
 - To be continued...
 
 ## Alumno
