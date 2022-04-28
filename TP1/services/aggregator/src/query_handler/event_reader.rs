@@ -118,7 +118,7 @@ impl EventReader {
             if timestamp < from {
                 continue;
             }
-            let assigned_window_idx = ((timestamp - from) / window_size) as usize
+            let assigned_window_idx = ((timestamp - from) / window_size) as usize;
             results[assigned_window_idx].push(value);
         }
 
@@ -169,7 +169,7 @@ impl EventReader {
     fn parse_range(
         &mut self,
         range: Option<DateTimeRange>,
-        metric_id: &String,
+        metric_id: &str,
     ) -> Result<(i64, i64), Error> {
         match range {
             Some(range) => Ok((range.from.timestamp_millis(), range.to.timestamp_millis())),
@@ -182,7 +182,7 @@ impl EventReader {
         }
     }
 
-    fn open_file_ro(&self, filepath: &String) -> OpenFileResult {
+    fn open_file_ro(&self, filepath: &str) -> OpenFileResult {
         if let Ok(file) = fs::File::open(&filepath) {
             return OpenFileResult::ReadOnly(file);
         };
@@ -212,7 +212,7 @@ impl EventReader {
         (ms_timestamp / 1000) / self.partition_secs
     }
 
-    fn get_first_timestamp(&mut self, metric_id: &String) -> Result<i64, Error> {
+    fn get_first_timestamp(&mut self, metric_id: &str) -> Result<i64, Error> {
         if let Some(first_timestamp) = self.first_timestamp_cache.get(metric_id) {
             return Ok(*first_timestamp);
         };
@@ -228,7 +228,7 @@ impl EventReader {
         Ok(timestamp)
     }
 
-    fn read_first_timestamp_from(&self, metric_id: &String, partition: i64) -> Result<i64, Error> {
+    fn read_first_timestamp_from(&self, metric_id: &str, partition: i64) -> Result<i64, Error> {
         let filepath = format!("{}/{}/{}.csv", &self.database_path, metric_id, partition);
 
         match self.open_file_ro(&filepath) {
@@ -253,7 +253,7 @@ impl EventReader {
         Ok(timestamp)
     }
 
-    fn read_first_partition(&self, metric_id: &String) -> Result<i64, Error> {
+    fn read_first_partition(&self, metric_id: &str) -> Result<i64, Error> {
         let filepath = format!(
             "{}/{}/{}",
             &self.database_path, metric_id, METRIC_FIRST_PARTITION_FILE
@@ -265,7 +265,7 @@ impl EventReader {
         Ok(i64::from_le_bytes(buf))
     }
 
-    fn check_if_metric_exists(&self, metric_id: &String) -> Result<(), QueryError> {
+    fn check_if_metric_exists(&self, metric_id: &str) -> Result<(), QueryError> {
         let first_partition_filepath = format!(
             "{}/{}/{}",
             self.database_path, metric_id, METRIC_FIRST_PARTITION_FILE

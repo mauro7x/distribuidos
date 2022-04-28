@@ -99,7 +99,7 @@ impl CheckExecutor {
         Ok(())
     }
 
-    fn write_alert(query: Query, limit: f32, output_dirpath: &String) -> Result<(), Error> {
+    fn write_alert(query: Query, limit: f32, output_dirpath: &str) -> Result<(), Error> {
         let filepath = format!("{}/{}.csv", output_dirpath, query.metric_id);
         let mut file = fs::OpenOptions::new()
             .create(true)
@@ -114,9 +114,9 @@ impl CheckExecutor {
 
         // Safe write
         file.lock_exclusive().unwrap();
-        write!(
+        writeln!(
             file,
-            "{},{},{:?},{},{}\n",
+            "{},{},{:?},{},{}",
             from, to, query.aggregation, aggregation_window_secs, limit
         )?;
         file.flush().map_err(|e| {

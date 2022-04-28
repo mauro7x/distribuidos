@@ -20,8 +20,8 @@ pub struct MetricFile {
 
 impl MetricFile {
     pub fn new(
-        metric_id: &String,
-        database_path: &String,
+        metric_id: &str,
+        database_path: &str,
         partition_secs: i64,
     ) -> Result<MetricFile, Error> {
         let now = Utc::now().timestamp();
@@ -102,7 +102,7 @@ impl MetricFile {
 
     // Static
 
-    fn restore_if_exists(dirpath: &String, partition: i64) -> Result<(), Error> {
+    fn restore_if_exists(dirpath: &str, partition: i64) -> Result<(), Error> {
         let ro_filepath = file_utils::filepath(dirpath, partition, true);
         if Path::new(&ro_filepath).exists() {
             let ro_file = fs::OpenOptions::new()
@@ -119,7 +119,7 @@ impl MetricFile {
         Ok(())
     }
 
-    fn create_file(dirpath: &String, partition: i64) -> Result<File, Error> {
+    fn create_file(dirpath: &str, partition: i64) -> Result<File, Error> {
         let filepath = file_utils::filepath(dirpath, partition, false);
 
         fs::OpenOptions::new()
@@ -129,7 +129,7 @@ impl MetricFile {
             .open(filepath)
     }
 
-    fn write_first_partition_metadata(dirpath: &String, partition: i64) -> Result<(), Error> {
+    fn write_first_partition_metadata(dirpath: &str, partition: i64) -> Result<(), Error> {
         let final_filepath = format!("{}/{}", dirpath, METRIC_FIRST_PARTITION_FILE);
         if Path::new(&final_filepath).exists() {
             return Ok(());

@@ -152,9 +152,9 @@ dependencies = [
 
 [[package]]
 name = "distribuidos_tp1_utils"
-version = "1.0.2"
+version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b010dfc0be4e100f5412de4432afbf994b954b144cd215ce9eb1a7c0f2ec5b07"
+checksum = "92a070648a0243974041d4057fe4e8a6680e5419ab1fc8c39a60b1e77b3a132a"
 dependencies = [
  "serde",
 ]
