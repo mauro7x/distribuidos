@@ -13,6 +13,7 @@ pub enum ExecuteError {
 
 pub type Job = Box<dyn FnBox + Send + 'static>;
 
-pub type MessageSender = mpsc::SyncSender<Message>;
+pub type MessageSender = mpsc::Sender<Message>;
+pub type MessageSyncSender = mpsc::SyncSender<Message>;
 pub type MessageReceiver = mpsc::Receiver<Message>;
 pub type SharedMessageReceiver = Arc<Mutex<MessageReceiver>>;

@@ -1,17 +1,15 @@
+pub use super::types::ExecuteError;
 use super::{
-    types::{ExecuteError, Message, MessageSyncSender},
+    types::{Message, MessageSender},
     worker::Worker,
 };
-use std::sync::{
-    mpsc::{self, TrySendError},
-    Arc, Mutex,
-};
+use std::sync::{mpsc, Arc, Mutex};
 
-use log::{error, trace};
+use log::*;
 
 pub struct ThreadPool {
     workers: Vec<Worker>,
-    sender: MessageSyncSender,
+    sender: MessageSender,
 }
 
 /// Static thread pool to execute tasks with a fixed number of threads.
@@ -20,16 +18,14 @@ impl ThreadPool {
     ///
     /// ## Arguments
     /// * `size`: number of threads in the pool.
-    /// * `max_jobs_queue`: max number of jobs waiting to be executed.
     ///
     /// ## Panics
     /// Function will panic if any parameter is zero.
-    pub fn new(size: usize, max_jobs_queue: usize) -> ThreadPool {
+    pub fn new(size: usize) -> ThreadPool {
         trace!("Creating ThreadPool...");
         assert!(size > 0);
-        assert!(max_jobs_queue > 0);
 
-        let (sender, receiver) = mpsc::sync_channel(max_jobs_queue);
+        let (sender, receiver) = mpsc::channel();
         let receiver = Arc::new(Mutex::new(receiver));
         let mut workers = Vec::with_capacity(size);
 
@@ -43,24 +39,14 @@ impl ThreadPool {
     }
 
     /// Queues a task for execution in the ThreadPool.
-    pub fn execute<F>(&self, f: F) -> Result<(), ExecuteError>
+    pub fn execute<F>(&self, f: F)
     where
         F: FnOnce() + Send + 'static,
     {
         let job = Box::new(f);
 
-        match self.sender.try_send(Message::NewJob(job)) {
-            Ok(()) => {
-                trace!("Job added to the queue");
-                Ok(())
-            }
-            Err(TrySendError::Full(_)) => Err(ExecuteError::Full),
-            Err(TrySendError::Disconnected(_)) => {
-                let msg = "Channel closed by receivers";
-                error!("{}", msg);
-                panic!("{}", msg);
-            }
-        }
+        self.sender.send(Message::NewJob(job)).unwrap();
+        trace!("Job added to the queue");
     }
 
     /// Joins every worker gracefully, waiting for them to finish their work.

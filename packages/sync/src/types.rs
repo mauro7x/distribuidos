@@ -13,6 +13,7 @@ pub enum QueueError<T> {
     Full(T),
 }
 
-pub type MessageSender<T> = mpsc::SyncSender<Message<T>>;
+pub type MessageSender<T> = mpsc::Sender<Message<T>>;
+pub type MessageSyncSender<T> = mpsc::SyncSender<Message<T>>;
 pub type MessageReceiver<T> = mpsc::Receiver<Message<T>>;
 pub type SharedMessageReceiver<T> = Arc<Mutex<MessageReceiver<T>>>;
