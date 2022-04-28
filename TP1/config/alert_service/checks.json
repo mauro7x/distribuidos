@@ -1,0 +1,32 @@
+[
+  {
+    "metric_id": "ram_usage_mb",
+    "aggregation": "MAX",
+    "aggregation_window_secs": 60,
+    "limit": 2048
+  },
+  {
+    "metric_id": "cpu_usage_percentage",
+    "aggregation": "AVG",
+    "aggregation_window_secs": 5,
+    "limit": 70
+  },
+  {
+    "metric_id": "metric_a",
+    "aggregation": "COUNT",
+    "aggregation_window_secs": 10,
+    "limit": 5
+  },
+  {
+    "metric_id": "metric_b",
+    "aggregation": "AVG",
+    "aggregation_window_secs": 30,
+    "limit": 500
+  },
+  {
+    "metric_id": "metric_c",
+    "aggregation": "MAX",
+    "aggregation_window_secs": 60,
+    "limit": 50
+  }
+]

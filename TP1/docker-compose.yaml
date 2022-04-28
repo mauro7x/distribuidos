@@ -2,7 +2,6 @@ version: '3'
 
 services:
   event_writer:
-    container_name: tp1_event_writer
     image: tp1_event_writer:latest
     build: ./services/event_writer
     entrypoint: target/release/main
@@ -12,11 +11,11 @@ services:
       - external_apps
       - internal
     volumes:
-      - database:/usr/app/events:rw
+      # - database:/usr/app/events:rw
+      - ./database:/usr/app/events:rw
       - ./config/event_writer:/usr/app/config:ro
 
   public_aggregator:
-    container_name: tp1_public_aggregator
     image: tp1_aggregator:latest
     build: ./services/aggregator
     entrypoint: target/release/main
@@ -26,11 +25,11 @@ services:
       - external_clients
       - internal
     volumes:
-      - database:/usr/app/events:ro
+      # - database:/usr/app/events:ro
+      - ./database:/usr/app/events:ro
       - ./config/public_aggregator:/usr/app/config:ro
 
   internal_aggregator:
-    container_name: tp1_internal_aggregator
     image: tp1_aggregator:latest
     build: ./services/aggregator
     entrypoint: target/release/main
@@ -39,16 +38,21 @@ services:
     networks:
       - internal
     volumes:
-      - database:/usr/app/events:ro
+      # - database:/usr/app/events:ro
+      - ./database:/usr/app/events:ro
       - ./config/internal_aggregator:/usr/app/config:ro
 
-  # alert_service:
-  #   container_name: tp1_alert_service
-  #   image: tp1_alert_service:latest
-  #   build: ./services/alert_service
-  #   entrypoint: target/release/alert_service
-  #   networks:
-  #     - internal
+  alert_service:
+    container_name: tp1_alert_service
+    image: tp1_alert_service:latest
+    build: ./services/alert_service
+    entrypoint: target/release/alert_service
+    environment:
+      - RUST_LOG=debug
+    networks:
+      - internal
+    volumes:
+      - ./config/alert_service:/usr/app/config:ro
 
   # app:
   #   container_name: tp1_app
