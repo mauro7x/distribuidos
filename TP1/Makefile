@@ -8,7 +8,7 @@ build:
 .PHONY: build
 
 up:
-	docker-compose up -d
+	docker-compose up -d --scale app=0 --scale client=0
 .PHONY: up
 
 down:
