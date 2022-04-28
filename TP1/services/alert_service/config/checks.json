@@ -4,5 +4,35 @@
     "aggregation": "MAX",
     "aggregation_window_secs": 60,
     "limit": 2048
+  },
+  {
+    "metric_id": "cpu_usage_percentage",
+    "aggregation": "AVG",
+    "aggregation_window_secs": 5,
+    "limit": 70
+  },
+  {
+    "metric_id": "metric_1",
+    "aggregation": "AVG",
+    "aggregation_window_secs": 10,
+    "limit": 220
+  },
+  {
+    "metric_id": "metric_2",
+    "aggregation": "COUNT",
+    "aggregation_window_secs": 60,
+    "limit": 100
+  },
+  {
+    "metric_id": "metric_3",
+    "aggregation": "COUNT",
+    "aggregation_window_secs": 60,
+    "limit": 1000
+  },
+  {
+    "metric_id": "metric_3",
+    "aggregation": "COUNT",
+    "aggregation_window_secs": 60,
+    "limit": 10000
   }
 ]

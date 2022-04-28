@@ -12,21 +12,27 @@
     "limit": 70
   },
   {
-    "metric_id": "metric_a",
-    "aggregation": "COUNT",
-    "aggregation_window_secs": 10,
-    "limit": 5
-  },
-  {
-    "metric_id": "metric_b",
+    "metric_id": "metric_1",
     "aggregation": "AVG",
-    "aggregation_window_secs": 30,
-    "limit": 500
+    "aggregation_window_secs": 10,
+    "limit": 220
   },
   {
-    "metric_id": "metric_c",
-    "aggregation": "MAX",
+    "metric_id": "metric_2",
+    "aggregation": "COUNT",
     "aggregation_window_secs": 60,
-    "limit": 50
+    "limit": 100
+  },
+  {
+    "metric_id": "metric_3",
+    "aggregation": "COUNT",
+    "aggregation_window_secs": 60,
+    "limit": 1000
+  },
+  {
+    "metric_id": "metric_3",
+    "aggregation": "COUNT",
+    "aggregation_window_secs": 60,
+    "limit": 10000
   }
 ]
