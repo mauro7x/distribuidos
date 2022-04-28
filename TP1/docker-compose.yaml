@@ -12,7 +12,7 @@ services:
       - internal
     volumes:
       # - database:/usr/app/events:rw
-      - ./events:/usr/app/events:rw
+      - ./events:/usr/app/events:rw # demo purposes
       - ./config/event_writer:/usr/app/config:ro
 
   public_aggregator:
@@ -26,7 +26,7 @@ services:
       - internal
     volumes:
       # - database:/usr/app/events:ro
-      - ./events:/usr/app/events:ro
+      - ./events:/usr/app/events:ro # demo purposes
       - ./config/public_aggregator:/usr/app/config:ro
 
   internal_aggregator:
@@ -39,7 +39,7 @@ services:
       - internal
     volumes:
       # - database:/usr/app/events:ro
-      - ./events:/usr/app/events:ro
+      - ./events:/usr/app/events:ro # demo purposes
       - ./config/internal_aggregator:/usr/app/config:ro
 
   alert_service:
@@ -51,6 +51,7 @@ services:
     networks:
       - internal
     volumes:
+      - ./alerts:/usr/app/alerts:rw # demo purposes
       - ./config/alert_service:/usr/app/config:ro
     depends_on:
       - internal_aggregator
