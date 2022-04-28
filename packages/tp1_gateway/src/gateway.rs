@@ -11,7 +11,7 @@ use std::net::TcpStream;
 
 use log::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Gateway {
     addr: String,
 }
