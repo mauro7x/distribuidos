@@ -7,8 +7,8 @@ edition = "2021"
 
 [dependencies]
 csv = "1.1"
-distribuidos_tp1_gateway = "0.1.5"
-distribuidos_tp1_protocols = "1.2.4"
+distribuidos_tp1_gateway = "0.1.7"
+distribuidos_tp1_protocols = "1.2.6"
 distribuidos_types = "0.1.0"
 log = "0.4"
 pretty_env_logger = "0.4"
