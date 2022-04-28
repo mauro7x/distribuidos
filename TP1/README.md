@@ -1,5 +1,7 @@
 # TP1: Metrics and Alert Server
 
+[![TP1 CI](https://github.com/mauro7x/distribuidos/actions/workflows/tp1_ci.yaml/badge.svg)](https://github.com/mauro7x/distribuidos/actions/workflows/tp1_ci.yaml)
+
 Desarrollo de un sistema distribuido que brinda servicios para el reporte de eventos de aplicación, consulta de métricas y disparo de alertas. Este sistema estará pensado para ser instalado dentro de una empresa que posee un gran ecosistema de aplicaciones y usuarios que monitorean los servicios.
 
 **Temas:** Concurrencia y Comunicaciones.
