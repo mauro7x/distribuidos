@@ -1,8 +1,9 @@
 use chrono::{DateTime as DateTimeT, Utc};
+use serde::{Deserialize, Serialize};
 
 pub type DateTime = DateTimeT<Utc>;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 #[repr(u8)]
 pub enum AggregationOpcode {
     AVG = 0,
