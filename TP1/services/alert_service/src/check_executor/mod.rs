@@ -116,7 +116,7 @@ impl CheckExecutor {
         file.lock_exclusive().unwrap();
         write!(
             file,
-            "{},{},{:?},{},{}",
+            "{},{},{:?},{},{}\n",
             from, to, query.aggregation, aggregation_window_secs, limit
         )?;
         file.flush().map_err(|e| {
