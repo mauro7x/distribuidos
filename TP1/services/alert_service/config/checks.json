@@ -1,1 +1,8 @@
-[]
+[
+  {
+    "metric_id": "ram_usage_mb",
+    "aggregation": "MAX",
+    "aggregation_window_secs": 60,
+    "limit": 2048
+  }
+]

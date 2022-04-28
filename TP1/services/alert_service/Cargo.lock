@@ -18,9 +18,11 @@ dependencies = [
  "chrono",
  "csv",
  "ctrlc",
+ "distribuidos_sync",
  "distribuidos_tp1_gateway",
  "distribuidos_tp1_protocols",
  "distribuidos_types",
+ "fs2",
  "log",
  "pretty_env_logger",
  "serde",
@@ -114,10 +116,19 @@ dependencies = [
 ]
 
 [[package]]
-name = "distribuidos_tp1_gateway"
-version = "0.1.5"
+name = "distribuidos_sync"
+version = "1.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a17d854ff77a0c7b90ac52910b9b675344ede0d5f486abd23e469c848f5ef2f0"
+checksum = "c6c6d091a0732c219643c0f2717c6d58c68558ce227f5d8f6bb240c7cbde9c16"
+dependencies = [
+ "log",
+]
+
+[[package]]
+name = "distribuidos_tp1_gateway"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a9f335166b56041ad9f238431aacd28d66468c45c09226d22252566493b32ec2"
 dependencies = [
  "distribuidos_tp1_protocols",
  "distribuidos_types",
@@ -128,12 +139,13 @@ dependencies = [
 
 [[package]]
 name = "distribuidos_tp1_protocols"
-version = "1.2.4"
+version = "1.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b92c38254699bd837c0c9e82d4f834c1f268fed433b2cfc266e773d76e2f0a3"
+checksum = "188f331f30f675fc4cee606ec299960cd3fc9bff2cdaff5fdf96c532320d1188"
 dependencies = [
  "chrono",
  "distribuidos_types",
+ "serde",
 ]
 
 [[package]]
@@ -153,6 +165,16 @@ dependencies = [
  "log",
  "regex",
  "termcolor",
+]
+
+[[package]]
+name = "fs2"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9564fc758e15025b46aa6643b1b77d047d1a56a1aea6e01002ac0c7026876213"
+dependencies = [
+ "libc",
+ "winapi",
 ]
 
 [[package]]
