@@ -96,7 +96,7 @@ fn loop_sending(query_rows: Vec<SimulatedRow>, rx: Receiver<()>) -> BoxResult<()
 
 fn handler(Context { gateway }: &mut Context, QueryWithId { id, query }: QueryWithId) {
     match gateway.send_query(query) {
-        Ok(_) => info!("[Event #{}] Accepted by server", id),
+        Ok(_) => info!("[Query #{}] Accepted by server", id),
         Err(QueryError::Invalid)
         | Err(QueryError::InvalidRange)
         | Err(QueryError::InvalidAggrWindow) => error!("[Query #{}] Received invalid format", id),
