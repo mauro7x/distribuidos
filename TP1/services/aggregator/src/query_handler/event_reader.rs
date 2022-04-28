@@ -67,7 +67,10 @@ impl EventReader {
         window_size_ms: i64,
     ) -> Result<QueryResult, QueryError> {
         let time_range = to - from;
-        let n_windows = (time_range / window_size_ms) + 1; // last window is incomplete
+        let mut n_windows = time_range / window_size_ms;
+        if time_range % window_size_ms != 0 {
+            n_windows += 1; // last window is incomplete
+        }
         let mut results = Window::create_with_size(n_windows.try_into().unwrap());
         let dirpath = format!("{}/{}", &self.database_path, &metric_id);
         let mut current_partition = self.ms_timestamp_to_partition(from);
@@ -111,17 +114,17 @@ impl EventReader {
         partition: i64,
         from: i64,
         to: i64,
-        window_size: i64,
+        window_size_ms: i64,
         results: &mut [Window],
     ) -> Result<(), Error> {
         let mut rdr = ReaderBuilder::new().has_headers(false).from_reader(file);
         for partition_row in rdr.deserialize::<PartitionRow>() {
             let PartitionRow { ms_rem, value } = partition_row?;
             let timestamp = (partition * self.partition_secs * 1000) + ms_rem;
-            if timestamp < from || timestamp > to {
+            if timestamp < from || timestamp >= to {
                 continue;
             }
-            let assigned_window_idx = ((timestamp - from) / window_size) as usize;
+            let assigned_window_idx = ((timestamp - from) / window_size_ms) as usize;
             results[assigned_window_idx].push(value);
         }
 
