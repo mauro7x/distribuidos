@@ -3,10 +3,21 @@ github: .github/**/*
 
 # TPs
 TP0: TP0/**/*
-TP1: TP1/**/*
-TP2: TP2/**/*
+TP1:
+  - TP1/**/*
+  - packages/tp1_gateway/**/*
+  - packages/tp1_protocols/**/*
+  - packages/tp1_utils/**/*
+TP2:
+  - TP2/**/*
 
 # Various
+config:
+  - '**/config/**/*'
+  - '**/*.yaml'
 docs:
   - docs/**/*
   - '**/*.md'
+ignore: '**/*ignore'
+pkg: packages/**/*
+script: '**/scripts/**/*'
