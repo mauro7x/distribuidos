@@ -15,10 +15,12 @@ CHECK="${GREEN}\xE2\x9C\x93${NC}"
 # Config
 VERBOSE="${VERBOSE:-false}"
 
+# Functions
+
 # $1 = name
 function build {
     echo -n -e "> Building ${CYAN}$1${NC}... "
-    CMD="docker build -t tp1_${1}:latest -f ./Dockerfile ./services/${1}"
+    CMD="docker build -t tp2_${1}:latest -f ./docker/Dockerfile ./services/${1}"
     
     set +e
     if ${VERBOSE}; then
@@ -38,7 +40,12 @@ function build {
     fi
 }
 
-services=("aggregator" "alert_service" "app" "client" "event_writer")
-for service in "${services[@]}"; do
-    build "${service}"
+# Main execution
+
+failed=false
+for SERVICE_DIRPATH in ./services/*; do
+    SERVICE="$(basename ${SERVICE_DIRPATH})"
+    build "${SERVICE}"
 done
+
+echo -e "\n${GREEN}Success!${NC}"

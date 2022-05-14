@@ -4,6 +4,10 @@
 
 Trabajo práctico introductorio, cuyo objetivo principal es familiarizarse con la automatización de un proyecto mediante las herramientas **Docker** y **Docker Compose**.
 
+- **Temas:** Docker y Docker Compose.
+- [Enunciado](./docs/Enunciado.pdf)
+- [Informe](https://github.com/mauro7x/distribuidos/wiki/TP0:-Docker,-Docker-Compose)
+
 ## Enunciado
 
 El siguiente ejemplo es un cliente-servidor el cual corre en containers
