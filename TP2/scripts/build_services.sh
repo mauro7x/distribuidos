@@ -20,7 +20,12 @@ VERBOSE="${VERBOSE:-false}"
 # $1 = name
 function build {
     echo -n -e "> Building ${CYAN}$1${NC}... "
-    CMD="docker build -t tp2_${1}:latest -f ./docker/Dockerfile ./services/${1}"
+    CMD="docker build \
+        -t tp2_${1}:latest \
+        -f ./Dockerfile \
+        --build-arg SRC_PATH=services/${1} \
+        --build-arg COMMON_PATH=common \
+        ."
     
     set +e
     if ${VERBOSE}; then
