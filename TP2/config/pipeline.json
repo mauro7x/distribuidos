@@ -1,0 +1,44 @@
+{
+  "ingestion": {
+    "base": {
+      "image": "dropper",
+      "config": {}
+    },
+    "input": [{ "id": "msg_1", "data": "dni,first_name,last_name,age" }],
+    "output": [
+      {
+        "to": "name_registry",
+        "msg": "msg_1"
+      },
+      {
+        "to": "age_registry",
+        "msg": "msg_1"
+      }
+    ]
+  },
+  "name_registry": {
+    "input": [{ "id": "msg_1", "data": "dni,first_name,last_name" }],
+    "output": [
+      {
+        "to": "joiner",
+        "msg": "msg_1"
+      }
+    ]
+  },
+  "age_registry": {
+    "input": [{ "id": "msg_1", "data": "dni,age" }],
+    "output": [
+      {
+        "to": "joiner",
+        "msg": "msg_2"
+      }
+    ]
+  },
+  "joiner": {
+    "affinity_key": "dni",
+    "input": [
+      { "id": "msg_1", "data": "dni,fullname" },
+      { "id": "msg_2", "data": "dni,age_in_months" }
+    ]
+  }
+}
