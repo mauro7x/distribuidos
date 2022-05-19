@@ -4,7 +4,7 @@ PWD := $(shell pwd)
 default: build
 
 build:
-	VERBOSE="${VERBOSE}" ./scripts/build_services.sh
+	VERBOSE="${VERBOSE}" ./scripts/build.sh
 .PHONY: build
 
 apply:

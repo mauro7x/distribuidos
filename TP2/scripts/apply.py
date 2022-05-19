@@ -19,8 +19,8 @@ SERVICES_CONFIG_DIRNAME = '.services'
 BASE_FILTER_CONFIG_NAME = 'filter'
 MIDDLEWARE_CONFIG_NAME = 'middleware'
 
-# Auxiliar functions
 
+# Auxiliar functions
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -48,9 +48,8 @@ def find_by_msg_id(msgs, msg_id):
         filter(lambda x: x[1]['id'] == msg_id, enumerate(msgs)))[0]
     return idx, msg['data']
 
+
 # Docker Compose generator class
-
-
 class DockerComposeGenerator:
     TAB = '  '
 
