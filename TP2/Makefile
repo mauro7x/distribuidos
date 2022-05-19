@@ -32,4 +32,5 @@ run: build
 clean:
 	rm -rf ./config/.services
 	rm -rf ./docker-compose.yaml
+	docker images --format '{{.Repository}}' | grep tp2_ | xargs docker rmi
 .PHONY: clean
