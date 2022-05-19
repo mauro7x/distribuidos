@@ -2,17 +2,24 @@
   "ingestion": {
     "base": {
       "image": "dropper",
-      "config": {}
+      "config": {
+        "fields": ["extra", "drop_this", "thrash"]
+      }
     },
-    "input": [{ "id": "msg_1", "data": "dni,first_name,last_name,age" }],
+    "input": [
+      {
+        "id": "msg_1",
+        "data": "dni,first_name,last_name,age,extra,drop_this,thrash"
+      }
+    ],
     "output": [
       {
         "to": "name_registry",
-        "msg": "msg_1"
+        "msg_id": "msg_1"
       },
       {
         "to": "age_registry",
-        "msg": "msg_1"
+        "msg_id": "msg_1"
       }
     ]
   },
@@ -21,7 +28,7 @@
     "output": [
       {
         "to": "joiner",
-        "msg": "msg_1"
+        "msg_id": "msg_1"
       }
     ]
   },
@@ -30,7 +37,7 @@
     "output": [
       {
         "to": "joiner",
-        "msg": "msg_2"
+        "msg_id": "msg_2"
       }
     ]
   },
@@ -39,6 +46,7 @@
     "input": [
       { "id": "msg_1", "data": "dni,fullname" },
       { "id": "msg_2", "data": "dni,age_in_months" }
-    ]
+    ],
+    "output": []
   }
 }

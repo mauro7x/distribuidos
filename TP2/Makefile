@@ -8,10 +8,7 @@ build:
 .PHONY: build
 
 apply:
-	python3 ./scripts/apply.py \
-		-p ./config/pipeline.json \
-		-s ./config/scale.json \
-		> docker-compose.yaml
+	python3 ./scripts/apply.py -c ./config -p "tp2_" > docker-compose.yaml
 .PHONY: apply
 
 up: apply
@@ -26,3 +23,8 @@ down:
 logs:
 	docker-compose logs -f
 .PHONY: logs
+
+run: build
+	docker-compose up
+	docker-compose down
+.PHONY: run
