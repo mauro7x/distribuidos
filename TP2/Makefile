@@ -28,3 +28,8 @@ run: build
 	docker-compose up
 	docker-compose down
 .PHONY: run
+
+clean:
+	rm -rf ./config/.services
+	rm -rf ./docker-compose.yaml
+.PHONY: clean
