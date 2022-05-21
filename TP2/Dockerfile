@@ -1,5 +1,8 @@
 FROM python:3.10.4-slim
 
+# Install zmq
+RUN pip install pyzmq
+
 # Dirpath to service source
 ARG MAIN_PATH
 ARG COMMON_PATH
