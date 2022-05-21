@@ -114,7 +114,7 @@ class DockerComposeGenerator:
         }
 
         if 'affinity_key' in definition:
-            middleware['input'] = definition['input']
+            middleware['inputs'] = definition['inputs']
             middleware['affinity_key'] = definition['affinity_key']
 
         self.add_svc_file(name, MIDDLEWARE_CONFIG_NAME, middleware)
@@ -122,16 +122,16 @@ class DockerComposeGenerator:
     def add_svc_middleware_file(self, name, definition):
         middleware = {
             'common': self.common_config,
-            'input': definition['input'],
-            'output': []
+            'inputs': definition['inputs'],
+            'outputs': []
         }
 
-        for output_msg in definition['output']:
+        for output_msg in definition['outputs']:
             to = output_msg['to']
             msg_id = output_msg['msg_id']
             msg_idx, data = find_by_msg_id(
-                self.pipeline[to]['input'], msg_id)
-            middleware['output'].append(
+                self.pipeline[to]['inputs'], msg_id)
+            middleware['outputs'].append(
                 {'to': to, 'msg_idx': msg_idx, 'data': data})
 
         self.add_svc_file(name, MIDDLEWARE_CONFIG_NAME, middleware)

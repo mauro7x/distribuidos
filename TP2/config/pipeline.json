@@ -6,13 +6,13 @@
         "fields": ["extra", "drop_this", "thrash"]
       }
     },
-    "input": [
+    "inputs": [
       {
         "id": "msg_1",
         "data": "dni,first_name,last_name,age,extra,drop_this,thrash"
       }
     ],
-    "output": [
+    "outputs": [
       {
         "to": "name_registry",
         "msg_id": "msg_1"
@@ -24,8 +24,8 @@
     ]
   },
   "name_registry": {
-    "input": [{ "id": "msg_1", "data": "dni,first_name,last_name" }],
-    "output": [
+    "inputs": [{ "id": "msg_1", "data": "dni,first_name,last_name" }],
+    "outputs": [
       {
         "to": "joiner",
         "msg_id": "msg_1"
@@ -33,8 +33,8 @@
     ]
   },
   "age_registry": {
-    "input": [{ "id": "msg_1", "data": "dni,age" }],
-    "output": [
+    "inputs": [{ "id": "msg_1", "data": "dni,age" }],
+    "outputs": [
       {
         "to": "joiner",
         "msg_id": "msg_2"
@@ -43,10 +43,10 @@
   },
   "joiner": {
     "affinity_key": "dni",
-    "input": [
+    "inputs": [
       { "id": "msg_1", "data": "dni,fullname" },
       { "id": "msg_2", "data": "dni,age_in_months" }
     ],
-    "output": []
+    "outputs": []
   }
 }
