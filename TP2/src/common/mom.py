@@ -1,7 +1,7 @@
 import zmq
 from collections import namedtuple
 from dataclasses import dataclass
-from typing import Any, List
+from typing import Any, List, Dict
 from common.utils import read_json
 
 LOCALHOST = '127.0.0.1'
@@ -31,7 +31,7 @@ class Output:
     data: Any
 
 
-Sendable = dict[str, Any]
+Sendable = Dict[str, Any]
 
 
 class MOM:
@@ -90,7 +90,7 @@ class MOM:
         self.__puller = puller
 
     def __init_pushers(self):
-        pushers: dict[str, zmq.Socket] = {}
+        pushers: Dict[str, zmq.Socket] = {}
 
         for output in self.__outputs:
             host = output.host
