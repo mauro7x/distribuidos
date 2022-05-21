@@ -24,7 +24,7 @@ logs:
 	docker-compose logs -f
 .PHONY: logs
 
-run: build
+run: build apply
 	docker-compose up
 	docker-compose down
 .PHONY: run
