@@ -1,0 +1,23 @@
+{
+  "common": {
+    "port": 3000,
+    "protocol": "tcp"
+  },
+  "inputs": [
+    {
+      "id": "msg_1",
+      "data": "dni,first_name,last_name"
+    },
+    {
+      "id": "msg_2",
+      "data": "dni,age"
+    }
+  ],
+  "outputs": [
+    {
+      "to": "sink",
+      "msg_idx": 0,
+      "data": "dni,first_name,age"
+    }
+  ]
+}
