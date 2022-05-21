@@ -38,7 +38,7 @@ class BrokerMOM(BaseMOM):
                 BrokerMOM.__parse_inputs(inputs, affinity_key)
         else:
             self.__strategy = const.ROUND_ROBIN_STRATEGY
-            self.__rr_last_sent = self.__count
+            self.__rr_last_sent = self.__count - 1
 
         logging.debug(
             'MOM broker configuration:'
@@ -74,11 +74,11 @@ class BrokerMOM(BaseMOM):
         self.__rr_last_sent = assigned_worker
 
     def __forward_msg_affinity(self, msg: str):
-        msg_idx, msg_data = msg
-        fields = msg_data.split(',')
+        msg_idx, msg_data = msg.split(const.MSG_SEP, 1)
+        fields = msg_data.split(const.MSG_DATA_JOINER)
 
         try:
-            affinity_idx = self.__affinity_idx_by_msg[msg_idx]
+            affinity_idx = self.__affinity_idx_by_msg[int(msg_idx)]
             affinity_value = fields[affinity_idx]
         except Exception:
             error = f'Invalid message index received ({msg_idx})'
@@ -100,7 +100,7 @@ class BrokerMOM(BaseMOM):
         affinity_idx_by_msg = []
         for input in inputs:
             data: str = input['data']
-            fields = data.split(',')
+            fields = data.split(const.MSG_DATA_JOINER)
             affinity_idx = fields.index(affinity_key)
             affinity_idx_by_msg.append(affinity_idx)
 

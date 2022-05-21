@@ -3,7 +3,7 @@ from common.utils import init_log
 
 
 def main():
-    init_log('debug')
+    init_log()
     mom = BrokerMOM()
     mom.run()
 

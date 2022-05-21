@@ -11,7 +11,7 @@ apply:
 	python3 ./scripts/apply.py -c ./config -p "tp2_" > docker-compose.yaml
 .PHONY: apply
 
-up: apply
+up:
 	docker-compose up -d
 .PHONY: up
 

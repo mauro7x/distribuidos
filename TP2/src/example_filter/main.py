@@ -37,7 +37,7 @@ def handle_msg_2(context, send, data):
 
 
 def main():
-    init_log('debug')
+    init_log()
 
     handlers = {
         "msg_1": handle_msg_1,

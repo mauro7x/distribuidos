@@ -67,7 +67,7 @@ class WorkerMOM(BaseMOM):
     # Private
 
     def __parse_msg(self, raw_msg):
-        msg_idx, raw_data = raw_msg.split(' ', 1)
+        msg_idx, raw_data = raw_msg.split(const.MSG_SEP, 1)
 
         try:
             input = self.__inputs[int(msg_idx)]
@@ -79,12 +79,12 @@ class WorkerMOM(BaseMOM):
             raise Exception(error)
 
         try:
-            msg_args = raw_data.split(',')
+            msg_args = raw_data.split(const.MSG_DATA_JOINER)
             data = MsgData(*msg_args)
         except Exception:
             error = ('Could not parse message.'
-                     '\nExpected: {MsgData}'
-                     '\nReceived: {raw_data}')
+                     f'\nExpected: {MsgData}'
+                     f'\nReceived: {raw_data}')
             logging.critical(error)
             raise Exception(error)
 
