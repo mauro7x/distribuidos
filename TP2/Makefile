@@ -11,7 +11,7 @@ apply:
 	python3 ./scripts/apply.py -c ./config -p "tp2_" > docker-compose.yaml
 .PHONY: apply
 
-up: apply
+up:
 	docker-compose up -d
 .PHONY: up
 
@@ -24,7 +24,13 @@ logs:
 	docker-compose logs -f
 .PHONY: logs
 
-run: build
+run: build apply
 	docker-compose up
 	docker-compose down
 .PHONY: run
+
+clean:
+	rm -rf ./config/.services
+	rm -rf ./docker-compose.yaml
+	docker images --format '{{.Repository}}' | grep tp2_ | xargs docker rmi
+.PHONY: clean

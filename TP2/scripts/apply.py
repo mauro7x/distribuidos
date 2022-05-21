@@ -18,9 +18,10 @@ CONFIG_MOUNTING_DIRPATH = '/config'
 SERVICES_CONFIG_DIRNAME = '.services'
 BASE_FILTER_CONFIG_NAME = 'filter'
 MIDDLEWARE_CONFIG_NAME = 'middleware'
-
+COMMON_CONFIG_NAME = 'common'
 
 # Auxiliar functions
+
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -107,31 +108,33 @@ class DockerComposeGenerator:
     def add_svc_file(self, svc_name, filename, content):
         self.svc_config_files.append((svc_name, filename, content))
 
-    def add_broker_middleware_file(self, name, definition, count):
+    def add_common_config_file(self, name):
+        self.add_svc_file(name, COMMON_CONFIG_NAME, self.common_config)
+
+    def add_broker_middleware_file(self, name, definition, svc_name, count):
         middleware = {
-            'common': self.common_config,
+            'base_hostname': svc_name,
             'count': count
         }
 
         if 'affinity_key' in definition:
-            middleware['input'] = definition['input']
+            middleware['inputs'] = definition['inputs']
             middleware['affinity_key'] = definition['affinity_key']
 
         self.add_svc_file(name, MIDDLEWARE_CONFIG_NAME, middleware)
 
     def add_svc_middleware_file(self, name, definition):
         middleware = {
-            'common': self.common_config,
-            'input': definition['input'],
-            'output': []
+            'inputs': definition['inputs'],
+            'outputs': []
         }
 
-        for output_msg in definition['output']:
+        for output_msg in definition['outputs']:
             to = output_msg['to']
             msg_id = output_msg['msg_id']
             msg_idx, data = find_by_msg_id(
-                self.pipeline[to]['input'], msg_id)
-            middleware['output'].append(
+                self.pipeline[to]['inputs'], msg_id)
+            middleware['outputs'].append(
                 {'to': to, 'msg_idx': msg_idx, 'data': data})
 
         self.add_svc_file(name, MIDDLEWARE_CONFIG_NAME, middleware)
@@ -158,7 +161,8 @@ class DockerComposeGenerator:
         self.add_image(BROKER_NAME)
         self.add_container_name(name)
         self.mount_config_volume(name)
-        self.add_broker_middleware_file(name, definition, count)
+        self.add_broker_middleware_file(name, definition, svc_name, count)
+        self.add_common_config_file(name)
 
     def add_svc_definition(self, name, definition, i=None):
         name_suffix = f'_{i}' if i else ''
@@ -179,12 +183,14 @@ class DockerComposeGenerator:
         self.add_group_broker(name, definition, count)
 
         self.add_svc_middleware_file(name, definition)
+        self.add_common_config_file(name)
         for i in range(1, count + 1):
             self.write('')
             self.add_svc_definition(name, definition, i)
 
     def add_single_svc(self, name, definition):
         self.add_svc_middleware_file(name, definition)
+        self.add_common_config_file(name)
         self.add_svc_definition(name, definition)
 
     def generate(self):

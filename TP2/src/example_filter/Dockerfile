@@ -5,10 +5,9 @@ RUN pip install pyzmq
 
 # Dirpath to service source
 ARG MAIN_PATH
-ARG COMMON_PATH
 
 # Copy sources
 COPY ${MAIN_PATH} /main.py
-COPY ${COMMON_PATH} /common
+COPY common /common
 
 CMD ["python3", "main.py"]
