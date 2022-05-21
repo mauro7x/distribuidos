@@ -1,21 +1,23 @@
 import zmq
+import logging
 from collections import namedtuple
 from dataclasses import dataclass
 from typing import Any, List, Dict
 from common.utils import read_json
 
-LOCALHOST = '127.0.0.1'
-CONFIG_FILEPATH = 'middleware.json'
+CONFIG_FILEPATH = 'config/middleware.json'
 EOF_MSG_ID = 'EOF'
 EOF_MSG = EOF_MSG_ID
 MSG_SEP = ' '
 MSG_DATA_JOINER = ','
 
+Sendable = Dict[str, Any]
+
 
 @dataclass
 class Message:
     id: str
-    data: str
+    data: Any
 
 
 @dataclass
@@ -31,35 +33,50 @@ class Output:
     data: Any
 
 
-Sendable = Dict[str, Any]
-
-
 class MOM:
     def __init__(self):
+        logging.debug('Initializing MOM...')
         self.__context: zmq.Context = zmq.Context()
+        logging.debug('Reading config...')
         self.__read_config()
+        logging.info(
+            'MOM Configuration:'
+            f'\nPort: {self.__port}'
+            f'\nInputs: {self.__inputs}'
+            f'\nOutputs: {self.__outputs}'
+        )
 
         # Init zmq pullers and pushers
+        logging.debug('Initializing puller...')
         self.__init_puller()
+        logging.debug('Initializing pushers...')
         self.__init_pushers()
+        logging.debug('MOM initialized')
 
     def recv(self) -> Message:
         msg = self.__puller.recv_string()
         if msg == EOF_MSG:
             return Message(EOF_MSG_ID, None)
 
-        return self.__parse_msg(msg)
+        msg = self.__parse_msg(msg)
+        logging.debug(f"Received: '{msg}'")
+        return msg
 
     def send(self, result: Sendable):
         for output in self.__outputs:
             pusher = self.__pushers[output.host]
             serialized = MOM.__serialize(output.msg_idx, output.data, result)
+            logging.debug(f"Sending '{serialized}' to {output.host}")
             pusher.send_string(serialized)
 
     def send_eof(self):
+        logging.info('Sending EOF')
         for output in self.__outputs:
             pusher = self.__pushers[output.host]
             pusher.send_string(EOF_MSG)
+
+    def __del__(self):
+        self.__context.destroy(linger=0)
 
     # Private
 
@@ -84,8 +101,8 @@ class MOM:
 
     def __init_puller(self):
         puller = self.__context.socket(zmq.PULL)
-        addr = self.__addr(LOCALHOST)
-        print(f'Binding puller to {addr}')
+        addr = self.__addr('*')
+        logging.debug(f'Binding puller to {addr}')
         puller.bind(addr)
         self.__puller = puller
 
@@ -99,7 +116,7 @@ class MOM:
 
             pusher = self.__context.socket(zmq.PUSH)
             addr = self.__addr(host)
-            print(f'Connecting pusher to {addr}')
+            logging.debug(f'Connecting pusher to {addr}')
             pusher.connect(addr)
             pushers[host] = pusher
 
@@ -109,19 +126,23 @@ class MOM:
         msg_idx, raw_data = raw_msg.split(' ', 1)
 
         try:
-            msg_id, MsgData = self.__inputs[int(msg_idx)]
+            input = self.__inputs[int(msg_idx)]
+            msg_id = input.id
+            MsgData = input.data
         except Exception:
-            raise Exception(f'Invalid message index received ({msg_idx})')
+            error = f'Invalid message index received ({msg_idx})'
+            logging.critical(error)
+            raise Exception(error)
 
         try:
             msg_args = raw_data.split(',')
             data = MsgData(*msg_args)
         except Exception:
-            raise Exception(
-                'Could not parse message.'
-                '\nExpected: {MsgData}'
-                '\nReceived: {raw_data}'
-            )
+            error = ('Could not parse message.'
+                     '\nExpected: {MsgData}'
+                     '\nReceived: {raw_data}')
+            logging.critical(error)
+            raise Exception(error)
 
         return Message(msg_id, data)
 
