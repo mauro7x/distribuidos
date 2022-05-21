@@ -1,10 +1,11 @@
-import logging
+from common.mom.broker import BrokerMOM
 from common.utils import init_log
 
 
 def main():
     init_log('debug')
-    logging.info('[Broker] Example broker executed')
+    mom = BrokerMOM()
+    mom.run()
 
 
 if __name__ == '__main__':

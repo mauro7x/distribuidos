@@ -1,6 +1,9 @@
 import logging
 from typing import Any, Callable, Dict
-from common.mom import MOM, EOF_MSG_ID, Message, Sendable
+from common.mom.worker import WorkerMOM
+from common.mom.constants import EOF_MSG_ID
+from common.mom.types import Message, Sendable
+
 
 SendFn = Callable[[Sendable], None]
 Context = Dict[str, Any]
@@ -11,7 +14,7 @@ Handlers = Dict[str, Handler]
 class Filter:
     def __init__(self, handlers: Handlers, context: Context):
         logging.debug('Initializing Filter...')
-        self.__mom = MOM()
+        self.__mom = WorkerMOM()
         self.__running = True
         self.__handlers = handlers
         self.__context = context
@@ -36,7 +39,7 @@ class Filter:
         elif msg.id == EOF_MSG_ID:
             logging.info('EOF message received')
             self.__running = False
-            self.__mom.send_eof()
+            self.__mom.broadcast_eof()
         else:
             logging.critical(f"Unknown message received: {msg}")
             exit(-1)

@@ -10,7 +10,6 @@ def example_handler(context, send_fn, data):
 
 def main():
     init_log('debug')
-
     handlers = {}
     context = {'name': 'Joiner'}
     filter = Filter(handlers, context)
