@@ -42,6 +42,7 @@
     ]
   },
   "joiner": {
+    "log_level": "INFO",
     "affinity_key": "dni",
     "inputs": [
       { "id": "msg_1", "data": "dni,fullname" },

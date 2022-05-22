@@ -8,7 +8,10 @@ build:
 .PHONY: build
 
 apply:
-	python3 ./scripts/apply.py -c ./config -p "tp2_" > docker-compose.yaml
+	LOG_LEVEL="${LOG_LEVEL}" python3 ./scripts/apply.py \
+		-c ./config \
+		-p "tp2_" \
+		> docker-compose.yaml
 .PHONY: apply
 
 up:
