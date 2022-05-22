@@ -19,6 +19,7 @@ SERVICES_CONFIG_DIRNAME = '.services'
 BASE_FILTER_CONFIG_NAME = 'filter'
 MIDDLEWARE_CONFIG_NAME = 'middleware'
 COMMON_CONFIG_NAME = 'common'
+LOGGING_LEVEL_ENV_KEY = 'LOG_LEVEL'
 
 # Auxiliar functions
 
@@ -57,6 +58,7 @@ class DockerComposeGenerator:
     def __init__(self):
         args = parse_args()
         self.prefix = args.prefix
+        self.log_level = os.getenv(LOGGING_LEVEL_ENV_KEY)
 
         # Config files
         pipeline = read_json(
@@ -81,13 +83,23 @@ class DockerComposeGenerator:
         # e.g.: ('ingestion', 'server', { 'port': 3000 })
         self.svc_config_files = []
 
-    def write(self, data, tabs=0):
-        tabs = ''.join([DockerComposeGenerator.TAB for _ in range(tabs)])
-        result = tabs + data
-        self.definition.append(result)
+    def generate(self):
+        self.write(f'version: \'{DOCKER_COMPOSE_VERSION}\'\n')
+        self.write('services:')
 
-    def pop(self):
-        self.definition.pop()
+        for svc_name, svc_definition in self.pipeline.items():
+            count = self.scale[svc_name]
+            assert(count > 0)
+
+            if count == 1:
+                self.add_single_svc(svc_name, svc_definition)
+            elif count > 1:
+                self.add_svc_group(svc_name, svc_definition, count)
+
+            self.write('')
+
+        # Remove extra \n
+        self.pop()
 
     def flush(self):
         for service, filename, content in self.svc_config_files:
@@ -103,7 +115,17 @@ class DockerComposeGenerator:
     def __str__(self):
         return '\n'.join(self.definition)
 
-    # Helpers
+    # Common helpers
+
+    def write(self, data, tabs=0):
+        tabs = ''.join([DockerComposeGenerator.TAB for _ in range(tabs)])
+        result = tabs + data
+        self.definition.append(result)
+
+    def pop(self):
+        self.definition.pop()
+
+    # File helpers
 
     def add_svc_file(self, svc_name, filename, content):
         self.svc_config_files.append((svc_name, filename, content))
@@ -139,6 +161,8 @@ class DockerComposeGenerator:
 
         self.add_svc_file(name, MIDDLEWARE_CONFIG_NAME, middleware)
 
+    # Docker compose sections
+
     def mount_config_volume(self, name):
         svc_config_dirpath = f'{self.config_dirpath}/{name}'
         self.write('volumes:', 2)
@@ -152,17 +176,6 @@ class DockerComposeGenerator:
         suffix = f'_{i}' if i else ''
         container_name = f'{self.prefix}{name}{suffix}'
         self.write(f'container_name: {container_name}', 2)
-
-    def add_group_broker(self, svc_name, definition, count):
-        # Transparet behaviour to the outside: reachable at svc_name
-        self.write(f'{svc_name}:', 1)
-
-        name = f'{svc_name}_{BROKER_NAME}'
-        self.add_image(BROKER_NAME)
-        self.add_container_name(name)
-        self.mount_config_volume(name)
-        self.add_broker_middleware_file(name, definition, svc_name, count)
-        self.add_common_config_file(name)
 
     def add_svc_definition(self, name, definition, i=None):
         name_suffix = f'_{i}' if i else ''
@@ -178,6 +191,30 @@ class DockerComposeGenerator:
 
         self.add_container_name(name, i)
         self.mount_config_volume(name)
+        self.add_env_vars(definition)
+
+    def add_env_vars(self, definition):
+        log_level = definition.get('log_level', self.log_level)
+        if not log_level:
+            return
+
+        self.write('environment:', 2)
+        self.write(
+            f'- {LOGGING_LEVEL_ENV_KEY}={log_level}', 3)
+
+    # Service wrappers
+
+    def add_group_broker(self, svc_name, definition, count):
+        # Transparet behaviour to the outside: reachable at svc_name
+        self.write(f'{svc_name}:', 1)
+
+        name = f'{svc_name}_{BROKER_NAME}'
+        self.add_image(BROKER_NAME)
+        self.add_container_name(name)
+        self.mount_config_volume(name)
+        self.add_env_vars(definition)
+        self.add_broker_middleware_file(name, definition, svc_name, count)
+        self.add_common_config_file(name)
 
     def add_svc_group(self, name, definition, count):
         self.add_group_broker(name, definition, count)
@@ -192,24 +229,6 @@ class DockerComposeGenerator:
         self.add_svc_middleware_file(name, definition)
         self.add_common_config_file(name)
         self.add_svc_definition(name, definition)
-
-    def generate(self):
-        self.write(f'version: \'{DOCKER_COMPOSE_VERSION}\'\n')
-        self.write('services:')
-
-        for svc_name, svc_definition in self.pipeline.items():
-            count = self.scale[svc_name]
-            assert(count > 0)
-
-            if count == 1:
-                self.add_single_svc(svc_name, svc_definition)
-            elif count > 1:
-                self.add_svc_group(svc_name, svc_definition, count)
-
-            self.write('')
-
-        # Remove extra \n
-        self.pop()
 
 
 # Main execution
