@@ -22,7 +22,7 @@
       { "to": "aggr_avg_post_sent", "msg_id": "sentiment" }
     ]
   },
-  "filter_highest_avg_sent": {
+  "download_highest_avg_sent": {
     "unique": true,
     "inputs": [{ "id": "post", "data": ["p_id", "img_url", "avg_sentiment"] }],
     "outputs": []
@@ -46,7 +46,7 @@
       { "id": "post_url", "data": ["p_id", "img_url"] },
       { "id": "post_sentiment", "data": ["p_id", "avg_sentiment"] }
     ],
-    "outputs": [{ "to": "filter_highest_avg_sent", "msg_id": "post" }]
+    "outputs": [{ "to": "download_highest_avg_sent", "msg_id": "post" }]
   },
   "join_post_student": {
     "inputs": [
