@@ -7,6 +7,15 @@ build:
 	VERBOSE="${VERBOSE}" ./scripts/build.sh
 .PHONY: build
 
+build-client:
+	docker build \
+        -t tp2_client:latest \
+        -f ./Dockerfile \
+        --build-arg MAIN_PATH=src/client.py \
+        --build-arg COMMON_PATH=src/common \
+        .
+.PHONY: build-client
+
 apply:
 	LOG_LEVEL="${LOG_LEVEL}" python3 ./scripts/apply.py \
 		-c ./config \
@@ -19,7 +28,8 @@ up:
 .PHONY: up
 
 down:
-	docker-compose stop
+	# docker-compose stop
+	docker-compose kill
 	docker-compose down
 .PHONY: down
 
