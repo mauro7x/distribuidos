@@ -25,7 +25,6 @@ class Filter:
             logging.info('Filter running...')
             while self.__running:
                 msg = self.__mom.recv()
-                logging.debug(f'Message received: {msg}')
                 self.__process_msg(msg)
         except KeyboardInterrupt:
             logging.info('Filter stopped')

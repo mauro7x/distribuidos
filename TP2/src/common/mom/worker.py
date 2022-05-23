@@ -82,9 +82,12 @@ class WorkerMOM(BaseMOM):
             msg_args = raw_data.split(const.MSG_DATA_JOINER)
             data = MsgData(*msg_args)
         except Exception:
-            error = ('Could not parse message.'
-                     f'\nExpected: {MsgData}'
-                     f'\nReceived: {raw_data}')
+            expected = MsgData._fields
+            error = ('Could not parse message'
+                     f'\nExpected: {expected} '
+                     f'(len: {len(expected)})'
+                     f'\nReceived: {raw_data} '
+                     f'(len: {len(raw_data.split(const.MSG_DATA_JOINER))})')
             logging.critical(error)
             raise Exception(error)
 

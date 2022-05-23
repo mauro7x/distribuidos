@@ -1,30 +1,65 @@
+import csv
+from multiprocessing import Process
 from sys import stdout
 import zmq
 from time import sleep
 
 
-def main():
-    print('Started')
+SEND_N = 1
+
+
+def send_posts():
     context = zmq.Context()
     pusher = context.socket(zmq.PUSH)
-    pusher.connect('tcp://ingestion:3000')
+    pusher.connect('tcp://purge_post:3000')
 
-    # dni,first_name,last_name,age,extra,drop_this,thrash
-    data = [
-        '0 123,mauro,parafati,23,jeje,jojo,juju',
-        '0 124,emma,hansen,9,ffdf,jojo,keke',
-        '0 125,aaron,hansen,14,sdfdsg,lfdg,isis',
-        '0 126,paula,parafati,41,3454353,jojo,www'
-    ]
+    with open('samples/posts.csv') as csv_src:
+        reader = csv.reader(csv_src)
+        sent = 0
+        for post in reader:
+            if sent == SEND_N:
+                break
 
+            post_str = '0 ' + ','.join(post)
+            pusher.send_string(post_str)
+            print('Sent:', post_str)
+            sent += 1
+
+    print('Finished sending posts')
+
+
+def send_comments():
+    context = zmq.Context()
+    pusher = context.socket(zmq.PUSH)
+    pusher.connect('tcp://purge_comment:3000')
+
+    with open('samples/comments.csv') as csv_src:
+        reader = csv.reader(csv_src)
+        sent = 0
+        for comment in reader:
+            if sent == SEND_N:
+                break
+
+            comment_str = '0 ' + ','.join(comment)
+            pusher.send_string(comment_str)
+            print('Sent:', comment_str)
+            sent += 1
+
+    print('Finished sending comments')
+
+
+def main():
+    print('Started. Waiting for system...')
     sleep(5)
-
-    print('Starting to send data')
+    print('Starting sending processes...')
     stdout.flush()
 
-    for line in data:
-        pusher.send_string(line)
-        print('Sent:', line)
+    post_sender = Process(target=send_posts)
+    comment_sender = Process(target=send_comments)
+    post_sender.start()
+    comment_sender.start()
+    post_sender.join()
+    comment_sender.join()
 
     print('Finished')
     stdout.flush()
