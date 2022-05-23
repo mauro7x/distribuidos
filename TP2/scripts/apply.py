@@ -88,13 +88,16 @@ class DockerComposeGenerator:
         self.write('services:')
 
         for svc_name, svc_definition in self.pipeline.items():
-            count = self.scale[svc_name]
-            assert(count > 0)
-
-            if count == 1:
+            if svc_definition.get('unique'):
                 self.add_single_svc(svc_name, svc_definition)
-            elif count > 1:
-                self.add_svc_group(svc_name, svc_definition, count)
+            else:
+                count = self.scale[svc_name]
+                assert(count > 0)
+
+                if count == 1:
+                    self.add_single_svc(svc_name, svc_definition)
+                elif count > 1:
+                    self.add_svc_group(svc_name, svc_definition, count)
 
             self.write('')
 
