@@ -36,7 +36,10 @@
   },
   "filter_student_post": {
     "inputs": [{ "id": "comment", "data": ["p_id", "body"] }],
-    "outputs": [{ "to": "join_post_student", "msg_id": "student_post" }]
+    "outputs": [
+      { "to": "join_post_student", "msg_id": "student_post" },
+      { "to": "discard_analyzed_post", "msg_id": "analyzed_post" }
+    ]
   },
   "join_post_avg_sent": {
     "inputs": [
