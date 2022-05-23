@@ -1,7 +1,12 @@
 {
   "aggr_avg_post_sent": {
-    "affinity_key": "p_id",
-    "inputs": [{ "id": "sentiment", "data": ["p_id", "sentiment"] }],
+    "inputs": [
+      {
+        "id": "sentiment",
+        "data": ["p_id", "sentiment"],
+        "affinity_key": "p_id"
+      }
+    ],
     "outputs": [{ "to": "join_post_avg_sent", "msg_id": "post_sentiment" }]
   },
   "aggr_avg_posts_score": {
@@ -22,31 +27,41 @@
     "outputs": []
   },
   "filter_post_by_score": {
-    "affinity_key": "p_id",
     "inputs": [
-      { "id": "post", "data": ["p_id", "img_url", "score"] },
+      {
+        "id": "post",
+        "data": ["p_id", "img_url", "score"],
+        "affinity_key": "p_id"
+      },
       { "id": "avg_score", "data": ["avg_score"] }
     ],
     "outputs": []
   },
   "filter_student_post": {
-    "affinity_key": "p_id",
-    "inputs": [{ "id": "comment", "data": ["p_id", "body"] }],
+    "inputs": [
+      { "id": "comment", "data": ["p_id", "body"], "affinity_key": "p_id" }
+    ],
     "outputs": [{ "to": "join_post_student", "msg_id": "student_post" }]
   },
   "join_post_avg_sent": {
-    "affinity_key": "p_id",
     "inputs": [
-      { "id": "post_url", "data": ["p_id", "img_url"] },
-      { "id": "post_sentiment", "data": ["p_id", "avg_sentiment"] }
+      { "id": "post_url", "data": ["p_id", "img_url"], "affinity_key": "p_id" },
+      {
+        "id": "post_sentiment",
+        "data": ["p_id", "avg_sentiment"],
+        "affinity_key": "p_id"
+      }
     ],
     "outputs": [{ "to": "download_highest_avg_sent", "msg_id": "post" }]
   },
   "join_post_student": {
-    "affinity_key": "p_id",
     "inputs": [
-      { "id": "post", "data": ["p_id", "img_url", "score"] },
-      { "id": "student_post", "data": ["p_id"] }
+      {
+        "id": "post",
+        "data": ["p_id", "img_url", "score"],
+        "affinity_key": "p_id"
+      },
+      { "id": "student_post", "data": ["p_id"], "affinity_key": "p_id" }
     ],
     "outputs": [{ "to": "filter_post_by_score", "msg_id": "post" }]
   },

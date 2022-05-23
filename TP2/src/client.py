@@ -56,7 +56,7 @@ def send_comments():
 def main():
     init_log()
     logging.info('Started. Waiting for system...')
-    sleep(5)
+    sleep(10)
     logging.info('Starting sending processes...')
     stdout.flush()
 

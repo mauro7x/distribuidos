@@ -176,12 +176,9 @@ class DockerComposeGenerator:
     def add_broker_middleware_file(self, name, definition, svc_name, count):
         middleware = {
             'base_hostname': svc_name,
-            'count': count
+            'count': count,
+            'inputs': definition['inputs']
         }
-
-        if 'affinity_key' in definition:
-            middleware['inputs'] = definition['inputs']
-            middleware['affinity_key'] = definition['affinity_key']
 
         self.add_svc_file(name, MIDDLEWARE_CONFIG_NAME, middleware)
 

@@ -10,9 +10,6 @@ class BrokerMOM(BaseMOM):
     def __init__(self):
         super().__init__()
         self.__eofs_received = 0
-        self.__forward_msg = self.__forward_msg_affinity \
-            if self.__strategy == const.AFFINITY_STRATEGY \
-            else self.__forward_msg_rr
 
     def run(self):
         logging.info('Broker running...')
@@ -30,22 +27,13 @@ class BrokerMOM(BaseMOM):
         self.__base_hostname = config['base_hostname']
         assert(self.__count > 1)
 
-        # Strategy
-        affinity_key = config.get('affinity_key')
-        if affinity_key:
-            self.__strategy = const.AFFINITY_STRATEGY
-            inputs = config['inputs']
-            self.__affinity_idx_by_msg = \
-                BrokerMOM.__parse_inputs(inputs, affinity_key)
-        else:
-            self.__strategy = const.ROUND_ROBIN_STRATEGY
-            self.__rr_last_sent = self.__count - 1
+        # Strategies
+        inputs = config['inputs']
+        self.__affinity_idx_by_msg = \
+            BrokerMOM.__parse_inputs(inputs)
+        self.__rr_last_sent = self.__count - 1
 
-        logging.debug(
-            'MOM broker configuration:'
-            f'\nCount: {self.__count}'
-            f'\nStrategy: {self.__strategy}'
-        )
+        logging.debug('MOM broker configuration: (count={self.__count})')
 
     def _init_pushers(self):
         self.__pushers: List[zmq.Socket] = []
@@ -78,23 +66,30 @@ class BrokerMOM(BaseMOM):
         for pusher in self.__pushers:
             pusher.send_string(const.EOF_MSG)
 
-    def __forward_msg_rr(self, msg: str):
-        assigned_worker = (self.__rr_last_sent + 1) % self.__count
-        self.__forward_to_worker(assigned_worker, msg)
-        self.__rr_last_sent = assigned_worker
-
-    def __forward_msg_affinity(self, msg: str):
-        msg_idx, msg_data = msg.split(const.MSG_SEP, 1)
-        fields = self._unpack(msg_data)
+    def __forward_msg(self, msg: str):
+        msg_idx, _ = msg.split(const.MSG_SEP, 1)
 
         try:
             affinity_idx = self.__affinity_idx_by_msg[int(msg_idx)]
-            affinity_value = fields[affinity_idx]
         except Exception:
             error = f'Invalid message index received ({msg_idx})'
             logging.critical(error)
             raise Exception(error)
 
+        if affinity_idx is None:
+            self.__forward_msg_rr(msg)
+        else:
+            self.__forward_msg_affinity(affinity_idx, msg)
+
+    def __forward_msg_rr(self, msg: str):
+        assigned_worker = (self.__rr_last_sent + 1) % self.__count
+        self.__forward_to_worker(assigned_worker, msg)
+        self.__rr_last_sent = assigned_worker
+
+    def __forward_msg_affinity(self, affinity_idx: int, msg: str):
+        _, msg_data = msg.split(const.MSG_SEP, 1)
+        fields = self._unpack(msg_data)
+        affinity_value = fields[affinity_idx]
         assigned_worker = hash(affinity_value) % self.__count
         self.__forward_to_worker(assigned_worker, msg)
 
@@ -106,11 +101,15 @@ class BrokerMOM(BaseMOM):
     # Static
 
     @staticmethod
-    def __parse_inputs(inputs, affinity_key: str):
+    def __parse_inputs(inputs):
         affinity_idx_by_msg = []
         for input in inputs:
-            fields: List[str] = input['data']
-            affinity_idx = fields.index(affinity_key)
-            affinity_idx_by_msg.append(affinity_idx)
+            affinity_key = input.get('affinity_key')
+            if affinity_key:
+                fields: List[str] = input['data']
+                affinity_idx = fields.index(affinity_key)
+                affinity_idx_by_msg.append(affinity_idx)
+            else:
+                affinity_idx_by_msg.append(None)
 
         return affinity_idx_by_msg
