@@ -83,6 +83,9 @@ class DockerComposeGenerator:
         # e.g.: ('ingestion', 'server', { 'port': 3000 })
         self.svc_config_files = []
 
+        # Cache
+        self.sources = {}
+
     def generate(self):
         self.write(f'version: \'{DOCKER_COMPOSE_VERSION}\'\n')
         self.write('services:')
@@ -129,12 +132,43 @@ class DockerComposeGenerator:
         self.definition.pop()
 
     # File helpers
+    def get_svc_sources(self, name, svc_name):
+        if name in self.sources:
+            return self.sources[name]
+
+        count = self.scale.get(svc_name, 1)
+        if count > 1 and name == svc_name:
+            # Has broker
+            self.sources[name] = 1
+            return 1
+
+        sources = 0
+        for name, definition in self.pipeline.items():
+            outputs = definition['outputs']
+            is_source = any([output['to'] == svc_name for output in outputs])
+            if not is_source:
+                continue
+
+            if definition.get('unique'):
+                sources += 1
+                continue
+
+            workers = self.scale[name]
+            sources += workers
+
+        self.sources[name] = sources
+        return sources
 
     def add_svc_file(self, svc_name, filename, content):
         self.svc_config_files.append((svc_name, filename, content))
 
-    def add_common_config_file(self, name):
-        self.add_svc_file(name, COMMON_CONFIG_NAME, self.common_config)
+    def add_common_config_file(self, name, svc_name=None):
+        if not svc_name:
+            svc_name = name
+
+        common = self.common_config.copy()
+        common['sources'] = self.get_svc_sources(name, svc_name)
+        self.add_svc_file(name, COMMON_CONFIG_NAME, common)
 
     def add_broker_middleware_file(self, name, definition, svc_name, count):
         middleware = {
@@ -217,7 +251,7 @@ class DockerComposeGenerator:
         self.mount_config_volume(name)
         self.add_env_vars(definition)
         self.add_broker_middleware_file(name, definition, svc_name, count)
-        self.add_common_config_file(name)
+        self.add_common_config_file(name, svc_name)
 
     def add_svc_group(self, name, definition, count):
         self.add_group_broker(name, definition, count)
