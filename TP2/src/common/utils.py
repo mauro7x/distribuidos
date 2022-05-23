@@ -3,7 +3,7 @@ import logging
 import os
 import hashlib
 
-DEFAULT_LOGGING_LEVEL = logging.WARN
+
 LOGGING_LEVEL_ENV_KEY = 'LOG_LEVEL'
 
 
@@ -15,7 +15,7 @@ def read_json(filepath: str):
 
 def init_log():
     level_name = os.getenv(LOGGING_LEVEL_ENV_KEY, '')
-    level = logging._nameToLevel.get(level_name.upper(), logging.WARN)
+    level = logging._nameToLevel.get(level_name.upper(), logging.INFO)
     logging.basicConfig(
         format='%(asctime)s %(levelname)-8s %(message)s',
         level=level,

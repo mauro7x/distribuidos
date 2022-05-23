@@ -71,7 +71,7 @@ def eof_handler(context: Context, send_fn):
     logging.info(f'Final: '
                  f'(p_id: {p_id}, '
                  f'img_url: {post.img_url}, '
-                 f'avg: {post.aggregator.get()})')
+                 f'avg: {post.aggregator.get()} ({(post.aggregator)}))')
 
 
 def main():
