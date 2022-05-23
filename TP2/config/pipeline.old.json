@@ -1,0 +1,53 @@
+{
+  "ingestion": {
+    "base": {
+      "image": "dropper",
+      "config": {
+        "fields": ["extra", "drop_this", "thrash"]
+      }
+    },
+    "inputs": [
+      {
+        "id": "msg_1",
+        "data": "dni,first_name,last_name,age,extra,drop_this,thrash"
+      }
+    ],
+    "outputs": [
+      {
+        "to": "name_registry",
+        "msg_id": "msg_1"
+      },
+      {
+        "to": "age_registry",
+        "msg_id": "msg_1"
+      }
+    ]
+  },
+  "name_registry": {
+    "inputs": [{ "id": "msg_1", "data": "dni,first_name,last_name" }],
+    "outputs": [
+      {
+        "to": "joiner",
+        "msg_id": "msg_1"
+      }
+    ]
+  },
+  "age_registry": {
+    "inputs": [{ "id": "msg_1", "data": "dni,age" }],
+    "outputs": [
+      {
+        "to": "joiner",
+        "msg_id": "msg_2"
+      }
+    ]
+  },
+  "joiner": {
+    "log_level": "INFO",
+    "affinity_key": "dni",
+    "inputs": [
+      { "id": "msg_1", "data": "dni,fullname" },
+      { "id": "msg_2", "data": "dni,age_in_months" }
+    ],
+    "outputs": []
+  }
+}

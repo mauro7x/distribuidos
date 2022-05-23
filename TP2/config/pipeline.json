@@ -1,53 +1,77 @@
 {
-  "ingestion": {
-    "base": {
-      "image": "dropper",
-      "config": {
-        "fields": ["extra", "drop_this", "thrash"]
-      }
-    },
+  "aggr_avg_post_sent": {
+    "inputs": [{ "id": "sentiment", "data": "p_id,sentiment" }],
+    "outputs": [{ "to": "join_post_avg_sent", "msg_id": "post_sentiment" }]
+  },
+  "aggr_avg_posts_score": {
+    "unique": true,
+    "inputs": [{ "id": "score", "data": "score" }],
+    "outputs": [{ "to": "filter_posts_by_score", "msg_id": "avg_score" }]
+  },
+  "discard_analyzed_post": {
     "inputs": [
-      {
-        "id": "msg_1",
-        "data": "dni,first_name,last_name,age,extra,drop_this,thrash"
-      }
+      { "id": "comment", "data": "p_id,body" },
+      { "id": "analyzed_post", "data": "p_id" }
     ],
+    "outputs": [{ "to": "filter_student_post", "msg_id": "comment" }]
+  },
+  "extract_post_id": {
+    "inputs": [{ "id": "comment", "data": "url,sentiment,body" }],
     "outputs": [
-      {
-        "to": "name_registry",
-        "msg_id": "msg_1"
-      },
-      {
-        "to": "age_registry",
-        "msg_id": "msg_1"
-      }
+      { "to": "discard_analyzed_post", "msg_id": "comment" },
+      { "to": "aggr_avg_post_sent", "msg_id": "sentiment" }
     ]
   },
-  "name_registry": {
-    "inputs": [{ "id": "msg_1", "data": "dni,first_name,last_name" }],
-    "outputs": [
-      {
-        "to": "joiner",
-        "msg_id": "msg_1"
-      }
-    ]
+  "filter_highest_avg_sent": {
+    "unique": true,
+    "inputs": [{ "id": "post", "data": "p_id,img_url,avg_sentiment" }],
+    "outputs": []
   },
-  "age_registry": {
-    "inputs": [{ "id": "msg_1", "data": "dni,age" }],
-    "outputs": [
-      {
-        "to": "joiner",
-        "msg_id": "msg_2"
-      }
-    ]
-  },
-  "joiner": {
-    "log_level": "INFO",
-    "affinity_key": "dni",
+  "filter_posts_by_score": {
     "inputs": [
-      { "id": "msg_1", "data": "dni,fullname" },
-      { "id": "msg_2", "data": "dni,age_in_months" }
+      { "id": "post", "data": "p_id,img_url,score" },
+      { "id": "avg_score", "data": "avg_score" }
     ],
     "outputs": []
+  },
+  "filter_student_post": {
+    "inputs": [{ "id": "comment", "data": "p_id,body" }],
+    "outputs": [{ "to": "join_post_student", "msg_id": "student_post" }]
+  },
+  "join_post_avg_sent": {
+    "inputs": [
+      { "id": "post_url", "data": "p_id,img_url" },
+      { "id": "post_sentiment", "data": "p_id,avg_sentiment" }
+    ],
+    "outputs": [{ "to": "filter_highest_avg_sent", "msg_id": "post" }]
+  },
+  "join_post_student": {
+    "inputs": [
+      { "id": "post", "data": "p_id,img_url,score" },
+      { "id": "student_post", "data": "p_id" }
+    ],
+    "outputs": [{ "to": "filter_posts_by_score", "msg_id": "post" }]
+  },
+  "purge_comment": {
+    "inputs": [
+      {
+        "id": "comment",
+        "data": "type,id,subreddit_id,subreddit_name,subreddit_nsfw,created_utc,permalink,body,sentiment,score"
+      }
+    ],
+    "outputs": [{ "to": "extract_post_id", "msg_id": "comment" }]
+  },
+  "purge_post": {
+    "inputs": [
+      {
+        "id": "post",
+        "data": "type,id,subreddit_id,subreddit_name,subreddit_nsfw,created_utc,permalink,domain,url,selftext,title,score"
+      }
+    ],
+    "outputs": [
+      { "to": "join_post_avg_sent", "msg_id": "post_url" },
+      { "to": "join_post_student", "msg_id": "post" },
+      { "to": "aggr_avg_posts_score", "msg_id": "score" }
+    ]
   }
 }
