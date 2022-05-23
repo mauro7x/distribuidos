@@ -58,6 +58,7 @@ class BaseMOM(ABC):
         config = read_json(const.COMMON_CONFIG_FILEPATH)
         self.__port = int(config['port'])
         self.__protocol: str = config['protocol']
+        self._sources = int(config['sources'])
         logging.debug(
             'MOM common configuration: '
             f'(protocol={self.__protocol}, port={self.__port})')

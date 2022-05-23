@@ -29,6 +29,7 @@
     "outputs": []
   },
   "filter_student_post": {
+    "affinity_key": "p_id",
     "inputs": [{ "id": "comment", "data": ["p_id", "body"] }],
     "outputs": [{ "to": "join_post_student", "msg_id": "student_post" }]
   },

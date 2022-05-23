@@ -9,6 +9,7 @@ import common.mom.constants as const
 class BrokerMOM(BaseMOM):
     def __init__(self):
         super().__init__()
+        self.__eofs_received = 0
         self.__forward_msg = self.__forward_msg_affinity \
             if self.__strategy == const.AFFINITY_STRATEGY \
             else self.__forward_msg_rr
@@ -63,13 +64,19 @@ class BrokerMOM(BaseMOM):
         while True:
             msg = self._puller.recv_string()
 
-            # OJO ACÁ, HAY QUE ESPERAR LOS EOFS DE TODOS ANTES DE
-            # BROADCASTEAR Y SALIR
             if msg == const.EOF_MSG:
-                break
+                self.__eofs_received += 1
+                if self.__eofs_received == self._sources:
+                    self.__broadcast_eof()
+                    break
+            else:
+                logging.debug(f"Received: '{msg}'")
+                self.__forward_msg(msg)
 
-            logging.debug(f"Received: '{msg}'")
-            self.__forward_msg(msg)
+    def __broadcast_eof(self):
+        logging.debug('Broadcasting EOF')
+        for pusher in self.__pushers:
+            pusher.send_string(const.EOF_MSG)
 
     def __forward_msg_rr(self, msg: str):
         assigned_worker = (self.__rr_last_sent + 1) % self.__count

@@ -137,23 +137,26 @@ class DockerComposeGenerator:
             return self.sources[name]
 
         count = self.scale.get(svc_name, 1)
-        if count > 1 and name == svc_name:
-            # Has broker
+        if count > 1 and name == svc_name:  # has broker
+            self.sources[name] = 1
+            return 1
+
+        if self.pipeline[svc_name].get('entrypoint'):
             self.sources[name] = 1
             return 1
 
         sources = 0
-        for name, definition in self.pipeline.items():
-            outputs = definition['outputs']
+        for src_name, src_definition in self.pipeline.items():
+            outputs = src_definition['outputs']
             is_source = any([output['to'] == svc_name for output in outputs])
             if not is_source:
                 continue
 
-            if definition.get('unique'):
+            if src_definition.get('unique'):
                 sources += 1
                 continue
 
-            workers = self.scale[name]
+            workers = self.scale[src_name]
             sources += workers
 
         self.sources[name] = sources

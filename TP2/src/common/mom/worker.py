@@ -11,18 +11,19 @@ import common.mom.constants as const
 class WorkerMOM(BaseMOM):
     def __init__(self):
         super().__init__()
+        self.__eofs_received = 0
 
     def recv(self) -> Message:
         msg = self._puller.recv_string()
-
-        # OJO ACÁ, HAY QUE ESPERAR LOS EOFS DE TODOS ANTES DE
-        # BROADCASTEAR Y SALIR
         if msg == const.EOF_MSG:
-            return Message(const.EOF_MSG_ID, None)
+            self.__eofs_received += 1
+            if self.__eofs_received == self._sources:
+                self.__eofs_received = 0
+                return Message(const.EOF_MSG_ID, None)
+            return None
 
-        msg = self.__parse_msg(msg)
         logging.debug(f"Received: '{msg}'")
-        return msg
+        return self.__parse_msg(msg)
 
     def send(self, result: Sendable):
         for output in self.__outputs:
