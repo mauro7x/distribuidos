@@ -6,12 +6,12 @@ from common.utils import init_log
 # import re
 # REGEX = r'comments/([^/]*)'
 #
-# def extract_post_id(url):
+# def extract_post_id(url: str):
 #     return re.findall(REGEX, url)[0]
 
 
 # Split method:
-def extract_post_id(url):
+def extract_post_id(url: str):
     # Format: protocol://host/r/meirl/comments/{POST_ID}/meirl/{comment_id}
     # e.g.: https://old.reddit.com/r/meirl/comments/tswh3j/meirl/i2x2j0g/
     # Splitting by '/', 7th group is our ID
