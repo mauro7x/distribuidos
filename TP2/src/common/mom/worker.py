@@ -30,7 +30,7 @@ class WorkerMOM(BaseMOM):
             pusher.send_string(serialized)
 
     def broadcast_eof(self):
-        logging.info('Broadcasting EOF')
+        logging.debug('Broadcasting EOF')
         for output in self.__outputs:
             pusher = self.__pushers[output.host]
             pusher.send_string(const.EOF_MSG)
