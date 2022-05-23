@@ -41,12 +41,10 @@ class Filter:
             handler = self.__handlers[msg.id]
             handler(self.__context, self.__mom.send, msg.data)
         elif msg.id == EOF_MSG_ID:
-            logging.debug('EOF message received')
+            logging.debug('EOF message received, stopping')
             if self.__eof_handler:
-                logging.debug('Invoking custom EOF handler')
                 self.__eof_handler(self.__context, self.__mom.send)
             self.__mom.broadcast_eof()
-            logging.debug('Stopping')
             self.__running = False
         else:
             logging.critical(f"Unknown message received: {msg}")
