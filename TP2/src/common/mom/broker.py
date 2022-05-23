@@ -1,7 +1,7 @@
 import zmq
 import logging
 from typing import List
-from common.utils import read_json
+from common.utils import read_json, hash
 from common.mom.base import BaseMOM
 import common.mom.constants as const
 
