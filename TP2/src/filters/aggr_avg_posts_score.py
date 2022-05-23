@@ -1,32 +1,29 @@
 import logging
 from dataclasses import dataclass
 from common.filters.custom import Filter
+from common.types import Average
 from common.utils import init_log
 
 
 @dataclass
 class Context:
-    count: int = 0
-    avg: float = 0.0
+    avg = Average()
 
 
 def score_handler(context: Context, _, data):
     logging.debug(f'Handler called with: {data}')
     score = int(data.score)
-
-    context.count += 1
-    context.avg = (context.avg * (1 - (1 / context.count)) +
-                   (score / context.count))
+    context.avg.add(score)
 
 
 def eof_handler(context: Context, send_fn):
     logging.debug('EOF handler called')
-    send_fn({"avg_score": context.avg})
+    send_fn({"avg_score": context.avg.get()})
 
     # Temp:
     print('Final:')
-    print('- AVG:', context.avg)
-    print('- Count:', context.count)
+    print('- AVG:', context.avg.get())
+    print('- Count:', len(context.avg))
 
 
 def main():
