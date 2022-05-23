@@ -19,7 +19,7 @@ def extract_post_id(url: str):
 
 
 def comment_handler(_, send_fn, data):
-    logging.info(f'Handler called with: {data}')
+    logging.debug(f'Handler called with: {data}')
     p_id = extract_post_id(data.url)
 
     send_fn({
