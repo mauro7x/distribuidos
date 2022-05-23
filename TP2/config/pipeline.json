@@ -1,5 +1,6 @@
 {
   "aggr_avg_post_sent": {
+    "affinity_key": "p_id",
     "inputs": [{ "id": "sentiment", "data": ["p_id", "sentiment"] }],
     "outputs": [{ "to": "join_post_avg_sent", "msg_id": "post_sentiment" }]
   },
@@ -8,17 +9,10 @@
     "inputs": [{ "id": "score", "data": ["score"] }],
     "outputs": [{ "to": "filter_posts_by_score", "msg_id": "avg_score" }]
   },
-  "discard_analyzed_post": {
-    "inputs": [
-      { "id": "comment", "data": ["p_id", "body"] },
-      { "id": "analyzed_post", "data": ["p_id"] }
-    ],
-    "outputs": [{ "to": "filter_student_post", "msg_id": "comment" }]
-  },
   "extract_post_id": {
     "inputs": [{ "id": "comment", "data": ["url", "sentiment", "body"] }],
     "outputs": [
-      { "to": "discard_analyzed_post", "msg_id": "comment" },
+      { "to": "filter_student_post", "msg_id": "comment" },
       { "to": "aggr_avg_post_sent", "msg_id": "sentiment" }
     ]
   },
@@ -36,10 +30,7 @@
   },
   "filter_student_post": {
     "inputs": [{ "id": "comment", "data": ["p_id", "body"] }],
-    "outputs": [
-      { "to": "join_post_student", "msg_id": "student_post" },
-      { "to": "discard_analyzed_post", "msg_id": "analyzed_post" }
-    ]
+    "outputs": [{ "to": "join_post_student", "msg_id": "student_post" }]
   },
   "join_post_avg_sent": {
     "inputs": [
@@ -56,6 +47,7 @@
     "outputs": [{ "to": "filter_posts_by_score", "msg_id": "post" }]
   },
   "purge_comment": {
+    "entrypoint": true,
     "inputs": [
       {
         "id": "comment",
@@ -76,6 +68,7 @@
     "outputs": [{ "to": "extract_post_id", "msg_id": "comment" }]
   },
   "purge_post": {
+    "entrypoint": true,
     "inputs": [
       {
         "id": "post",
