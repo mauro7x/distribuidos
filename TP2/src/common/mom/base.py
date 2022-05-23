@@ -1,8 +1,10 @@
 from abc import ABC, abstractclassmethod
+from typing import List
 import zmq
 import logging
 import common.mom.constants as const
 from common.utils import read_json
+from common.csv import CSVParser
 
 
 class BaseMOM(ABC):
@@ -10,6 +12,7 @@ class BaseMOM(ABC):
         logging.debug('Initializing BaseMOM...')
         self._context: zmq.Context = zmq.Context()
         self.__parse_config()
+        self.__csv_parser = CSVParser()
 
         # Init zmq pullers and pushers
         logging.debug('Initializing puller...')
@@ -34,6 +37,12 @@ class BaseMOM(ABC):
 
     def _addr(self, host: str):
         return f'{self.__protocol}://{host}:{self.__port}'
+
+    def _pack(self, values: List[str]):
+        return self.__csv_parser.encode(values)
+
+    def _unpack(self, csv_line: str):
+        return self.__csv_parser.decode(csv_line)
 
     # Private
 

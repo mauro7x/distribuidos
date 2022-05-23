@@ -24,7 +24,7 @@ class WorkerMOM(BaseMOM):
     def send(self, result: Sendable):
         for output in self.__outputs:
             pusher = self.__pushers[output.host]
-            serialized = WorkerMOM.__serialize(
+            serialized = self.__serialize(
                 output.msg_idx, output.data, result)
             logging.debug(f"Sending '{serialized}' to {output.host}")
             pusher.send_string(serialized)
@@ -79,23 +79,28 @@ class WorkerMOM(BaseMOM):
             raise Exception(error)
 
         try:
-            msg_args = raw_data.split(const.MSG_DATA_JOINER)
+            msg_args = self._unpack(raw_data)
             data = MsgData(*msg_args)
         except Exception:
             expected = MsgData._fields
             error = ('Could not parse message'
                      f'\nExpected: {expected} '
                      f'(len: {len(expected)})'
-                     f'\nReceived: {raw_data} '
-                     f'(len: {len(raw_data.split(const.MSG_DATA_JOINER))})')
+                     f'\nReceived: {raw_data}')
             logging.critical(error)
             raise Exception(error)
 
         return Message(msg_id, data)
 
+    def __serialize(self, msg_idx: int, output_data, result: Sendable) -> str:
+        output_values = [str(result[field]) for field in output_data._fields]
+        data = self._pack(output_values)
+
+        return f'{msg_idx}{const.MSG_SEP}{data}'
+
     # Static
 
-    @staticmethod
+    @ staticmethod
     def __parse_inputs(raw_inputs) -> List[Input]:
         inputs: List[Input] = []
         for raw_input in raw_inputs:
@@ -107,22 +112,15 @@ class WorkerMOM(BaseMOM):
 
         return inputs
 
-    @staticmethod
+    @ staticmethod
     def __parse_outputs(raw_outputs) -> List[Output]:
         outputs: List[Output] = []
         for raw_output in raw_outputs:
             to_host = raw_output['to']
             msg_idx = int(raw_output['msg_idx'])
-            raw_data = raw_output['data']
-            MsgData = namedtuple(f'MsgData_{to_host}_{msg_idx}', raw_data)
+            data = raw_output['data']
+            MsgData = namedtuple(f'MsgData_{to_host}_{msg_idx}', data)
             output = Output(to_host, msg_idx, MsgData)
             outputs.append(output)
 
         return outputs
-
-    @staticmethod
-    def __serialize(msg_idx: int, output_data, result: Sendable) -> str:
-        output_values = [str(result[field]) for field in output_data._fields]
-        data = const.MSG_DATA_JOINER.join(output_values)
-
-        return f'{msg_idx}{const.MSG_SEP}{data}'

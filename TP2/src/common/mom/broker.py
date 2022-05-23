@@ -75,7 +75,7 @@ class BrokerMOM(BaseMOM):
 
     def __forward_msg_affinity(self, msg: str):
         msg_idx, msg_data = msg.split(const.MSG_SEP, 1)
-        fields = msg_data.split(const.MSG_DATA_JOINER)
+        fields = self._unpack(msg_data)
 
         try:
             affinity_idx = self.__affinity_idx_by_msg[int(msg_idx)]
@@ -99,8 +99,7 @@ class BrokerMOM(BaseMOM):
     def __parse_inputs(inputs, affinity_key: str):
         affinity_idx_by_msg = []
         for input in inputs:
-            data: str = input['data']
-            fields = data.split(const.MSG_DATA_JOINER)
+            fields: List[str] = input['data']
             affinity_idx = fields.index(affinity_key)
             affinity_idx_by_msg.append(affinity_idx)
 
