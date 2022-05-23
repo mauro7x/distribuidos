@@ -6,46 +6,80 @@ from common.types import Average
 from common.utils import init_log
 
 
+class Post:
+    def __init__(self):
+        self.img_url: str = None
+        self.aggregator = Average()
+
+
 @dataclass
 class Context:
-    avg_post_sentiments = defaultdict(Average)
+    posts = defaultdict(Post)
 
 
-def get_max_avg(avg_post_sentiments: defaultdict[str, Average]):
-    iterator = iter(avg_post_sentiments.items())
-    p_id, aggr = next(iterator)
-    result = p_id, aggr.get()
-
-    for p_id, aggr in iterator:
-        avg = aggr.get()
-        if avg > result[1]:
-            result = (p_id, avg)
+def filter_valid_posts(posts: defaultdict[str, Post]):
+    result = {}
+    for p_id, post in posts.items():
+        if post.img_url is None or post.aggregator.get() is None:
+            continue
+        result[p_id] = post
 
     return result
 
 
-def sentiment_handler(context: Context, _, data):
+def get_max_avg(valid_posts: defaultdict[str, Post]):
+    iterator = iter(valid_posts.items())
+    result = next(iterator)
+
+    for p_id, post in iterator:
+        avg = post.aggregator.get()
+        if avg > result[1].aggregator.get():
+            result = (p_id, post)
+
+    return result
+
+
+def post_url_handler(context: Context, _, data):
     logging.debug(f'Handler called with: {data}')
-    p_id = data.p_id
+    post = context.posts[data.p_id]
+    post.img_url = data.img_url
+
+
+def post_sentiment_handler(context: Context, _, data):
+    logging.debug(f'Handler called with: {data}')
     sentiment = float(data.sentiment)
-    context.avg_post_sentiments[p_id].add(sentiment)
+    post = context.posts[data.p_id]
+    post.aggregator.add(sentiment)
 
 
 def eof_handler(context: Context, send_fn):
     logging.debug('EOF handler called')
-    if not context.avg_post_sentiments:
+
+    valid_posts = filter_valid_posts(context.posts)
+    if not valid_posts:
+        logging.info('Final: no valid posts')
         return
 
-    p_id, avg = get_max_avg(context.avg_post_sentiments)
-    send_fn({"p_id": p_id, "avg_sentiment": avg})
+    p_id, post = get_max_avg(valid_posts)
+    send_fn({
+        "p_id": p_id,
+        "img_url": post.img_url,
+        "avg_sentiment": post.aggregator.get()
+    })
 
     # Temp:
-    logging.info(f'Final: (p_id: {p_id}, avg: {avg})')
+    logging.info(f'Final: '
+                 f'(p_id: {p_id}, '
+                 f'img_url: {post.img_url}, '
+                 f'avg: {post.aggregator.get()})')
 
 
 def main():
     init_log()
-    handlers = {"sentiment": sentiment_handler}
+    handlers = {
+        "post_url": post_url_handler,
+        "post_sentiment": post_sentiment_handler
+    }
     context = Context()
     filter = Filter(handlers, context)
     filter.set_eof_handler(eof_handler)

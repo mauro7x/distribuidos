@@ -19,6 +19,7 @@ def send_posts():
 
     with open('samples/posts.csv') as csv_src:
         reader = csv.reader(csv_src)
+        _ = next(reader)  # skip headers
         sent = 0
         for post in reader:
             if sent == SEND_N:
@@ -40,6 +41,7 @@ def send_comments():
 
     with open('samples/comments.csv') as csv_src:
         reader = csv.reader(csv_src)
+        _ = next(reader)  # skip headers
         sent = 0
         for comment in reader:
             if sent == SEND_N:
