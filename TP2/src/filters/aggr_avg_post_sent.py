@@ -33,13 +33,14 @@ def sentiment_handler(context: Context, _, data):
 
 def eof_handler(context: Context, send_fn):
     logging.debug('EOF handler called')
+    if not context.avg_post_sentiments:
+        return
+
     p_id, avg = get_max_avg(context.avg_post_sentiments)
     send_fn({"p_id": p_id, "avg_sentiment": avg})
 
     # Temp:
-    print('Final:')
-    print('- Post ID:', p_id)
-    print('- AVG:', avg)
+    logging.info(f'Final: (p_id: {p_id}, avg: {avg})')
 
 
 def main():
