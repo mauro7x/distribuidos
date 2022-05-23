@@ -4,11 +4,13 @@ import logging
 import zmq
 from multiprocessing import Process
 from sys import stdout
-from time import sleep
+from time import sleep, time
 from common.csv import CSVParser
 from common.utils import init_log
 
 SEND_N = int(os.getenv('SEND_N', '1'))
+
+PRINT_EVERY = 10000
 
 
 def send_posts():
@@ -17,11 +19,21 @@ def send_posts():
     pusher.connect('tcp://purge_post:3000')
     csv_parser = CSVParser()
 
+    start = time()
+    last = start
     with open('samples/posts.csv') as csv_src:
         reader = csv.reader(csv_src)
         _ = next(reader)  # skip headers
         sent = 0
         for post in reader:
+            if sent % PRINT_EVERY == 0:
+                now = time()
+                logging.info(
+                    f'Posts sent: {sent}'
+                    f' (last: {now - last} secs, '
+                    f'acum: {now - start} secs)'
+                )
+                last = now
             if sent == SEND_N:
                 break
 
@@ -39,11 +51,21 @@ def send_comments():
     pusher.connect('tcp://purge_comment:3000')
     csv_parser = CSVParser()
 
+    start = time()
+    last = start
     with open('samples/comments.csv') as csv_src:
         reader = csv.reader(csv_src)
         _ = next(reader)  # skip headers
         sent = 0
         for comment in reader:
+            if sent % PRINT_EVERY == 0:
+                now = time()
+                logging.info(
+                    f'Comments sent: {sent}'
+                    f' (last: {now - last} secs, '
+                    f'acum: {now - start} secs)'
+                )
+                last = now
             if sent == SEND_N:
                 break
 
@@ -62,6 +84,7 @@ def main():
     logging.info('Starting sending processes...')
     stdout.flush()
 
+    start = time()
     post_sender = Process(target=send_posts)
     comment_sender = Process(target=send_comments)
     post_sender.start()
@@ -69,7 +92,8 @@ def main():
     post_sender.join()
     comment_sender.join()
 
-    logging.info('Finished')
+    elapsed = time() - start
+    logging.info(f'Finished (elapsed: {elapsed:.2f})')
     stdout.flush()
 
 
