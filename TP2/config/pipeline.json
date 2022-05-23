@@ -7,7 +7,7 @@
   "aggr_avg_posts_score": {
     "unique": true,
     "inputs": [{ "id": "score", "data": ["score"] }],
-    "outputs": [{ "to": "filter_posts_by_score", "msg_id": "avg_score" }]
+    "outputs": [{ "to": "filter_post_by_score", "msg_id": "avg_score" }]
   },
   "extract_post_id": {
     "inputs": [{ "id": "comment", "data": ["url", "sentiment", "body"] }],
@@ -21,7 +21,8 @@
     "inputs": [{ "id": "post", "data": ["p_id", "img_url", "avg_sentiment"] }],
     "outputs": []
   },
-  "filter_posts_by_score": {
+  "filter_post_by_score": {
+    "affinity_key": "p_id",
     "inputs": [
       { "id": "post", "data": ["p_id", "img_url", "score"] },
       { "id": "avg_score", "data": ["avg_score"] }
@@ -34,6 +35,7 @@
     "outputs": [{ "to": "join_post_student", "msg_id": "student_post" }]
   },
   "join_post_avg_sent": {
+    "affinity_key": "p_id",
     "inputs": [
       { "id": "post_url", "data": ["p_id", "img_url"] },
       { "id": "post_sentiment", "data": ["p_id", "avg_sentiment"] }
@@ -41,11 +43,12 @@
     "outputs": [{ "to": "download_highest_avg_sent", "msg_id": "post" }]
   },
   "join_post_student": {
+    "affinity_key": "p_id",
     "inputs": [
       { "id": "post", "data": ["p_id", "img_url", "score"] },
       { "id": "student_post", "data": ["p_id"] }
     ],
-    "outputs": [{ "to": "filter_posts_by_score", "msg_id": "post" }]
+    "outputs": [{ "to": "filter_post_by_score", "msg_id": "post" }]
   },
   "purge_comment": {
     "entrypoint": true,
