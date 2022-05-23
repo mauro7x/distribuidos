@@ -14,6 +14,9 @@ class WorkerMOM(BaseMOM):
 
     def recv(self) -> Message:
         msg = self._puller.recv_string()
+
+        # OJO ACÁ, HAY QUE ESPERAR LOS EOFS DE TODOS ANTES DE
+        # BROADCASTEAR Y SALIR
         if msg == const.EOF_MSG:
             return Message(const.EOF_MSG_ID, None)
 

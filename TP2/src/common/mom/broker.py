@@ -62,6 +62,9 @@ class BrokerMOM(BaseMOM):
     def __run(self):
         while True:
             msg = self._puller.recv_string()
+
+            # OJO ACÁ, HAY QUE ESPERAR LOS EOFS DE TODOS ANTES DE
+            # BROADCASTEAR Y SALIR
             if msg == const.EOF_MSG:
                 break
 
