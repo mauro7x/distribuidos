@@ -86,9 +86,7 @@ class BrokerMOM(BaseMOM):
     def __broadcast(self, msg):
         logging.debug(f'Broadcasting {msg}')
         for pusher in self.__pushers:
-            possible_rc_cause = pusher.send_string(msg)
-            if possible_rc_cause:
-                logging.error(f'SEND RETURNED: {possible_rc_cause}')
+            pusher.send_string(msg)
 
     def __forward_msg(self, msg: str):
         msg_idx, _ = msg.split(const.MSG_SEP, 1)
