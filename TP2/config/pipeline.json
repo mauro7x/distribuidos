@@ -2,7 +2,14 @@
   "aggr_avg_posts_score": {
     "unique": true,
     "inputs": [{ "id": "score", "data": ["score"] }],
-    "outputs": [{ "to": "filter_post_by_score", "msg_id": "avg_score" }]
+    "outputs": [
+      { "to": "filter_post_by_score", "msg_id": "avg_score" },
+      {
+        "sink": true,
+        "idx": 0,
+        "data": ["avg_score"]
+      }
+    ]
   },
   "extract_post_id": {
     "inputs": [{ "id": "comment", "data": ["url", "sentiment", "body"] }],
@@ -14,7 +21,13 @@
   "download_highest_avg_sent": {
     "unique": true,
     "inputs": [{ "id": "img", "data": ["img_url", "avg_sentiment"] }],
-    "outputs": []
+    "outputs": [
+      {
+        "sink": true,
+        "idx": 2,
+        "data": ["img"]
+      }
+    ]
   },
   "filter_post_by_score": {
     "inputs": [
@@ -25,7 +38,13 @@
       },
       { "id": "avg_score", "data": ["avg_score"], "broadcast": true }
     ],
-    "outputs": []
+    "outputs": [
+      {
+        "sink": true,
+        "idx": 1,
+        "data": ["img_url"]
+      }
+    ]
   },
   "filter_student_post": {
     "inputs": [

@@ -26,6 +26,7 @@ def eof_handler(context: Context, send_fn):
     url, avg_sentiment = context.highest_sent_img
 
     # TODO: Send binary to client
+    send_fn({"img": url})
 
     # Temp:
     logging.warning(f'Final: (url={url}, avg_sentiment={avg_sentiment})')

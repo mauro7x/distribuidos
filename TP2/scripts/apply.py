@@ -10,11 +10,14 @@ import argparse
 DOCKER_COMPOSE_VERSION = 3
 IMAGE_TAG = 'latest'
 BROKER_NAME = 'broker'
+CLIENT_NAME = 'client'
 DEFAULT_CONFIG_DIRPATH = './config'
+DEFAULT_DATA_DIRPATH = './data'
 PIPELINE_CONFIG_FILENAME = 'pipeline.json'
 SCALE_CONFIG_FILENAME = 'scale.json'
 COMMON_CONFIG_FILENAME = 'common.json'
 CONFIG_MOUNTING_DIRPATH = '/config'
+DATA_MOUNTING_DIRPATH = '/data'
 SERVICES_CONFIG_DIRNAME = '.services'
 BASE_FILTER_CONFIG_NAME = 'filter'
 MIDDLEWARE_CONFIG_NAME = 'middleware'
@@ -33,7 +36,13 @@ def parse_args():
     parser.add_argument('-c', '--config-dirpath', dest='config_dirpath',
                         type=str, required=False,
                         default=DEFAULT_CONFIG_DIRPATH,
-                        help='path to config directory (default: ./config)')
+                        help='path to config directory '
+                        f'(default: {DEFAULT_CONFIG_DIRPATH})')
+    parser.add_argument('-d', '--data-dirpath', dest='data_dirpath',
+                        type=str, required=False,
+                        default=DEFAULT_DATA_DIRPATH,
+                        help='path to data directory '
+                        f'(default: {DEFAULT_DATA_DIRPATH})')
     args = parser.parse_args()
 
     return args
@@ -71,6 +80,8 @@ class DockerComposeGenerator:
         self.common_config = common_config
 
         # Services config directory
+        self.base_config_dirpath = args.config_dirpath
+        self.data_dirpath = args.data_dirpath
         config_dirpath = f'{args.config_dirpath}/{SERVICES_CONFIG_DIRNAME}'
         shutil.rmtree(config_dirpath, ignore_errors=True)
         os.makedirs(config_dirpath)
@@ -89,6 +100,7 @@ class DockerComposeGenerator:
     def generate(self):
         self.write(f'version: \'{DOCKER_COMPOSE_VERSION}\'\n')
         self.write('services:')
+        self.add_client()
 
         for svc_name, svc_definition in self.pipeline.items():
             if svc_definition.get('unique'):
@@ -148,7 +160,8 @@ class DockerComposeGenerator:
         sources = 0
         for src_name, src_definition in self.pipeline.items():
             outputs = src_definition['outputs']
-            is_source = any([output['to'] == svc_name for output in outputs])
+            is_source = any(
+                [output.get('to') == svc_name for output in outputs])
             if not is_source:
                 continue
 
@@ -189,10 +202,16 @@ class DockerComposeGenerator:
         }
 
         for output_msg in definition['outputs']:
-            to = output_msg['to']
-            msg_id = output_msg['msg_id']
-            msg_idx, data = find_by_msg_id(
-                self.pipeline[to]['inputs'], msg_id)
+            if output_msg.get('sink'):
+                to = CLIENT_NAME
+                msg_idx = output_msg['idx']
+                data = output_msg['data']
+            else:
+                to = output_msg['to']
+                msg_id = output_msg['msg_id']
+                msg_idx, data = find_by_msg_id(
+                    self.pipeline[to]['inputs'], msg_id)
+
             middleware['outputs'].append(
                 {'to': to, 'msg_idx': msg_idx, 'data': data})
 
@@ -237,9 +256,21 @@ class DockerComposeGenerator:
 
         self.write('environment:', 2)
         self.write(
-            f'- {LOGGING_LEVEL_ENV_KEY}={log_level}', 3)
+            f'- {LOGGING_LEVEL_ENV_KEY}={log_level.upper()}', 3)
 
     # Service wrappers
+
+    def add_client(self):
+        self.write(f'{CLIENT_NAME}:', 1)
+        self.add_image(CLIENT_NAME)
+        self.add_container_name(CLIENT_NAME)
+        self.write('environment:', 2)
+        self.write(
+            f'- {LOGGING_LEVEL_ENV_KEY}=INFO', 3)
+        self.write('volumes:', 2)
+        self.write(
+            f'- {self.data_dirpath}:{DATA_MOUNTING_DIRPATH}:ro', 3)
+        self.write('')
 
     def add_group_broker(self, svc_name, definition, count):
         # Transparet behaviour to the outside: reachable at svc_name
