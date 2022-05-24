@@ -11,26 +11,33 @@ import common.mom.constants as const
 class WorkerMOM(BaseMOM):
     def __init__(self):
         super().__init__()
+        self.__eofs_received = 0
+
+    def __del__(self):
+        super().__del__()
 
     def recv(self) -> Message:
         msg = self._puller.recv_string()
         if msg == const.EOF_MSG:
-            return Message(const.EOF_MSG_ID, None)
+            self.__eofs_received += 1
+            if self.__eofs_received == self._sources:
+                self.__eofs_received = 0
+                return Message(const.EOF_MSG_ID, None)
+            return None
 
-        msg = self.__parse_msg(msg)
         logging.debug(f"Received: '{msg}'")
-        return msg
+        return self.__parse_msg(msg)
 
     def send(self, result: Sendable):
         for output in self.__outputs:
             pusher = self.__pushers[output.host]
-            serialized = WorkerMOM.__serialize(
+            serialized = self.__serialize(
                 output.msg_idx, output.data, result)
             logging.debug(f"Sending '{serialized}' to {output.host}")
             pusher.send_string(serialized)
 
     def broadcast_eof(self):
-        logging.info('Broadcasting EOF')
+        logging.debug('Broadcasting EOF')
         for output in self.__outputs:
             pusher = self.__pushers[output.host]
             pusher.send_string(const.EOF_MSG)
@@ -79,20 +86,28 @@ class WorkerMOM(BaseMOM):
             raise Exception(error)
 
         try:
-            msg_args = raw_data.split(const.MSG_DATA_JOINER)
+            msg_args = self._unpack(raw_data)
             data = MsgData(*msg_args)
         except Exception:
-            error = ('Could not parse message.'
-                     f'\nExpected: {MsgData}'
+            expected = MsgData._fields
+            error = ('Could not parse message'
+                     f'\nExpected: {expected} '
+                     f'(len: {len(expected)})'
                      f'\nReceived: {raw_data}')
             logging.critical(error)
             raise Exception(error)
 
         return Message(msg_id, data)
 
+    def __serialize(self, msg_idx: int, output_data, result: Sendable) -> str:
+        output_values = [str(result[field]) for field in output_data._fields]
+        data = self._pack(output_values)
+
+        return f'{msg_idx}{const.MSG_SEP}{data}'
+
     # Static
 
-    @staticmethod
+    @ staticmethod
     def __parse_inputs(raw_inputs) -> List[Input]:
         inputs: List[Input] = []
         for raw_input in raw_inputs:
@@ -104,22 +119,15 @@ class WorkerMOM(BaseMOM):
 
         return inputs
 
-    @staticmethod
+    @ staticmethod
     def __parse_outputs(raw_outputs) -> List[Output]:
         outputs: List[Output] = []
         for raw_output in raw_outputs:
             to_host = raw_output['to']
             msg_idx = int(raw_output['msg_idx'])
-            raw_data = raw_output['data']
-            MsgData = namedtuple(f'MsgData_{to_host}_{msg_idx}', raw_data)
+            data = raw_output['data']
+            MsgData = namedtuple(f'MsgData_{to_host}_{msg_idx}', data)
             output = Output(to_host, msg_idx, MsgData)
             outputs.append(output)
 
         return outputs
-
-    @staticmethod
-    def __serialize(msg_idx: int, output_data, result: Sendable) -> str:
-        output_values = [str(result[field]) for field in output_data._fields]
-        data = const.MSG_DATA_JOINER.join(output_values)
-
-        return f'{msg_idx}{const.MSG_SEP}{data}'

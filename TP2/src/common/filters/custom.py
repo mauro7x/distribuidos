@@ -6,18 +6,20 @@ from common.mom.types import Message, Sendable
 
 
 SendFn = Callable[[Sendable], None]
-Context = Dict[str, Any]
-Handler = Callable[[Context, SendFn, Any], None]
-Handlers = Dict[str, Handler]
+Context = Any
+EofHandler = Callable[[Context, SendFn], None]
+MsgHandler = Callable[[Context, SendFn, Any], None]
+Handlers = Dict[str, MsgHandler]
 
 
 class Filter:
-    def __init__(self, handlers: Handlers, context: Context):
+    def __init__(self, handlers: Handlers, context: Context = None):
         logging.debug('Initializing Filter...')
         self.__mom = WorkerMOM()
         self.__running = True
         self.__handlers = handlers
         self.__context = context
+        self.__eof_handler = None
         logging.debug('Filter initialized')
 
     def run(self):
@@ -25,10 +27,13 @@ class Filter:
             logging.info('Filter running...')
             while self.__running:
                 msg = self.__mom.recv()
-                logging.debug(f'Message received: {msg}')
-                self.__process_msg(msg)
+                if msg:
+                    self.__process_msg(msg)
         except KeyboardInterrupt:
             logging.info('Filter stopped')
+
+    def set_eof_handler(self, eof_handler: EofHandler):
+        self.__eof_handler = eof_handler
 
     # Private
 
@@ -37,9 +42,11 @@ class Filter:
             handler = self.__handlers[msg.id]
             handler(self.__context, self.__mom.send, msg.data)
         elif msg.id == EOF_MSG_ID:
-            logging.info('EOF message received')
-            self.__running = False
+            logging.debug('EOF message received, stopping')
+            if self.__eof_handler:
+                self.__eof_handler(self.__context, self.__mom.send)
             self.__mom.broadcast_eof()
+            self.__running = False
         else:
             logging.critical(f"Unknown message received: {msg}")
             exit(-1)

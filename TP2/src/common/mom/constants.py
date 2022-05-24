@@ -9,8 +9,3 @@ EOF_MSG = EOF_MSG_ID
 
 # Serialization
 MSG_SEP = ' '
-MSG_DATA_JOINER = ','
-
-# Broker strategies
-AFFINITY_STRATEGY = 'affinity'
-ROUND_ROBIN_STRATEGY = 'round_robin'

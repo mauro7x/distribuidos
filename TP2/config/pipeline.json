@@ -1,53 +1,106 @@
 {
-  "ingestion": {
-    "base": {
-      "image": "dropper",
-      "config": {
-        "fields": ["extra", "drop_this", "thrash"]
-      }
-    },
+  "aggr_avg_posts_score": {
+    "unique": true,
+    "inputs": [{ "id": "score", "data": ["score"] }],
+    "outputs": [{ "to": "filter_post_by_score", "msg_id": "avg_score" }]
+  },
+  "extract_post_id": {
+    "inputs": [{ "id": "comment", "data": ["url", "sentiment", "body"] }],
+    "outputs": [
+      { "to": "filter_student_post", "msg_id": "comment" },
+      { "to": "aggr_avg_post_sent", "msg_id": "post_sentiment" }
+    ]
+  },
+  "download_highest_avg_sent": {
+    "unique": true,
+    "inputs": [{ "id": "img", "data": ["img_url", "avg_sentiment"] }],
+    "outputs": []
+  },
+  "filter_post_by_score": {
     "inputs": [
       {
-        "id": "msg_1",
-        "data": "dni,first_name,last_name,age,extra,drop_this,thrash"
-      }
-    ],
-    "outputs": [
-      {
-        "to": "name_registry",
-        "msg_id": "msg_1"
+        "id": "post",
+        "data": ["p_id", "img_url", "score"],
+        "affinity_key": "p_id"
       },
-      {
-        "to": "age_registry",
-        "msg_id": "msg_1"
-      }
-    ]
-  },
-  "name_registry": {
-    "inputs": [{ "id": "msg_1", "data": "dni,first_name,last_name" }],
-    "outputs": [
-      {
-        "to": "joiner",
-        "msg_id": "msg_1"
-      }
-    ]
-  },
-  "age_registry": {
-    "inputs": [{ "id": "msg_1", "data": "dni,age" }],
-    "outputs": [
-      {
-        "to": "joiner",
-        "msg_id": "msg_2"
-      }
-    ]
-  },
-  "joiner": {
-    "log_level": "INFO",
-    "affinity_key": "dni",
-    "inputs": [
-      { "id": "msg_1", "data": "dni,fullname" },
-      { "id": "msg_2", "data": "dni,age_in_months" }
+      { "id": "avg_score", "data": ["avg_score"], "broadcast": true }
     ],
     "outputs": []
+  },
+  "filter_student_post": {
+    "inputs": [
+      { "id": "comment", "data": ["p_id", "body"], "affinity_key": "p_id" }
+    ],
+    "outputs": [{ "to": "join_post_student", "msg_id": "student_post" }]
+  },
+  "aggr_avg_post_sent": {
+    "inputs": [
+      { "id": "post_url", "data": ["p_id", "img_url"], "affinity_key": "p_id" },
+      {
+        "id": "post_sentiment",
+        "data": ["p_id", "sentiment"],
+        "affinity_key": "p_id"
+      }
+    ],
+    "outputs": [{ "to": "download_highest_avg_sent", "msg_id": "img" }]
+  },
+  "join_post_student": {
+    "inputs": [
+      {
+        "id": "post",
+        "data": ["p_id", "img_url", "score"],
+        "affinity_key": "p_id"
+      },
+      { "id": "student_post", "data": ["p_id"], "affinity_key": "p_id" }
+    ],
+    "outputs": [{ "to": "filter_post_by_score", "msg_id": "post" }]
+  },
+  "purge_comment": {
+    "entrypoint": true,
+    "inputs": [
+      {
+        "id": "comment",
+        "data": [
+          "type",
+          "id",
+          "subreddit_id",
+          "subreddit_name",
+          "subreddit_nsfw",
+          "created_utc",
+          "permalink",
+          "body",
+          "sentiment",
+          "score"
+        ]
+      }
+    ],
+    "outputs": [{ "to": "extract_post_id", "msg_id": "comment" }]
+  },
+  "purge_post": {
+    "entrypoint": true,
+    "inputs": [
+      {
+        "id": "post",
+        "data": [
+          "type",
+          "id",
+          "subreddit_id",
+          "subreddit_name",
+          "subreddit_nsfw",
+          "created_utc",
+          "permalink",
+          "domain",
+          "url",
+          "selftext",
+          "title",
+          "score"
+        ]
+      }
+    ],
+    "outputs": [
+      { "to": "aggr_avg_post_sent", "msg_id": "post_url" },
+      { "to": "join_post_student", "msg_id": "post" },
+      { "to": "aggr_avg_posts_score", "msg_id": "score" }
+    ]
   }
 }
