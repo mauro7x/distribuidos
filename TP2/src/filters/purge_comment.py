@@ -1,5 +1,5 @@
 import logging
-from common.filters.custom import Filter
+from common.filter import Filter
 from common.utils import init_log
 
 

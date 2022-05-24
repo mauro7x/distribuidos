@@ -6,7 +6,7 @@
       { "to": "filter_post_by_score", "msg_id": "avg_score" },
       {
         "sink": true,
-        "idx": 0,
+        "msg_idx": 0,
         "data": ["avg_score"]
       }
     ]
@@ -24,8 +24,7 @@
     "outputs": [
       {
         "sink": true,
-        "idx": 2,
-        "data": ["img"]
+        "data": "img"
       }
     ]
   },
@@ -41,7 +40,7 @@
     "outputs": [
       {
         "sink": true,
-        "idx": 1,
+        "msg_idx": 1,
         "data": ["img_url"]
       }
     ]

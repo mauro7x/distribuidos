@@ -1,7 +1,7 @@
 import logging
 from collections import defaultdict
 from dataclasses import dataclass
-from common.filters.custom import Filter
+from common.filter import Filter
 from common.utils import init_log
 
 

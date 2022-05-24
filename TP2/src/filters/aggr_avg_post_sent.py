@@ -1,7 +1,7 @@
 import logging
 from collections import defaultdict
 from dataclasses import dataclass
-from common.filters.custom import Filter
+from common.filter import Filter
 from common.types import Average
 from common.utils import init_log
 
@@ -66,12 +66,6 @@ def eof_handler(context: Context, send_fn):
         "img_url": post.img_url,
         "avg_sentiment": post.aggregator.get()
     })
-
-    # Temp:
-    logging.warning(f'Final: '
-                    f'(p_id: {p_id}, '
-                    f'img_url: {post.img_url}, '
-                    f'avg: {post.aggregator.get()} ({len(post.aggregator)}))')
 
 
 def main():

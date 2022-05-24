@@ -1,8 +1,7 @@
 import logging
 from typing import Any, Callable, Dict
 from common.mom.worker import WorkerMOM
-from common.mom.constants import EOF_MSG_ID
-from common.mom.types import Message, Sendable
+from common.mom.types import DataMessage, Sendable
 
 
 SendFn = Callable[[Sendable], None]
@@ -29,24 +28,34 @@ class Filter:
                 msg = self.__mom.recv()
                 if msg:
                     self.__process_msg(msg)
+                else:
+                    self.__handle_eof()
         except KeyboardInterrupt:
             logging.info('Filter stopped')
+        except Exception as e:
+            logging.critical(e)
+            exit(-1)
 
     def set_eof_handler(self, eof_handler: EofHandler):
         self.__eof_handler = eof_handler
 
     # Private
 
-    def __process_msg(self, msg: Message):
+    def __process_msg(self, msg: DataMessage):
         if msg.id in self.__handlers:
             handler = self.__handlers[msg.id]
-            handler(self.__context, self.__mom.send, msg.data)
-        elif msg.id == EOF_MSG_ID:
-            logging.debug('EOF message received, stopping')
-            if self.__eof_handler:
-                self.__eof_handler(self.__context, self.__mom.send)
-            self.__mom.broadcast_eof()
-            self.__running = False
+            handler(self.__context, self.__send, msg.data)
         else:
-            logging.critical(f"Unknown message received: {msg}")
-            exit(-1)
+            raise Exception(f'No handler found for msg: {msg}')
+
+    def __handle_eof(self):
+        if self.__eof_handler:
+            self.__eof_handler(self.__context, self.__send)
+        self.__mom.broadcast_eof()
+        self.__running = False
+
+    def __send(self, data):
+        send_fn = self.__mom.send_bytes \
+            if isinstance(data, bytes) \
+            else self.__mom.send_csv
+        send_fn(data)

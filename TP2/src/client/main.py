@@ -12,7 +12,7 @@ from sink import run as sink_runner
 
 def main():
     init_log()
-    logging.info('=== Started ===')
+    logging.info('Started')
 
     logging.debug('Spawning processes...')
     post_ingestion = Process(target=post_ingestion_runner)
@@ -38,7 +38,7 @@ def main():
     sink.join()
 
     elapsed = time() - start
-    logging.info(f'=== Finished === (elapsed: {elapsed:.2f} secs)')
+    logging.info(f'Finished (elapsed: {elapsed:.2f} secs)')
 
 
 if __name__ == "__main__":

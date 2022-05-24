@@ -3,24 +3,20 @@ from typing import List
 import zmq
 import logging
 import common.mom.constants as const
+from common.mom.transport import Puller
 from common.utils import read_json
 from common.csv import CSVParser
 
 
 class BaseMOM(ABC):
     def __init__(self):
-        logging.debug('Initializing BaseMOM...')
         self._context: zmq.Context = zmq.Context()
         self.__parse_config()
         self.__csv_parser = CSVParser()
 
         # Init zmq pullers and pushers
-        logging.debug('Initializing puller...')
         self.__init_puller()
-        logging.debug('Initializing pushers...')
         self._init_pushers()
-
-        logging.debug('BaseMOM initialized')
 
     def __del__(self):
         self._context.destroy(-1)
@@ -34,9 +30,6 @@ class BaseMOM(ABC):
     @abstractclassmethod
     def _init_pushers(self):
         pass
-
-    def _addr(self, host: str):
-        return f'{self.__protocol}://{host}:{self.__port}'
 
     def _pack(self, values: List[str]):
         return self.__csv_parser.encode(values)
@@ -54,18 +47,19 @@ class BaseMOM(ABC):
             raise Exception('Invalid config file')
 
     def __parse_common_config(self):
-        logging.debug('Parsing common configuration...')
         config = read_json(const.COMMON_CONFIG_FILEPATH)
-        self.__port = int(config['port'])
-        self.__protocol: str = config['protocol']
+        self._port = int(config['port'])
+        self._protocol: str = config['protocol']
         self._sources = int(config['sources'])
+        self._batch_size = int(config['batch_size'])
         logging.debug(
-            'MOM common configuration: '
-            f'(protocol={self.__protocol}, port={self.__port})')
+            'BaseMOM configuration:'
+            f'\nPort: {self._port}'
+            f'\nProtocol: {self._protocol}'
+            f'\nSources: {self._sources}'
+            f'\nBatch size: {self._batch_size}'
+        )
 
     def __init_puller(self):
-        puller = self._context.socket(zmq.PULL)
-        addr = self._addr('*')
-        logging.debug(f'Binding puller to {addr}')
-        puller.bind(addr)
-        self._puller = puller
+        self._puller = Puller(self._context, self._protocol)
+        self._puller.bind(self._port)

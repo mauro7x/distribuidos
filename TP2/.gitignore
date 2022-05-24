@@ -2,3 +2,4 @@ __pycache__/
 .services/
 docker-compose.yaml
 data/
+out/

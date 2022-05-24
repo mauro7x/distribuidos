@@ -203,17 +203,25 @@ class DockerComposeGenerator:
 
         for output_msg in definition['outputs']:
             if output_msg.get('sink'):
-                to = CLIENT_NAME
-                msg_idx = output_msg['idx']
-                data = output_msg['data']
+                output = {
+                    'to': CLIENT_NAME,
+                    'data': output_msg['data']
+                }
+                msg_idx = output_msg.get('msg_idx')
+                if msg_idx is not None:
+                    output['msg_idx'] = msg_idx
             else:
                 to = output_msg['to']
                 msg_id = output_msg['msg_id']
                 msg_idx, data = find_by_msg_id(
                     self.pipeline[to]['inputs'], msg_id)
+                output = {
+                    'to': to,
+                    'msg_idx': msg_idx,
+                    'data': data
+                }
 
-            middleware['outputs'].append(
-                {'to': to, 'msg_idx': msg_idx, 'data': data})
+            middleware['outputs'].append(output)
 
         self.add_svc_file(name, MIDDLEWARE_CONFIG_NAME, middleware)
 
@@ -266,10 +274,11 @@ class DockerComposeGenerator:
         self.add_container_name(CLIENT_NAME)
         self.write('environment:', 2)
         self.write(
-            f'- {LOGGING_LEVEL_ENV_KEY}=INFO', 3)
+            f'- {LOGGING_LEVEL_ENV_KEY}=info', 3)
         self.write('volumes:', 2)
         self.write(
             f'- {self.data_dirpath}:{DATA_MOUNTING_DIRPATH}:ro', 3)
+        self.write('- ./out:/out:rw', 3)
         self.write('')
 
     def add_group_broker(self, svc_name, definition, count):

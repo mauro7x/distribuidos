@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass
 from typing import NamedTuple
-from common.filters.custom import Filter
+from common.filter import Filter
 from common.utils import init_log
 
 
@@ -27,9 +27,6 @@ def post_handler(context: Context, send_fn, data):
         return
 
     send_fn({"img_url": img_url})
-
-    # Temp:
-    logging.warning(f'Student meme: {img_url}')
 
 
 def avg_score_handler(context: Context, send_fn, data):

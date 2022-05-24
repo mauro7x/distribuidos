@@ -1,8 +1,14 @@
 import logging
+import requests
+import mimetypes
 from dataclasses import dataclass
 from typing import Tuple
-from common.filters.custom import Filter
+from common.filter import Filter
 from common.utils import init_log
+
+
+DOWNLOADED_FILEPATH = '/tmp/downloaded.png'
+CHUNK_SIZE = 1024
 
 
 @dataclass
@@ -23,13 +29,22 @@ def img_handler(context: Context, _, data):
 
 def eof_handler(context: Context, send_fn):
     logging.debug('EOF handler called')
-    url, avg_sentiment = context.highest_sent_img
+    if not context.highest_sent_img:
+        logging.warning('Final: no image!')
+        return
 
-    # TODO: Send binary to client
-    send_fn({"img": url})
+    url, _ = context.highest_sent_img
+    response = requests.get(url, stream=True)
+    status = response.status_code
+    if status != 200:
+        logging.warning(f'Could not download image (status: {status})')
+        return
 
-    # Temp:
-    logging.warning(f'Final: (url={url}, avg_sentiment={avg_sentiment})')
+    content_type = response.headers['content-type']
+    extension = mimetypes.guess_extension(content_type)
+    logging.warning(f'URL: {url} | Extension: {extension}')
+    for chunk in response.iter_content(CHUNK_SIZE):
+        send_fn(chunk)
 
 
 def main():
