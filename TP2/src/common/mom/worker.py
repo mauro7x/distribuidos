@@ -107,7 +107,7 @@ class WorkerMOM(BaseMOM):
 
     # Static
 
-    @ staticmethod
+    @staticmethod
     def __parse_inputs(raw_inputs) -> List[Input]:
         inputs: List[Input] = []
         for raw_input in raw_inputs:
@@ -119,7 +119,7 @@ class WorkerMOM(BaseMOM):
 
         return inputs
 
-    @ staticmethod
+    @staticmethod
     def __parse_outputs(raw_outputs) -> List[Output]:
         outputs: List[Output] = []
         for raw_output in raw_outputs:
