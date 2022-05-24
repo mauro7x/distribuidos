@@ -23,7 +23,7 @@ class BaseMOM(ABC):
         logging.debug('BaseMOM initialized')
 
     def __del__(self):
-        self._context.destroy(linger=0)
+        self._context.destroy(-1)
 
     # Protected
 

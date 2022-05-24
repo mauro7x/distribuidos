@@ -57,7 +57,7 @@ def eof_handler(context: Context, send_fn):
 
     valid_posts = filter_valid_posts(context.posts)
     if not valid_posts:
-        logging.info('Final: no valid posts')
+        logging.warning('Final: no valid posts')
         return
 
     p_id, post = get_max_avg(valid_posts)
@@ -68,10 +68,10 @@ def eof_handler(context: Context, send_fn):
     })
 
     # Temp:
-    logging.info(f'Final: '
-                 f'(p_id: {p_id}, '
-                 f'img_url: {post.img_url}, '
-                 f'avg: {post.aggregator.get()} ({(post.aggregator)}))')
+    logging.warning(f'Final: '
+                    f'(p_id: {p_id}, '
+                    f'img_url: {post.img_url}, '
+                    f'avg: {post.aggregator.get()} ({len(post.aggregator)}))')
 
 
 def main():

@@ -13,7 +13,7 @@
   },
   "download_highest_avg_sent": {
     "unique": true,
-    "inputs": [{ "id": "post", "data": ["p_id", "img_url", "avg_sentiment"] }],
+    "inputs": [{ "id": "img", "data": ["img_url", "avg_sentiment"] }],
     "outputs": []
   },
   "filter_post_by_score": {
@@ -23,7 +23,7 @@
         "data": ["p_id", "img_url", "score"],
         "affinity_key": "p_id"
       },
-      { "id": "avg_score", "data": ["avg_score"] }
+      { "id": "avg_score", "data": ["avg_score"], "broadcast": true }
     ],
     "outputs": []
   },
@@ -42,7 +42,7 @@
         "affinity_key": "p_id"
       }
     ],
-    "outputs": [{ "to": "download_highest_avg_sent", "msg_id": "post" }]
+    "outputs": [{ "to": "download_highest_avg_sent", "msg_id": "img" }]
   },
   "join_post_student": {
     "inputs": [

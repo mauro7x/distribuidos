@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from common.filters.custom import Filter
 from common.utils import init_log
 
+
 STUDENT_RELATED_WORDS = set(
     ['university', 'college', 'student', 'teacher', 'professor'])
 

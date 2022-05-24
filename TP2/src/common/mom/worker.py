@@ -13,6 +13,9 @@ class WorkerMOM(BaseMOM):
         super().__init__()
         self.__eofs_received = 0
 
+    def __del__(self):
+        super().__del__()
+
     def recv(self) -> Message:
         msg = self._puller.recv_string()
         if msg == const.EOF_MSG:

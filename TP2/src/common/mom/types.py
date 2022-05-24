@@ -1,25 +1,21 @@
-from dataclasses import dataclass
-from typing import Any, Dict
+from typing import Any, Dict, NamedTuple
 
 
 Sendable = Dict[str, Any]
 Data = Any
 
 
-@dataclass
-class Message:
+class Message(NamedTuple):
     id: str
     data: Data
 
 
-@dataclass
-class Input:
+class Input(NamedTuple):
     id: str
     data: Data
 
 
-@dataclass
-class Output:
+class Output(NamedTuple):
     host: str
     msg_idx: int
     data: Data

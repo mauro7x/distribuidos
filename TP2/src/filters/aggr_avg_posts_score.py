@@ -21,7 +21,7 @@ def eof_handler(context: Context, send_fn):
     send_fn({"avg_score": context.avg.get()})
 
     # Temp:
-    logging.info(
+    logging.warning(
         f'Final: (avg: {context.avg.get()}, count: {len(context.avg)})')
 
 

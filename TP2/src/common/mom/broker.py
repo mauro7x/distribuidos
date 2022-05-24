@@ -11,6 +11,9 @@ class BrokerMOM(BaseMOM):
         super().__init__()
         self.__eofs_received = 0
 
+    def __del__(self):
+        super().__del__()
+
     def run(self):
         logging.info('Broker running...')
         try:
@@ -29,8 +32,7 @@ class BrokerMOM(BaseMOM):
 
         # Strategies
         inputs = config['inputs']
-        self.__affinity_idx_by_msg = \
-            BrokerMOM.__parse_inputs(inputs)
+        self.__parse_inputs(inputs)
         self.__rr_last_sent = self.__count - 1
 
         logging.debug('MOM broker configuration: (count={self.__count})')
@@ -48,6 +50,26 @@ class BrokerMOM(BaseMOM):
 
     # Private
 
+    def __parse_inputs(self, inputs):
+        self.__affinity_idx_by_msg = []
+        self.__broadcast_by_msg = []
+
+        for input in inputs:
+            affinity_key = input.get('affinity_key')
+            if affinity_key:
+                fields: List[str] = input['data']
+                affinity_idx = fields.index(affinity_key)
+            else:
+                affinity_idx = None
+
+            if input.get('broadcast'):
+                broadcast = True
+            else:
+                broadcast = False
+
+            self.__affinity_idx_by_msg.append(affinity_idx)
+            self.__broadcast_by_msg.append(broadcast)
+
     def __run(self):
         while True:
             msg = self._puller.recv_string()
@@ -55,26 +77,34 @@ class BrokerMOM(BaseMOM):
             if msg == const.EOF_MSG:
                 self.__eofs_received += 1
                 if self.__eofs_received == self._sources:
-                    self.__broadcast_eof()
+                    self.__broadcast(const.EOF_MSG)
                     break
             else:
                 logging.debug(f"Received: '{msg}'")
                 self.__forward_msg(msg)
 
-    def __broadcast_eof(self):
-        logging.debug('Broadcasting EOF')
+    def __broadcast(self, msg):
+        logging.debug(f'Broadcasting {msg}')
         for pusher in self.__pushers:
-            pusher.send_string(const.EOF_MSG)
+            possible_rc_cause = pusher.send_string(msg)
+            if possible_rc_cause:
+                logging.error(f'SEND RETURNED: {possible_rc_cause}')
 
     def __forward_msg(self, msg: str):
         msg_idx, _ = msg.split(const.MSG_SEP, 1)
 
         try:
-            affinity_idx = self.__affinity_idx_by_msg[int(msg_idx)]
+            msg_idx = int(msg_idx)
+            broadcast = self.__broadcast_by_msg[msg_idx]
+            affinity_idx = self.__affinity_idx_by_msg[msg_idx]
         except Exception:
             error = f'Invalid message index received ({msg_idx})'
             logging.critical(error)
             raise Exception(error)
+
+        if broadcast:
+            self.__broadcast(msg)
+            return
 
         if affinity_idx is None:
             self.__forward_msg_rr(msg)
@@ -97,19 +127,3 @@ class BrokerMOM(BaseMOM):
         pusher = self.__pushers[worker_idx]
         logging.debug(f'Forwarding to worker #{worker_idx}')
         pusher.send_string(msg)
-
-    # Static
-
-    @staticmethod
-    def __parse_inputs(inputs):
-        affinity_idx_by_msg = []
-        for input in inputs:
-            affinity_key = input.get('affinity_key')
-            if affinity_key:
-                fields: List[str] = input['data']
-                affinity_idx = fields.index(affinity_key)
-                affinity_idx_by_msg.append(affinity_idx)
-            else:
-                affinity_idx_by_msg.append(None)
-
-        return affinity_idx_by_msg

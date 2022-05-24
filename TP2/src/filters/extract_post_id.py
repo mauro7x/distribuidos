@@ -2,6 +2,7 @@ import logging
 from common.filters.custom import Filter
 from common.utils import init_log
 
+
 # Regex method:
 # import re
 # REGEX = r'comments/([^/]*)'
