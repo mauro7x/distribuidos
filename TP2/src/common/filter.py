@@ -1,54 +1,21 @@
 import logging
-from typing import Any, Callable, Dict
+from common.mom.types import DataMessage
 from common.mom.worker import WorkerMOM
-from common.mom.types import DataMessage, Sendable
+from common.wrapper import BaseWrapper
 
 
-LOG_NAME = 'Filter'
-SendFn = Callable[[Sendable], None]
-Context = Any
-EofHandler = Callable[[Context, SendFn], None]
-MsgHandler = Callable[[Context, SendFn, Any], None]
-Handlers = Dict[str, MsgHandler]
+LOG_NAME = 'BaseFilter'
 
 
-class BaseFilter():
+class BaseFilter(BaseWrapper):
     def __init__(self):
-        logging.debug(f'[{LOG_NAME}] Initializing...')
-        self.__mom = WorkerMOM()
-        self.__running = True
+        super().__init__()
+        self._mom = WorkerMOM()
         self._handlers = {}
-        logging.debug(f'[{LOG_NAME}] Initialized')
 
-    def run(self):
-        try:
-            logging.info(f'[{LOG_NAME}] Running...')
-            while self.__running:
-                msg = self.__mom.recv()
-                if msg:
-                    self.__process_msg(msg)
-                else:
-                    self.__handle_eof()
+    # Base class implementations
 
-        except KeyboardInterrupt:
-            logging.info(f'[{LOG_NAME}] Stopped')
-
-    # Abstract
-
-    def _eof_handler(self):
-        return
-
-    # Protected
-
-    def _send(self, data):
-        send_fn = self.__mom.send_bytes \
-            if isinstance(data, bytes) \
-            else self.__mom.send_csv
-        send_fn(data)
-
-    # Private
-
-    def __process_msg(self, msg: DataMessage):
+    def _handle_msg(self, msg: DataMessage):
         if msg.id in self._handlers:
             handler = self._handlers[msg.id]
             logging.debug(f'Invoking message handler with: {msg.data}')
@@ -56,7 +23,17 @@ class BaseFilter():
         else:
             raise Exception(f'No handler found for msg: {msg}')
 
-    def __handle_eof(self):
+    def _handle_eof(self):
         self._eof_handler()
-        self.__mom.broadcast_eof()
-        self.__running = False
+        self._mom.broadcast_eof()
+
+    # Protected
+
+    def _send(self, data):
+        send_fn = self._mom.send_bytes \
+            if isinstance(data, bytes) \
+            else self._mom.send_csv
+        send_fn(data)
+
+    def _eof_handler(self):
+        pass

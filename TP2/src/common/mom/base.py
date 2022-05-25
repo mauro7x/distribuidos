@@ -28,6 +28,10 @@ class BaseMOM(ABC):
         self._close_pushers()
         self._context.term()
 
+    @abstractclassmethod
+    def recv(self):
+        pass
+
     # Protected
 
     @abstractclassmethod

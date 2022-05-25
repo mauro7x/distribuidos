@@ -8,7 +8,7 @@ from common.mom.transport import Pusher
 
 
 NAME = '[Comment Ingestion]'
-SEND_N = 1
+SEND_N = 100000
 PRINT_BETWEEN = 100000
 BATCH_SIZE = 1000
 

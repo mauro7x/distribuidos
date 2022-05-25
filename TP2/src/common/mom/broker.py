@@ -14,21 +14,37 @@ class BrokerMOM(BaseMOM):
     def __init__(self):
         logging.debug(f'[{LOG_NAME}] Initializing...')
         super().__init__()
-        self.__eofs_received = 0
         self.__running = True
         logging.debug(f'[{LOG_NAME}] Initialized')
 
     def __del__(self):
         super().__del__()
 
-    def run(self):
-        logging.info(f'[{LOG_NAME}] Running...')
+    def forward(self, msg: RawDataMessage):
         try:
-            self.__run()
-        except KeyboardInterrupt:
-            logging.info(f'[{LOG_NAME}] Stopped')
+            broadcast = self.__broadcast_by_msg[msg.idx]
+            affinity_idx = self.__affinity_idx_by_msg[msg.idx]
+        except Exception:
+            raise Exception(f'Invalid message index received ({msg.idx})')
+
+        if broadcast:
+            self.__broadcast_msg(msg)
+            return
+
+        if affinity_idx is None:
+            self.__forward_msg_rr(msg)
+        else:
+            self.__forward_msg_affinity(affinity_idx, msg)
+
+    def broadcast_eof(self):
+        logging.debug(f'[{LOG_NAME}] Broadcasting EOF')
+        for pusher in self.__pushers:
+            pusher.send_eof()
 
     # Base class implementations
+
+    def recv(self) -> RawDataMessage:
+        return self._recv_data_msg()
 
     def _parse_custom_config(self):
         logging.debug(f'[{LOG_NAME}] Parsing configuration...')
@@ -80,31 +96,6 @@ class BrokerMOM(BaseMOM):
             self.__affinity_idx_by_msg.append(affinity_idx)
             self.__broadcast_by_msg.append(broadcast)
 
-    def __run(self):
-        while self.__running:
-            msg = self._recv_data_msg()
-            if msg:
-                self.__forward_msg(msg)
-            else:
-                self.__broadcast_eof()
-                self.__running = False
-
-    def __forward_msg(self, msg: RawDataMessage):
-        try:
-            broadcast = self.__broadcast_by_msg[msg.idx]
-            affinity_idx = self.__affinity_idx_by_msg[msg.idx]
-        except Exception:
-            raise Exception(f'Invalid message index received ({msg.idx})')
-
-        if broadcast:
-            self.__broadcast_msg(msg)
-            return
-
-        if affinity_idx is None:
-            self.__forward_msg_rr(msg)
-        else:
-            self.__forward_msg_affinity(affinity_idx, msg)
-
     def __forward_msg_rr(self, msg: RawDataMessage):
         assigned_worker = (self.__rr_last_sent + 1) % self.__count
         self.__forward_to_worker(assigned_worker, msg)
@@ -125,8 +116,3 @@ class BrokerMOM(BaseMOM):
         logging.debug(f'[{LOG_NAME}] Broadcasting msg: "{msg}"')
         for pusher in self.__pushers:
             pusher.send_csv(msg.as_csv())
-
-    def __broadcast_eof(self):
-        logging.debug(f'[{LOG_NAME}] Broadcasting EOF')
-        for pusher in self.__pushers:
-            pusher.send_eof()

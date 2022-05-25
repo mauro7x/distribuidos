@@ -22,11 +22,6 @@ class WorkerMOM(BaseMOM):
     def __del__(self):
         super().__del__()
 
-    def recv(self) -> DataMessage:
-        msg = self._recv_data_msg()
-        if msg:
-            return self.__parse_msg(msg)
-
     def send_csv(self, result: Sendable):
         for output in self.__csv_outputs:
             pusher = self.__pushers[output.host]
@@ -51,6 +46,11 @@ class WorkerMOM(BaseMOM):
             pusher.send_eof()
 
     # Base class implementations
+
+    def recv(self) -> DataMessage:
+        msg = self._recv_data_msg()
+        if msg:
+            return self.__parse_msg(msg)
 
     def _parse_custom_config(self):
         logging.debug(f'[{LOG_NAME}] Parsing configuration...')
