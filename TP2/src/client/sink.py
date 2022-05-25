@@ -3,6 +3,7 @@ import os
 import zmq
 from typing import List, NamedTuple
 from dataclasses import dataclass
+
 from common.csv import CSVParser
 from common.mom.transport import Puller
 from common.mom.types import MessageType, RawDataMessage
@@ -15,7 +16,8 @@ FINAL_MEME_FILENAME = f'{OUT_DIRPATH}/best_meme'
 STUDENT_MEMES_FILEPATH = f'{OUT_DIRPATH}/student_memes.txt'
 
 
-class Config(NamedTuple):
+class SinkConfig(NamedTuple):
+    name: str
     port: int
     protocol: str
     sources: int
@@ -27,10 +29,6 @@ class Context:
     student_memes_file = None
     best_meme_file = None
     file_extension = None
-
-
-def read_config() -> Config:
-    return Config(3000, 'tcp', 3)
 
 
 def handle_results(context: Context):
@@ -83,37 +81,45 @@ def handle_highest_avg_sentiment_meme(context: Context, data: bytes):
     context.best_meme_file.write(data)
 
 
-def run():
-    logging.debug(f'{NAME} Started')
-    config = read_config()
+def run(config: SinkConfig):
+    logging.debug(f'[{config.name}] Started')
     context = zmq.Context()
-    receiver = Puller(context, config.protocol)
-    receiver.bind(config.port)
-    parser = CSVParser()
+    puller = Puller(context, config.protocol)
+    puller.bind(config.port)
     context = Context()
-    data_handlers = [
+    handlers = [
         handle_avg_posts_score,
         handle_student_meme,
         handle_file_extension
     ]
+
+    process_msgs(puller, context, handlers, config)
+    handle_results(context)
+
+    logging.debug(f'[{config.name}] Finished')
+
+
+def process_msgs(
+    puller: Puller,
+    context: Context,
+    handlers,
+    config: SinkConfig
+):
+    parser = CSVParser()
     eof_received = 0
 
     while True:
-        msg = receiver.recv()
+        msg = puller.recv()
         if msg.type == MessageType.EOF.value:
             eof_received += 1
             if eof_received == config.sources:
                 break
         elif msg.type == MessageType.DATA.value:
             data_msg: RawDataMessage = msg.data
-            handler = data_handlers[data_msg.idx]
+            handler = handlers[data_msg.idx]
             values = parser.decode(data_msg.data)
             handler(context, values)
         elif msg.type == MessageType.BYTEARRAY.value:
             handle_highest_avg_sentiment_meme(context, msg.data)
         else:
             raise Exception('Invalid message received from puller')
-
-    handle_results(context)
-
-    logging.debug(f'{NAME} Finished')
