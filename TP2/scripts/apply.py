@@ -19,7 +19,7 @@ BROKER_NAME = 'broker'
 CLIENT_NAME = 'client'
 
 # Filenames
-PIPELINE_CONFIG_FILENAME = 'pipeline.json'
+FILTERS_CONFIG_FILENAME = 'filters.json'
 SCALE_CONFIG_FILENAME = 'scale.json'
 COMMON_CONFIG_FILENAME = 'common.json'
 INGESTION_CONFIG_FILENAME = 'ingestion.json'
@@ -112,12 +112,12 @@ class DockerComposeGenerator:
 
         # Config files
         self.config_dirpath = args.config_dirpath
-        pipeline = read_json(
-            f'{self.config_dirpath}/{PIPELINE_CONFIG_FILENAME}')
+        filters = read_json(
+            f'{self.config_dirpath}/{FILTERS_CONFIG_FILENAME}')
         scale = read_json(f'{self.config_dirpath}/{SCALE_CONFIG_FILENAME}')
         common_config = read_json(
             f'{self.config_dirpath}/{COMMON_CONFIG_FILENAME}')
-        self.pipeline = pipeline
+        self.filters = filters
         self.scale = scale
         self.common_config = common_config
 
@@ -139,7 +139,7 @@ class DockerComposeGenerator:
         self.write('services:')
         self.add_client()
 
-        for svc_name, svc_definition in self.pipeline.items():
+        for svc_name, svc_definition in self.filters.items():
             if svc_definition.get('unique'):
                 self.add_single_svc(svc_name, svc_definition)
             else:
@@ -190,12 +190,12 @@ class DockerComposeGenerator:
             self.sources[name] = 1
             return 1
 
-        if self.pipeline[svc_name].get('entrypoint'):
+        if self.filters[svc_name].get('entrypoint'):
             self.sources[name] = 1
             return 1
 
         sources = 0
-        for src_name, src_definition in self.pipeline.items():
+        for src_name, src_definition in self.filters.items():
             outputs = src_definition['outputs']
             is_source = any(
                 [output.get('to') == svc_name for output in outputs])
@@ -214,7 +214,7 @@ class DockerComposeGenerator:
 
     def get_client_sources(self):
         sources = 0
-        for src_name, src_definition in self.pipeline.items():
+        for src_name, src_definition in self.filters.items():
             outputs = src_definition['outputs']
             is_source = any(
                 [bool(output.get('sink', False)) for output in outputs])
@@ -271,7 +271,7 @@ class DockerComposeGenerator:
                 to = output_msg['to']
                 msg_id = output_msg['msg_id']
                 msg_idx, data = find_by_msg_id(
-                    self.pipeline[to]['inputs'], msg_id)
+                    self.filters[to]['inputs'], msg_id)
                 output = {
                     'to': to,
                     'msg_idx': msg_idx,
