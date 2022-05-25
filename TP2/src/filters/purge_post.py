@@ -1,34 +1,40 @@
 import logging
-from common.filter import Filter
+from common.filter import BaseFilter
 from common.utils import init_log
 
 
-def post_handler(_, send_fn, data):
-    logging.debug(f'Handler called with: {data}')
+class Filter(BaseFilter):
+    def __init__(self):
+        super().__init__()
+        self._handlers = {
+            "post": self.__post_handler
+        }
 
-    if not data.id:
-        logging.debug('Ignoring post with null id')
-        return
+    def __post_handler(self, data):
+        logging.debug(f'Handler called with: {data}')
 
-    if not data.url:
-        logging.debug('Ignoring post with null URL')
-        return
+        if not data.id:
+            logging.debug('Ignoring post with null id')
+            return
 
-    if not data.score:
-        logging.debug('Ignoring post with null score')
-        return
+        if not data.url:
+            logging.debug('Ignoring post with null URL')
+            return
 
-    send_fn({
-        "p_id": data.id,
-        "img_url": data.url,
-        "score": data.score
-    })
+        if not data.score:
+            logging.debug('Ignoring post with null score')
+            return
+
+        self._send({
+            "p_id": data.id,
+            "img_url": data.url,
+            "score": data.score
+        })
 
 
 def main():
     init_log()
-    handlers = {"post": post_handler}
-    filter = Filter(handlers)
+    filter = Filter()
     filter.run()
 
 

@@ -19,7 +19,9 @@ class BaseMOM(ABC):
         self._init_pushers()
 
     def __del__(self):
-        self._context.destroy(-1)
+        self._puller.close()
+        self._close_pushers()
+        self._context.term()
 
     # Protected
 
@@ -29,6 +31,10 @@ class BaseMOM(ABC):
 
     @abstractclassmethod
     def _init_pushers(self):
+        pass
+
+    @abstractclassmethod
+    def _close_pushers(self):
         pass
 
     def _pack(self, values: List[str]):

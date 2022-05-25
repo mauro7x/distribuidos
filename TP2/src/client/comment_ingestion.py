@@ -8,9 +8,9 @@ from common.mom.transport import Pusher
 
 
 NAME = '[Comment Ingestion]'
-SEND_N = 10000
-PRINT_BETWEEN = 10000
-BATCH_SIZE = 100
+SEND_N = None
+PRINT_BETWEEN = 100000
+BATCH_SIZE = 1000
 
 
 class Config(NamedTuple):
@@ -49,5 +49,6 @@ def run():
             sent += 1
 
     sender.send_eof()
+    logging.info(f'{NAME} Finished')
 
-    logging.debug(f'{NAME} Finished')
+    # logging.debug(f'{NAME} Finished')

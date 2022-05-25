@@ -88,7 +88,12 @@ class WorkerMOM(BaseMOM):
             pusher.connect(host, self._port)
             self.__pushers[host] = pusher
 
+    def _close_pushers(self):
+        for pusher in self.__pushers.values():
+            pusher.close()
+
     # Private
+
     def __parse_inputs(self, raw_inputs) -> List[Input]:
         self.__inputs: List[Input] = []
         for raw_input in raw_inputs:

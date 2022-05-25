@@ -17,6 +17,7 @@ class Pusher(Socket):
     def __init__(self, context: zmq.Context, batch_size: int, protocol=str):
         super().__init__(protocol)
         self.__socket = context.socket(zmq.PUSH)
+        self.__socket.set_hwm(10)
         self.__csv_batch_size = batch_size
         self.__csv_batch: List[str] = []
 
@@ -38,6 +39,9 @@ class Pusher(Socket):
         self.__flush_batch()
         self.__socket.send(MessageType.EOF.value)
 
+    def close(self):
+        self.__socket.close()
+
     # Private
 
     def __flush_batch(self):
@@ -54,6 +58,7 @@ class Puller(Socket):
     def __init__(self, context: zmq.Context, protocol: str):
         super().__init__(protocol)
         self.__socket = context.socket(zmq.PULL)
+        self.__socket.set_hwm(10)
         self.__buffer: List[Message] = []
 
     def bind(self, port: int):
@@ -66,6 +71,9 @@ class Puller(Socket):
             self.__recv()
 
         return self.__buffer.pop()
+
+    def close(self):
+        self.__socket.close()
 
     # Private
 
