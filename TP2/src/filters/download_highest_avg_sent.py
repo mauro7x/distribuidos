@@ -19,7 +19,6 @@ class Filter(BaseFilter):
         self.__highest_sent_img: Tuple[str, float] = None
 
     def __img_handler(self, data):
-        logging.debug(f'Handler called with: {data}')
         if not self.__highest_sent_img:
             self.__highest_sent_img = (data.img_url, data.avg_sentiment)
             return
@@ -29,7 +28,6 @@ class Filter(BaseFilter):
             self.__highest_sent_img = (data.img_url, data.avg_sentiment)
 
     def _eof_handler(self):
-        logging.debug('EOF handler called')
         if not self.__highest_sent_img:
             logging.warning('Final: no image!')
             return
@@ -47,8 +45,8 @@ class Filter(BaseFilter):
         self._send({"file_extension": extension})
 
         # File content
-        logging.warning(f'URL: {url} ({avg} sentiment)'
-                        f' | Extension: {extension}')
+        logging.info(f'URL: {url} ({avg} sentiment)'
+                     f' | Extension: {extension}')
         for chunk in response.iter_content(CHUNK_SIZE):
             self._send(chunk)
 

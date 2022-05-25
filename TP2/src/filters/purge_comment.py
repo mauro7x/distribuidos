@@ -11,23 +11,19 @@ class Filter(BaseFilter):
         }
 
     def __comment_handler(self, data):
-        logging.debug(f'Handler called with: {data}')
-
-        if not data.permalink:
-            logging.debug('Ignoring comment with null URL')
+        if not (data.permalink and data.sentiment and data.body):
+            logging.debug('Ignoring comment (missing data)')
             return
 
-        if not data.sentiment:
-            logging.debug('Ignoring comment with null sentiment')
-            return
-
-        if not data.body:
-            logging.debug('Ignoring comment with null body')
+        try:
+            sentiment = float(data.sentiment)
+        except Exception:
+            logging.debug('Ignoring comment (invalid sentiment)')
             return
 
         self._send({
             "url": data.permalink,
-            "sentiment": data.sentiment,
+            "sentiment": sentiment,
             "body": data.body
         })
 

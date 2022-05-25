@@ -1,4 +1,3 @@
-import logging
 from common.filter import BaseFilter
 from common.utils import init_log
 
@@ -14,7 +13,6 @@ class Filter(BaseFilter):
         self.__waiting_post_data = set()
 
     def __post_handler(self, data):
-        logging.debug(f'Handler called with: {data}')
         p_id = data.p_id
         img_url = data.img_url
         score = float(data.score)
@@ -30,7 +28,6 @@ class Filter(BaseFilter):
             self.__waiting_student_related[data.p_id] = (img_url, score)
 
     def __student_post_handler(self, data):
-        logging.debug(f'Handler called with: {data}')
         p_id = data.p_id
 
         if p_id in self.__waiting_student_related:

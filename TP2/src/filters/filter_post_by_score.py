@@ -1,4 +1,3 @@
-import logging
 from common.filter import BaseFilter
 from common.utils import init_log
 
@@ -14,7 +13,6 @@ class Filter(BaseFilter):
         self.__avg_score: float = None
 
     def __post_handler(self, data):
-        logging.debug(f'Handler called with: {data}')
         img_url = data.img_url
         score = float(data.score)
 
@@ -26,7 +24,6 @@ class Filter(BaseFilter):
         self._send({"img_url": img_url})
 
     def __avg_score_handler(self, data):
-        logging.debug(f'Handler called with: {data}')
         avg_score = float(data.avg_score)
         self.__avg_score = avg_score
 

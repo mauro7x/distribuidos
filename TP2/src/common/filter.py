@@ -4,6 +4,7 @@ from common.mom.worker import WorkerMOM
 from common.mom.types import DataMessage, Sendable
 
 
+LOG_NAME = 'Filter'
 SendFn = Callable[[Sendable], None]
 Context = Any
 EofHandler = Callable[[Context, SendFn], None]
@@ -13,15 +14,15 @@ Handlers = Dict[str, MsgHandler]
 
 class BaseFilter():
     def __init__(self):
-        logging.debug('Initializing Filter...')
+        logging.debug(f'[{LOG_NAME}] Initializing...')
         self.__mom = WorkerMOM()
         self.__running = True
         self._handlers = {}
-        logging.debug('Filter initialized')
+        logging.debug(f'[{LOG_NAME}] Initialized')
 
     def run(self):
         try:
-            logging.info('Filter running...')
+            logging.info(f'[{LOG_NAME}] Running...')
             while self.__running:
                 msg = self.__mom.recv()
                 if msg:
@@ -30,7 +31,7 @@ class BaseFilter():
                     self.__handle_eof()
 
         except KeyboardInterrupt:
-            logging.info('Filter stopped')
+            logging.info(f'[{LOG_NAME}] Stopped')
 
     # Abstract
 
@@ -50,6 +51,7 @@ class BaseFilter():
     def __process_msg(self, msg: DataMessage):
         if msg.id in self._handlers:
             handler = self._handlers[msg.id]
+            logging.debug(f'Invoking message handler with: {msg.data}')
             handler(msg.data)
         else:
             raise Exception(f'No handler found for msg: {msg}')

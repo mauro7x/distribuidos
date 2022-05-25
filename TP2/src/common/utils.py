@@ -17,5 +17,6 @@ def init_log():
     logging.basicConfig(
         format='%(asctime)s %(levelname)-8s %(message)s',
         level=level,
-        datefmt='%Y-%m-%d %H:%M:%S',
+        # datefmt='%Y-%m-%d %H:%M:%S', # <--- noise for practical purposes
+        datefmt='%H:%M:%S',
     )

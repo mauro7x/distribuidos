@@ -1,4 +1,3 @@
-import logging
 from common.filter import BaseFilter
 from common.utils import init_log
 
@@ -11,7 +10,6 @@ class Filter(BaseFilter):
         }
 
     def __comment_handler(self, data):
-        logging.debug(f'Handler called with: {data}')
         p_id = Filter.extract_post_id(data.url)
 
         self._send({
