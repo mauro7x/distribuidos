@@ -1,34 +1,40 @@
 import logging
-from common.filters.custom import Filter
+from common.filter import BaseFilter
 from common.utils import init_log
 
 
-def comment_handler(_, send_fn, data):
-    logging.debug(f'Handler called with: {data}')
+class Filter(BaseFilter):
+    def __init__(self):
+        super().__init__()
+        self._handlers = {
+            "comment": self.__comment_handler
+        }
 
-    if not data.permalink:
-        logging.debug('Ignoring comment with null URL')
-        return
+    def __comment_handler(self, data):
+        logging.debug(f'Handler called with: {data}')
 
-    if not data.sentiment:
-        logging.debug('Ignoring comment with null sentiment')
-        return
+        if not data.permalink:
+            logging.debug('Ignoring comment with null URL')
+            return
 
-    if not data.body:
-        logging.debug('Ignoring comment with null body')
-        return
+        if not data.sentiment:
+            logging.debug('Ignoring comment with null sentiment')
+            return
 
-    send_fn({
-        "url": data.permalink,
-        "sentiment": data.sentiment,
-        "body": data.body
-    })
+        if not data.body:
+            logging.debug('Ignoring comment with null body')
+            return
+
+        self._send({
+            "url": data.permalink,
+            "sentiment": data.sentiment,
+            "body": data.body
+        })
 
 
 def main():
     init_log()
-    handlers = {"comment": comment_handler}
-    filter = Filter(handlers)
+    filter = Filter()
     filter.run()
 
 

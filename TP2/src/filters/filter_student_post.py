@@ -1,6 +1,5 @@
 import logging
-from dataclasses import dataclass
-from common.filters.custom import Filter
+from common.filter import BaseFilter
 from common.utils import init_log
 
 
@@ -8,35 +7,38 @@ STUDENT_RELATED_WORDS = set(
     ['university', 'college', 'student', 'teacher', 'professor'])
 
 
-@dataclass
-class Context:
-    student_posts = set()
+class Filter(BaseFilter):
+    def __init__(self):
+        super().__init__()
+        self._handlers = {
+            "comment": self.__comment_handler
+        }
+        self.__student_posts = set()
 
+    def __comment_handler(self, data):
+        logging.debug(f'Handler called with: {data}')
 
-def is_student_related(body: str):
-    for word in body.split(' '):
-        word = word.lower()
-        if word in STUDENT_RELATED_WORDS:
-            return True
-    return False
+        if data.p_id in self.__student_posts:
+            return
 
+        if Filter.__is_student_related(data.body):
+            self.__student_posts.add(data.p_id)
+            self._send({"p_id": data.p_id})
 
-def comment_handler(context: Context, send_fn, data):
-    logging.debug(f'Handler called with: {data}')
+    # Helpers
 
-    if data.p_id in context.student_posts:
-        return
-
-    if is_student_related(data.body):
-        context.student_posts.add(data.p_id)
-        send_fn({"p_id": data.p_id})
+    @staticmethod
+    def __is_student_related(body: str):
+        for word in body.split(' '):
+            word = word.lower()
+            if word in STUDENT_RELATED_WORDS:
+                return True
+        return False
 
 
 def main():
     init_log()
-    handlers = {"comment": comment_handler}
-    context = Context()
-    filter = Filter(handlers, context)
+    filter = Filter()
     filter.run()
 
 

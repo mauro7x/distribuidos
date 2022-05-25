@@ -1,4 +1,5 @@
 {
   "port": 3000,
-  "protocol": "tcp"
+  "protocol": "tcp",
+  "batch_size": 1000
 }

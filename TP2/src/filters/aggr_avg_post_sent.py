@@ -1,88 +1,78 @@
 import logging
-from collections import defaultdict
-from dataclasses import dataclass
-from common.filters.custom import Filter
-from common.types import Average
+from common.filter import BaseFilter
 from common.utils import init_log
 
 
-class Post:
+class Filter(BaseFilter):
     def __init__(self):
-        self.img_url: str = None
-        self.aggregator = Average()
+        super().__init__()
+        self._handlers = {
+            "post_url": self.__post_url_handler,
+            "post_sentiment": self.__post_sentiment_handler
+        }
+        self.__posts = {}
 
+    def __post_url_handler(self, data):
+        logging.debug(f'Handler called with: {data}')
+        _, avg, count = self.__posts.get(data.p_id, (None, None, 0))
+        self.__posts[data.p_id] = (data.img_url, avg, count)
 
-@dataclass
-class Context:
-    posts = defaultdict(Post)
+    def __post_sentiment_handler(self, data):
+        logging.debug(f'Handler called with: {data}')
+        sentiment = float(data.sentiment)
+        url, avg, count = self.__posts.get(data.p_id, (None, None, 0))
+        if avg is None:
+            self.__posts[data.p_id] = (url, sentiment, 1)
+            return
 
+        count += 1
+        new_avg = (avg * (1 - (1 / count)) +
+                   (sentiment / count))
+        self.__posts[data.p_id] = (url, new_avg, count)
 
-def filter_valid_posts(posts: defaultdict[str, Post]):
-    result = {}
-    for p_id, post in posts.items():
-        if post.img_url is None or post.aggregator.get() is None:
-            continue
-        result[p_id] = post
+    def _eof_handler(self):
+        logging.debug('EOF handler called')
+        valid_posts = self.__filter_valid_posts()
+        if not valid_posts:
+            logging.warning('Final: no valid posts')
+            return
 
-    return result
+        p_id, post = Filter.__get_max_avg(valid_posts)
+        url, avg, _ = post
+        self._send({
+            "p_id": p_id,
+            "img_url": url,
+            "avg_sentiment": avg
+        })
 
+    # Helpers
 
-def get_max_avg(valid_posts: defaultdict[str, Post]):
-    iterator = iter(valid_posts.items())
-    result = next(iterator)
+    def __filter_valid_posts(self):
+        result = {}
+        for p_id, post in self.__posts.items():
+            url, avg, _ = post
+            if url is None or avg is None:
+                continue
+            result[p_id] = post
 
-    for p_id, post in iterator:
-        avg = post.aggregator.get()
-        if avg > result[1].aggregator.get():
-            result = (p_id, post)
+        return result
 
-    return result
+    @staticmethod
+    def __get_max_avg(valid_posts):
+        iterator = iter(valid_posts.items())
+        result = next(iterator)
 
+        for p_id, post in iterator:
+            _, avg, _ = post
+            if avg > result[1][1]:
+                result = (p_id, post)
 
-def post_url_handler(context: Context, _, data):
-    logging.debug(f'Handler called with: {data}')
-    post = context.posts[data.p_id]
-    post.img_url = data.img_url
-
-
-def post_sentiment_handler(context: Context, _, data):
-    logging.debug(f'Handler called with: {data}')
-    sentiment = float(data.sentiment)
-    post = context.posts[data.p_id]
-    post.aggregator.add(sentiment)
-
-
-def eof_handler(context: Context, send_fn):
-    logging.debug('EOF handler called')
-
-    valid_posts = filter_valid_posts(context.posts)
-    if not valid_posts:
-        logging.warning('Final: no valid posts')
-        return
-
-    p_id, post = get_max_avg(valid_posts)
-    send_fn({
-        "p_id": p_id,
-        "img_url": post.img_url,
-        "avg_sentiment": post.aggregator.get()
-    })
-
-    # Temp:
-    logging.warning(f'Final: '
-                    f'(p_id: {p_id}, '
-                    f'img_url: {post.img_url}, '
-                    f'avg: {post.aggregator.get()} ({len(post.aggregator)}))')
+        return result
 
 
 def main():
     init_log()
-    handlers = {
-        "post_url": post_url_handler,
-        "post_sentiment": post_sentiment_handler
-    }
-    context = Context()
-    filter = Filter(handlers, context)
-    filter.set_eof_handler(eof_handler)
+    filter = Filter()
     filter.run()
 
 

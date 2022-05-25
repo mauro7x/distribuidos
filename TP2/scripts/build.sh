@@ -18,6 +18,26 @@ VERBOSE="${VERBOSE:-false}"
 
 # Functions
 
+# $1 = cmd
+function run_cmd {
+    set +e
+    if ${VERBOSE}; then
+        OUTPUT=$(DOCKER_BUILDKIT=1 ${1})
+    else
+        OUTPUT=$(DOCKER_BUILDKIT=1 ${1} 2>&1)
+    fi
+    RESULT=$?
+    set -e
+
+    if [ $RESULT -eq 0 ]; then
+        echo -e "${CHECK}"
+    else
+        echo -e "${RED}failed. See output:${NC}\n"
+        echo -e "${OUTPUT}"
+        exit 1
+    fi
+}
+
 # $1 = name
 # $2 = filepath
 function build {
@@ -28,23 +48,21 @@ function build {
         --build-arg MAIN_PATH=${2} \
         --build-arg COMMON_PATH=src/common \
         ."
-    
-    set +e
-    if ${VERBOSE}; then
-        OUTPUT=$(DOCKER_BUILDKIT=1 ${CMD})
-    else
-        OUTPUT=$(DOCKER_BUILDKIT=1 ${CMD} 2>&1)
-    fi
-    RESULT=$?
-    set -e
 
-    if [ $RESULT -eq 0 ]; then
-        echo -e "${CHECK}"
-    else
-        echo -e "${RED}failed. See output:${NC}\n"
-        echo -e "$OUTPUT"
-        exit 1
-    fi
+    run_cmd "${CMD}"
+}
+
+# $1 = dirpath
+function build_client {
+    echo -n -e "> Building ${CYAN}client${NC}... "
+    CMD="docker build \
+        -t tp2_client:latest \
+        -f ${1}/Dockerfile \
+        --build-arg DIR_PATH=${1} \
+        --build-arg COMMON_PATH=src/common \
+        ."
+
+    run_cmd "${CMD}"
 }
 
 # $1 = list of filepaths
@@ -55,15 +73,15 @@ function build_filepaths {
     done
 }
 
+
 # Main execution
 
-services=$(ls ./src/*.py)
-filters=$(ls ./src/filters/*.py)
-
-echo -e "${CYANB}Services:${NC}"
-build_filepaths $services
-
-echo -e "\n${CYANB}Filters:${NC}"
+filters=$(ls src/filters/*.py)
+echo -e "${CYANB}Filters:${NC}"
 build_filepaths $filters
+
+echo -e "\n${CYANB}Other services:${NC}"
+build_client "src/client"
+build_filepaths "src/broker.py"
 
 echo -e "\n${GREEN}Success!${NC}"

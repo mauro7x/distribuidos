@@ -1,66 +1,53 @@
 import logging
-from collections import defaultdict
-from dataclasses import dataclass
-from common.filters.custom import Filter
+from common.filter import BaseFilter
 from common.utils import init_log
 
 
-class Post:
+class Filter(BaseFilter):
     def __init__(self):
-        self.img_url: str = None
-        self.score: float = None
+        super().__init__()
+        self._handlers = {
+            "post": self.__post_handler,
+            "student_post": self.__student_post_handler
+        }
+        self.__waiting_student_related = {}
+        self.__waiting_post_data = set()
 
+    def __post_handler(self, data):
+        logging.debug(f'Handler called with: {data}')
+        p_id = data.p_id
+        img_url = data.img_url
+        score = float(data.score)
 
-@dataclass
-class Context:
-    waiting_student_related = defaultdict(Post)
-    waiting_post_data = set()
+        if p_id in self.__waiting_post_data:
+            self._send({
+                "p_id": p_id,
+                "img_url": img_url,
+                "score": score
+            })
+            self.__waiting_post_data.remove(p_id)
+        else:
+            self.__waiting_student_related[data.p_id] = (img_url, score)
 
+    def __student_post_handler(self, data):
+        logging.debug(f'Handler called with: {data}')
+        p_id = data.p_id
 
-def post_handler(context: Context, send_fn, data):
-    logging.debug(f'Handler called with: {data}')
-    p_id = data.p_id
-    img_url = data.img_url
-    score = float(data.score)
+        if p_id in self.__waiting_student_related:
+            img_url, score = self.__waiting_student_related.pop(p_id)
+            self._send({
+                "p_id": p_id,
+                "img_url": img_url,
+                "score": score
+            })
+            return
 
-    if p_id in context.waiting_post_data:
-        send_fn({
-            "p_id": p_id,
-            "img_url": img_url,
-            "score": score
-        })
-        context.waiting_post_data.remove(p_id)
-        return
-
-    post = context.waiting_student_related[data.p_id]
-    post.img_url = img_url
-    post.score = score
-
-
-def student_post_handler(context: Context, send_fn, data):
-    logging.debug(f'Handler called with: {data}')
-    p_id = data.p_id
-
-    if p_id in context.waiting_student_related:
-        post = context.waiting_student_related.pop(p_id)
-        send_fn({
-            "p_id": p_id,
-            "img_url": post.img_url,
-            "score": post.score
-        })
-        return
-
-    context.waiting_post_data.add(p_id)
+        self.__waiting_post_data.add(p_id)
 
 
 def main():
     init_log()
-    handlers = {
-        "post": post_handler,
-        "student_post": student_post_handler
-    }
-    context = Context()
-    filter = Filter(handlers, context)
+    filter = Filter()
     filter.run()
 
 

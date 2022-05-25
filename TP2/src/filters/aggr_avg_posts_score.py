@@ -1,36 +1,36 @@
 import logging
-from dataclasses import dataclass
-from common.filters.custom import Filter
-from common.types import Average
+from common.filter import BaseFilter
 from common.utils import init_log
 
 
-@dataclass
-class Context:
-    avg = Average()
+class Filter(BaseFilter):
+    def __init__(self):
+        super().__init__()
+        self._handlers = {
+            "score": self.__score_handler
+        }
+        self.__avg = None
+        self.__count = 0
 
+    def __score_handler(self, data):
+        logging.debug(f'Handler called with: {data}')
+        score = int(data.score)
+        self.__count += 1
+        if self.__avg is None:
+            self.__avg = score
+            return
 
-def score_handler(context: Context, _, data):
-    logging.debug(f'Handler called with: {data}')
-    score = int(data.score)
-    context.avg.add(score)
+        self.__avg = (self.__avg * (1 - (1 / self.__count)) +
+                      (score / self.__count))
 
-
-def eof_handler(context: Context, send_fn):
-    logging.debug('EOF handler called')
-    send_fn({"avg_score": context.avg.get()})
-
-    # Temp:
-    logging.warning(
-        f'Final: (avg: {context.avg.get()}, count: {len(context.avg)})')
+    def _eof_handler(self):
+        logging.debug('EOF handler called')
+        self._send({"avg_score": self.__avg})
 
 
 def main():
     init_log()
-    handlers = {"score": score_handler}
-    context = Context()
-    filter = Filter(handlers, context)
-    filter.set_eof_handler(eof_handler)
+    filter = Filter()
     filter.run()
 
 

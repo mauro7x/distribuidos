@@ -1,55 +1,44 @@
 import logging
-from dataclasses import dataclass
-from typing import NamedTuple
-from common.filters.custom import Filter
+from common.filter import BaseFilter
 from common.utils import init_log
 
 
-class Post(NamedTuple):
-    img_url: str
-    score: float
+class Filter(BaseFilter):
+    def __init__(self):
+        super().__init__()
+        self._handlers = {
+            "post": self.__post_handler,
+            "avg_score": self.__avg_score_handler
+        }
+        self.__waiting_avg_score = []
+        self.__avg_score: float = None
 
+    def __post_handler(self, data):
+        logging.debug(f'Handler called with: {data}')
+        img_url = data.img_url
+        score = float(data.score)
 
-@dataclass
-class Context:
-    waiting_avg_score = []
-    avg_score: float = None
+        if not self.__avg_score:
+            post = (img_url, score)
+            self.__waiting_avg_score.append(post)
+            return
 
+        self._send({"img_url": img_url})
 
-def post_handler(context: Context, send_fn, data):
-    logging.debug(f'Handler called with: {data}')
-    img_url = data.img_url
-    score = float(data.score)
+    def __avg_score_handler(self, data):
+        logging.debug(f'Handler called with: {data}')
+        avg_score = float(data.avg_score)
+        self.__avg_score = avg_score
 
-    if not context.avg_score:
-        post = Post(img_url, score)
-        context.waiting_avg_score.append(post)
-        return
-
-    send_fn({"img_url": img_url})
-
-    # Temp:
-    logging.warning(f'Student meme: {img_url}')
-
-
-def avg_score_handler(context: Context, send_fn, data):
-    logging.debug(f'Handler called with: {data}')
-    avg_score = float(data.avg_score)
-    context.avg_score = avg_score
-
-    for post in context.waiting_avg_score:
-        if post.score > avg_score:
-            send_fn({"img_url": post.img_url})
+        for post in self.__waiting_avg_score:
+            url, score = post
+            if score > avg_score:
+                self._send({"img_url": url})
 
 
 def main():
     init_log()
-    handlers = {
-        "post": post_handler,
-        "avg_score": avg_score_handler
-    }
-    context = Context()
-    filter = Filter(handlers, context)
+    filter = Filter()
     filter.run()
 
 
