@@ -8,6 +8,9 @@ from common.utils import read_json
 from common.csv import CSVParser
 
 
+LOG_NAME = 'BaseMOM'
+
+
 class BaseMOM(ABC):
     def __init__(self):
         self._context: zmq.Context = zmq.Context()
@@ -59,7 +62,7 @@ class BaseMOM(ABC):
         self._sources = int(config['sources'])
         self._batch_size = int(config['batch_size'])
         logging.debug(
-            'BaseMOM configuration:'
+            f'[{LOG_NAME}] configuration:'
             f'\nPort: {self._port}'
             f'\nProtocol: {self._protocol}'
             f'\nSources: {self._sources}'

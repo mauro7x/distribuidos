@@ -11,14 +11,14 @@ class Filter(BaseFilter):
         }
 
     def __post_handler(self, data):
-        logging.debug(f'Handler called with: {data}')
-
         if not (data.id and data.url and data.score):
+            logging.debug('Ignoring post (missing data)')
             return
 
         try:
             score = int(data.score)
         except Exception:
+            logging.debug('Ignoring post (invalid score)')
             return
 
         self._send({

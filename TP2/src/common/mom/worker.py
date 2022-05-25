@@ -9,12 +9,15 @@ from common.mom.transport import Pusher
 import common.mom.constants as const
 
 
+LOG_NAME = 'WorkerMOM'
+
+
 class WorkerMOM(BaseMOM):
     def __init__(self):
-        logging.debug('Initializing WorkerMOM')
+        logging.debug(f'[{LOG_NAME}] Initializing')
         super().__init__()
         self.__eofs_received = 0
-        logging.debug('WorkerMOM initialized')
+        logging.debug(f'[{LOG_NAME}] Initialized')
 
     def __del__(self):
         super().__del__()
@@ -37,25 +40,28 @@ class WorkerMOM(BaseMOM):
             pusher = self.__pushers[output.host]
             serialized = self.__serialize(
                 output.msg_idx, output.data, result)
-            logging.debug(f"Sending '{serialized}' to {output.host}")
+            logging.debug(
+                f'[{LOG_NAME}] Sending "{serialized}" to {output.host}')
             pusher.send_csv(serialized)
 
     def send_bytes(self, data: bytes):
         for output in self.__bytearray_outputs:
             pusher = self.__pushers[output.host]
             logging.debug(
-                f"Sending {len(data)} bytes (binary) to {output.host}")
+                f'[{LOG_NAME}] Sending {len(data)} bytes'
+                f' (binary) to {output.host}'
+            )
             pusher.send_bytes(data)
 
     def broadcast_eof(self):
-        logging.debug('Sending EOF')
+        logging.debug(f'[{LOG_NAME}] Broadcasting EOF')
         for pusher in self.__pushers.values():
             pusher.send_eof()
 
     # Base class implementations
 
     def _parse_custom_config(self):
-        logging.debug('Parsing worker configuration...')
+        logging.debug(f'[{LOG_NAME}] Parsing configuration...')
         config = read_json(const.MIDDLEWARE_CONFIG_FILEPATH)
         raw_inputs = config['inputs']
         raw_outputs = config['outputs']
@@ -69,7 +75,7 @@ class WorkerMOM(BaseMOM):
             outputs
         ))
         logging.debug(
-            'MOM worker configuration:'
+            f'[{LOG_NAME}] Configuration:'
             f'\nInputs: {pretty_inputs}'
             f'\nOutputs: {pretty_outputs}'
         )

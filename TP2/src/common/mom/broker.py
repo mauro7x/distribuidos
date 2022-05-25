@@ -7,28 +7,31 @@ from common.mom.base import BaseMOM
 import common.mom.constants as const
 
 
+LOG_NAME = 'BrokerMOM'
+
+
 class BrokerMOM(BaseMOM):
     def __init__(self):
-        logging.debug('Initializing BrokerMOM')
+        logging.debug(f'[{LOG_NAME}] Initializing...')
         super().__init__()
         self.__eofs_received = 0
         self.__running = True
-        logging.debug('BrokerMOM initialized')
+        logging.debug(f'[{LOG_NAME}] Initialized')
 
     def __del__(self):
         super().__del__()
 
     def run(self):
-        logging.info('Broker running...')
+        logging.info(f'[{LOG_NAME}] Running...')
         try:
             self.__run()
         except KeyboardInterrupt:
-            logging.info('Broker stopped')
+            logging.info(f'[{LOG_NAME}] Stopped')
 
     # Base class implementations
 
     def _parse_custom_config(self):
-        logging.debug('Parsing broker configuration...')
+        logging.debug(f'[{LOG_NAME}] Parsing configuration...')
         config = read_json(const.MIDDLEWARE_CONFIG_FILEPATH)
         self.__count = int(config['count'])
         self.__base_hostname = config['base_hostname']
@@ -39,7 +42,8 @@ class BrokerMOM(BaseMOM):
         self.__parse_inputs(inputs)
         self.__rr_last_sent = self.__count - 1
 
-        logging.debug(f'MOM broker configuration: (count={self.__count})')
+        logging.debug(
+            f'[{LOG_NAME}] Configuration: (count={self.__count})')
 
     def _init_pushers(self):
         self.__pushers: List[Pusher] = []
@@ -127,15 +131,15 @@ class BrokerMOM(BaseMOM):
 
     def __forward_to_worker(self, worker_idx: int, msg: RawDataMessage):
         pusher = self.__pushers[worker_idx]
-        logging.debug(f'Forwarding to worker #{worker_idx}')
+        logging.debug(f'[{LOG_NAME}] Forwarding to worker #{worker_idx}')
         pusher.send_csv(msg.as_csv())
 
     def __broadcast_msg(self, msg: RawDataMessage):
-        logging.debug(f'Broadcasting {msg}')
+        logging.debug(f'[{LOG_NAME}] Broadcasting msg: "{msg}"')
         for pusher in self.__pushers:
             pusher.send_csv(msg.as_csv())
 
     def __broadcast_eof(self):
-        logging.debug('Sending EOF')
+        logging.debug(f'[{LOG_NAME}] Broadcasting EOF')
         for pusher in self.__pushers:
             pusher.send_eof()

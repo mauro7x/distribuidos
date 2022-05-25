@@ -1,4 +1,3 @@
-import logging
 from common.filter import BaseFilter
 from common.utils import init_log
 
@@ -16,8 +15,6 @@ class Filter(BaseFilter):
         self.__student_posts = set()
 
     def __comment_handler(self, data):
-        logging.debug(f'Handler called with: {data}')
-
         if data.p_id in self.__student_posts:
             return
 

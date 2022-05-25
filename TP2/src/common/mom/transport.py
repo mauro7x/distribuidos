@@ -5,6 +5,9 @@ from typing import List, Tuple
 from common.mom.types import Message, MessageType, RawDataMessage
 
 
+LOG_NAME = 'Transport'
+
+
 class Socket:
     def __init__(self, protocol: str):
         self.__protocol = protocol
@@ -23,7 +26,7 @@ class Pusher(Socket):
 
     def connect(self, host: str, port: int):
         addr = self._addr(host, port)
-        logging.debug(f'Connecting pusher to {addr}')
+        logging.debug(f'[{LOG_NAME}] Connecting pusher to {addr}')
         self.__socket.connect(addr)
 
     def send_csv(self, data: str):
@@ -63,7 +66,7 @@ class Puller(Socket):
 
     def bind(self, port: int):
         addr = self._addr('*', port)
-        logging.debug(f'Binding puller to {addr}')
+        logging.debug(f'[{LOG_NAME}] Binding puller to {addr}')
         self.__socket.bind(addr)
 
     def recv(self) -> Message:

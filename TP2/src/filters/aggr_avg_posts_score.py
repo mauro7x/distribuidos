@@ -1,4 +1,3 @@
-import logging
 from common.filter import BaseFilter
 from common.utils import init_log
 
@@ -13,7 +12,6 @@ class Filter(BaseFilter):
         self.__count = 0
 
     def __score_handler(self, data):
-        logging.debug(f'Handler called with: {data}')
         score = int(data.score)
         self.__count += 1
         if self.__avg is None:
@@ -24,7 +22,6 @@ class Filter(BaseFilter):
                       (score / self.__count))
 
     def _eof_handler(self):
-        logging.debug('EOF handler called')
         self._send({"avg_score": self.__avg})
 
 

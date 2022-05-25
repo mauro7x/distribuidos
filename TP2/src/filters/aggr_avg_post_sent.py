@@ -13,12 +13,10 @@ class Filter(BaseFilter):
         self.__posts = {}
 
     def __post_url_handler(self, data):
-        logging.debug(f'Handler called with: {data}')
         _, avg, count = self.__posts.get(data.p_id, (None, None, 0))
         self.__posts[data.p_id] = (data.img_url, avg, count)
 
     def __post_sentiment_handler(self, data):
-        logging.debug(f'Handler called with: {data}')
         sentiment = float(data.sentiment)
         url, avg, count = self.__posts.get(data.p_id, (None, None, 0))
         if avg is None:
@@ -31,7 +29,6 @@ class Filter(BaseFilter):
         self.__posts[data.p_id] = (url, new_avg, count)
 
     def _eof_handler(self):
-        logging.debug('EOF handler called')
         valid_posts = self.__filter_valid_posts()
         if not valid_posts:
             logging.warning('Final: no valid posts')
