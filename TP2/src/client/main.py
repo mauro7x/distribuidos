@@ -24,7 +24,7 @@ def main():
 
     logging.debug('Waiting for start signal...')
     # TODO: Replace with signal
-    sleep(3)
+    sleep(5)
 
     start = time()
 

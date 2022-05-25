@@ -9,8 +9,9 @@ build:
 
 apply:
 	LOG_LEVEL="${LOG_LEVEL}" python3 ./scripts/apply.py \
-		-c ./config \
 		-p "tp2_" \
+		-o ./out \
+		-c ./config \
 		> docker-compose.yaml
 .PHONY: apply
 
@@ -28,7 +29,7 @@ logs:
 	docker-compose logs -f
 .PHONY: logs
 
-run: down apply
+run: down
 	docker-compose up
 	docker-compose down
 .PHONY: run

@@ -1,15 +1,19 @@
-import zmq
 import logging
 from typing import List
-from common.utils import read_json, hash
+from common.mom.transport import Pusher
+from common.mom.types import MessageType, RawDataMessage
+from common.utils import read_json
 from common.mom.base import BaseMOM
 import common.mom.constants as const
 
 
 class BrokerMOM(BaseMOM):
     def __init__(self):
+        logging.debug('Initializing BrokerMOM')
         super().__init__()
         self.__eofs_received = 0
+        self.__running = True
+        logging.debug('BrokerMOM initialized')
 
     def __del__(self):
         super().__del__()
@@ -35,18 +39,20 @@ class BrokerMOM(BaseMOM):
         self.__parse_inputs(inputs)
         self.__rr_last_sent = self.__count - 1
 
-        logging.debug('MOM broker configuration: (count={self.__count})')
+        logging.debug(f'MOM broker configuration: (count={self.__count})')
 
     def _init_pushers(self):
-        self.__pushers: List[zmq.Socket] = []
+        self.__pushers: List[Pusher] = []
 
         for i in range(1, self.__count + 1):
             host = f'{self.__base_hostname}_{i}'
-            pusher = self._context.socket(zmq.PUSH)
-            addr = self._addr(host)
-            logging.debug(f'Connecting pusher to {addr}')
-            pusher.connect(addr)
+            pusher = Pusher(self._context, self._batch_size, self._protocol)
+            pusher.connect(host, self._port)
             self.__pushers.append(pusher)
+
+    def _close_pushers(self):
+        for pusher in self.__pushers:
+            pusher.close()
 
     # Private
 
@@ -71,37 +77,36 @@ class BrokerMOM(BaseMOM):
             self.__broadcast_by_msg.append(broadcast)
 
     def __run(self):
-        while True:
-            msg = self._puller.recv_string()
+        while self.__running:
+            msg = self.__recv()
+            if msg:
+                self.__forward_msg(msg)
+            else:
+                self.__broadcast_eof()
+                self.__running = False
 
-            if msg == const.EOF_MSG:
+    def __recv(self) -> RawDataMessage:
+        while True:
+            msg = self._puller.recv()
+            if msg.type == MessageType.EOF.value:
                 self.__eofs_received += 1
                 if self.__eofs_received == self._sources:
-                    self.__broadcast(const.EOF_MSG)
-                    break
+                    self.__eofs_received = 0
+                    return None
+            elif msg.type == MessageType.DATA.value:
+                return msg.data
             else:
-                logging.debug(f"Received: '{msg}'")
-                self.__forward_msg(msg)
+                raise Exception('Invalid message received from puller')
 
-    def __broadcast(self, msg):
-        logging.debug(f'Broadcasting {msg}')
-        for pusher in self.__pushers:
-            pusher.send_string(msg)
-
-    def __forward_msg(self, msg: str):
-        msg_idx, _ = msg.split(const.MSG_SEP, 1)
-
+    def __forward_msg(self, msg: RawDataMessage):
         try:
-            msg_idx = int(msg_idx)
-            broadcast = self.__broadcast_by_msg[msg_idx]
-            affinity_idx = self.__affinity_idx_by_msg[msg_idx]
+            broadcast = self.__broadcast_by_msg[msg.idx]
+            affinity_idx = self.__affinity_idx_by_msg[msg.idx]
         except Exception:
-            error = f'Invalid message index received ({msg_idx})'
-            logging.critical(error)
-            raise Exception(error)
+            raise Exception(f'Invalid message index received ({msg.idx})')
 
         if broadcast:
-            self.__broadcast(msg)
+            self.__broadcast_msg(msg)
             return
 
         if affinity_idx is None:
@@ -109,19 +114,28 @@ class BrokerMOM(BaseMOM):
         else:
             self.__forward_msg_affinity(affinity_idx, msg)
 
-    def __forward_msg_rr(self, msg: str):
+    def __forward_msg_rr(self, msg: RawDataMessage):
         assigned_worker = (self.__rr_last_sent + 1) % self.__count
         self.__forward_to_worker(assigned_worker, msg)
         self.__rr_last_sent = assigned_worker
 
-    def __forward_msg_affinity(self, affinity_idx: int, msg: str):
-        _, msg_data = msg.split(const.MSG_SEP, 1)
-        fields = self._unpack(msg_data)
+    def __forward_msg_affinity(self, affinity_idx: int, msg: RawDataMessage):
+        fields = self._unpack(msg.data)
         affinity_value = fields[affinity_idx]
         assigned_worker = hash(affinity_value) % self.__count
         self.__forward_to_worker(assigned_worker, msg)
 
-    def __forward_to_worker(self, worker_idx: int, msg: str):
+    def __forward_to_worker(self, worker_idx: int, msg: RawDataMessage):
         pusher = self.__pushers[worker_idx]
         logging.debug(f'Forwarding to worker #{worker_idx}')
-        pusher.send_string(msg)
+        pusher.send_csv(msg.as_csv())
+
+    def __broadcast_msg(self, msg: RawDataMessage):
+        logging.debug(f'Broadcasting {msg}')
+        for pusher in self.__pushers:
+            pusher.send_csv(msg.as_csv())
+
+    def __broadcast_eof(self):
+        logging.debug('Sending EOF')
+        for pusher in self.__pushers:
+            pusher.send_eof()

@@ -43,7 +43,8 @@ class WorkerMOM(BaseMOM):
     def send_bytes(self, data: bytes):
         for output in self.__bytearray_outputs:
             pusher = self.__pushers[output.host]
-            logging.debug(f"Sending '{data}' to {output.host}")
+            logging.debug(
+                f"Sending {len(data)} bytes (binary) to {output.host}")
             pusher.send_bytes(data)
 
     def broadcast_eof(self):

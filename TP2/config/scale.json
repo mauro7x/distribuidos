@@ -1,9 +1,9 @@
 {
-  "aggr_avg_post_sent": 1,
+  "aggr_avg_post_sent": 3,
   "extract_post_id": 1,
   "filter_post_by_score": 1,
   "filter_student_post": 1,
-  "join_post_student": 1,
+  "join_post_student": 3,
   "purge_comment": 1,
   "purge_post": 1
 }

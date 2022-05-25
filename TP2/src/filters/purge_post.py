@@ -13,22 +13,18 @@ class Filter(BaseFilter):
     def __post_handler(self, data):
         logging.debug(f'Handler called with: {data}')
 
-        if not data.id:
-            logging.debug('Ignoring post with null id')
+        if not (data.id and data.url and data.score):
             return
 
-        if not data.url:
-            logging.debug('Ignoring post with null URL')
-            return
-
-        if not data.score:
-            logging.debug('Ignoring post with null score')
+        try:
+            score = int(data.score)
+        except Exception:
             return
 
         self._send({
             "p_id": data.id,
             "img_url": data.url,
-            "score": data.score
+            "score": score
         })
 
 

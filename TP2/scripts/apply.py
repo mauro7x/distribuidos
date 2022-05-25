@@ -7,22 +7,42 @@ import argparse
 
 # Constants
 
+# Docker compose
 DOCKER_COMPOSE_VERSION = 3
 IMAGE_TAG = 'latest'
+
+# Names
 BROKER_NAME = 'broker'
 CLIENT_NAME = 'client'
-DEFAULT_CONFIG_DIRPATH = './config'
-DEFAULT_DATA_DIRPATH = './data'
+
+# Filenames
 PIPELINE_CONFIG_FILENAME = 'pipeline.json'
 SCALE_CONFIG_FILENAME = 'scale.json'
 COMMON_CONFIG_FILENAME = 'common.json'
+
+# Mounting dirpaths
 CONFIG_MOUNTING_DIRPATH = '/config'
 DATA_MOUNTING_DIRPATH = '/data'
+OUT_MOUNTING_DIRPATH = '/out'
+
+# Defaults
+DEFAULT_CONFIG_DIRPATH = './config'
+DEFAULT_DATA_DIRPATH = './data'
+DEFAULT_OUT_DIRPATH = './data'
+
+# Config
 SERVICES_CONFIG_DIRNAME = '.services'
 BASE_FILTER_CONFIG_NAME = 'filter'
 MIDDLEWARE_CONFIG_NAME = 'middleware'
 COMMON_CONFIG_NAME = 'common'
+
+# Hash seed
+HASH_SEED_KEY = 'PYTHONHASHSEED'
+HASH_SEED_VALUE = 42
+
+# Other
 LOGGING_LEVEL_ENV_KEY = 'LOG_LEVEL'
+
 
 # Auxiliar functions
 
@@ -43,6 +63,11 @@ def parse_args():
                         default=DEFAULT_DATA_DIRPATH,
                         help='path to data directory '
                         f'(default: {DEFAULT_DATA_DIRPATH})')
+    parser.add_argument('-o', '--out-dirpath', dest='out_dirpath',
+                        type=str, required=False,
+                        default=DEFAULT_OUT_DIRPATH,
+                        help='path to out directory '
+                        f'(default: {DEFAULT_OUT_DIRPATH})')
     args = parser.parse_args()
 
     return args
@@ -79,9 +104,14 @@ class DockerComposeGenerator:
         self.scale = scale
         self.common_config = common_config
 
+        # I/O
+        self.data_dirpath = args.data_dirpath
+        self.out_dirpath = args.out_dirpath
+        shutil.rmtree(self.out_dirpath, ignore_errors=True)
+        os.makedirs(self.out_dirpath)
+
         # Services config directory
         self.base_config_dirpath = args.config_dirpath
-        self.data_dirpath = args.data_dirpath
         config_dirpath = f'{args.config_dirpath}/{SERVICES_CONFIG_DIRNAME}'
         shutil.rmtree(config_dirpath, ignore_errors=True)
         os.makedirs(config_dirpath)
@@ -255,30 +285,33 @@ class DockerComposeGenerator:
 
         self.add_container_name(name, i)
         self.mount_config_volume(name)
-        self.add_env_vars(definition)
+        self.add_svc_env_vars(definition)
 
-    def add_env_vars(self, definition):
+    def add_svc_env_vars(self, definition):
         log_level = definition.get('log_level', self.log_level)
-        if not log_level:
-            return
+        self.add_env_vars(log_level)
 
+    def add_env_vars(self, log_level):
         self.write('environment:', 2)
-        self.write(
-            f'- {LOGGING_LEVEL_ENV_KEY}={log_level.upper()}', 3)
+        self.write(f'- {HASH_SEED_KEY}={HASH_SEED_VALUE}', 3)
+
+        if log_level:
+            self.write(
+                f'- {LOGGING_LEVEL_ENV_KEY}={log_level.upper()}', 3)
 
     # Service wrappers
 
     def add_client(self):
+        log_level = self.log_level if self.log_level else 'info'
         self.write(f'{CLIENT_NAME}:', 1)
         self.add_image(CLIENT_NAME)
         self.add_container_name(CLIENT_NAME)
-        self.write('environment:', 2)
-        self.write(
-            f'- {LOGGING_LEVEL_ENV_KEY}=info', 3)
+        self.add_env_vars(log_level)
         self.write('volumes:', 2)
         self.write(
             f'- {self.data_dirpath}:{DATA_MOUNTING_DIRPATH}:ro', 3)
-        self.write('- ./out:/out:rw', 3)
+        self.write(
+            f'- {self.out_dirpath}:{OUT_MOUNTING_DIRPATH}:rw', 3)
         self.write('')
 
     def add_group_broker(self, svc_name, definition, count):
@@ -289,7 +322,7 @@ class DockerComposeGenerator:
         self.add_image(BROKER_NAME)
         self.add_container_name(name)
         self.mount_config_volume(name)
-        self.add_env_vars(definition)
+        self.add_svc_env_vars(definition)
         self.add_broker_middleware_file(name, definition, svc_name, count)
         self.add_common_config_file(name, svc_name)
 

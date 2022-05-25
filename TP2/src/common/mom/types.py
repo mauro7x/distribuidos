@@ -24,6 +24,9 @@ class RawDataMessage:
         self.idx = int(idx)
         self.data = data
 
+    def as_csv(self) -> str:
+        return f'{self.idx}{const.MSG_SEP}{self.data}'
+
 
 class DataMessage(NamedTuple):
     id: str
