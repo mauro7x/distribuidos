@@ -10,7 +10,7 @@ from common.mom.transport import Pusher
 NAME = '[Post Ingestion]'
 SEND_N = None
 PRINT_BETWEEN = 100000
-BATCH_SIZE = 1000
+BATCH_SIZE = 10000
 
 
 class Config(NamedTuple):
@@ -22,7 +22,7 @@ class Config(NamedTuple):
 
 
 def read_config() -> Config:
-    return Config('purge_post', 3000, 'tcp', SEND_N, BATCH_SIZE)
+    return Config('post_ingestion', 3000, 'tcp', SEND_N, BATCH_SIZE)
 
 
 def run():

@@ -11,7 +11,7 @@ class Filter(BaseFilter):
         }
 
     def __post_handler(self, data):
-        if not (data.id and data.url and data.score):
+        if not (data.id and data.score):
             logging.debug('Ignoring post (missing data)')
             return
 

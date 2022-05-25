@@ -22,7 +22,7 @@ class Config(NamedTuple):
 
 
 def read_config() -> Config:
-    return Config('purge_comment', 3000, 'tcp', SEND_N, BATCH_SIZE)
+    return Config('comment_ingestion', 3000, 'tcp', SEND_N, BATCH_SIZE)
 
 
 def run():

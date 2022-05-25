@@ -4,7 +4,7 @@ from typing import List, Dict
 from common.utils import read_json
 from common.mom.base import BaseMOM
 from common.mom.types import \
-    Sendable, Input, Output, MessageType, RawDataMessage, DataMessage
+    Sendable, Input, Output, RawDataMessage, DataMessage
 from common.mom.transport import Pusher
 import common.mom.constants as const
 
@@ -23,17 +23,9 @@ class WorkerMOM(BaseMOM):
         super().__del__()
 
     def recv(self) -> DataMessage:
-        while True:
-            msg = self._puller.recv()
-            if msg.type == MessageType.EOF.value:
-                self.__eofs_received += 1
-                if self.__eofs_received == self._sources:
-                    self.__eofs_received = 0
-                    return None
-            elif msg.type == MessageType.DATA.value:
-                return self.__parse_msg(msg.data)
-            else:
-                raise Exception('Invalid message received from puller')
+        msg = self._recv_data_msg()
+        if msg:
+            return self.__parse_msg(msg)
 
     def send_csv(self, result: Sendable):
         for output in self.__csv_outputs:

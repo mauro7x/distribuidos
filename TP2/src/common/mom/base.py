@@ -4,6 +4,7 @@ import zmq
 import logging
 import common.mom.constants as const
 from common.mom.transport import Puller
+from common.mom.types import MessageType, RawDataMessage
 from common.utils import read_json
 from common.csv import CSVParser
 
@@ -16,6 +17,7 @@ class BaseMOM(ABC):
         self._context: zmq.Context = zmq.Context()
         self.__parse_config()
         self.__csv_parser = CSVParser()
+        self.__eofs_received = 0
 
         # Init zmq pullers and pushers
         self.__init_puller()
@@ -45,6 +47,19 @@ class BaseMOM(ABC):
 
     def _unpack(self, csv_line: str):
         return self.__csv_parser.decode(csv_line)
+
+    def _recv_data_msg(self) -> RawDataMessage:
+        while True:
+            msg = self._puller.recv()
+            if msg.type == MessageType.EOF.value:
+                self.__eofs_received += 1
+                if self.__eofs_received == self._sources:
+                    self.__eofs_received = 0
+                    return None
+            elif msg.type == MessageType.DATA.value:
+                return msg.data
+            else:
+                raise Exception('Invalid message received from puller')
 
     # Private
 

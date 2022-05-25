@@ -1,7 +1,7 @@
 import logging
 from typing import List
 from common.mom.transport import Pusher
-from common.mom.types import MessageType, RawDataMessage
+from common.mom.types import RawDataMessage
 from common.utils import read_json
 from common.mom.base import BaseMOM
 import common.mom.constants as const
@@ -82,25 +82,12 @@ class BrokerMOM(BaseMOM):
 
     def __run(self):
         while self.__running:
-            msg = self.__recv()
+            msg = self._recv_data_msg()
             if msg:
                 self.__forward_msg(msg)
             else:
                 self.__broadcast_eof()
                 self.__running = False
-
-    def __recv(self) -> RawDataMessage:
-        while True:
-            msg = self._puller.recv()
-            if msg.type == MessageType.EOF.value:
-                self.__eofs_received += 1
-                if self.__eofs_received == self._sources:
-                    self.__eofs_received = 0
-                    return None
-            elif msg.type == MessageType.DATA.value:
-                return msg.data
-            else:
-                raise Exception('Invalid message received from puller')
 
     def __forward_msg(self, msg: RawDataMessage):
         try:
