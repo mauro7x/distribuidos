@@ -34,16 +34,21 @@ class Filter(BaseFilter):
             logging.warning('Final: no image!')
             return
 
-        url, _ = self.__highest_sent_img
+        url, avg = self.__highest_sent_img
         response = requests.get(url, stream=True)
         status = response.status_code
         if status != 200:
             logging.warning(f'Could not download image (status: {status})')
             return
 
+        # File extension
         content_type = response.headers['content-type']
         extension = mimetypes.guess_extension(content_type)
-        logging.warning(f'URL: {url} | Extension: {extension}')
+        self._send({"file_extension": extension})
+
+        # File content
+        logging.warning(f'URL: {url} ({avg} sentiment)'
+                        f' | Extension: {extension}')
         for chunk in response.iter_content(CHUNK_SIZE):
             self._send(chunk)
 

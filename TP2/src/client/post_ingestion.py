@@ -8,7 +8,7 @@ from common.mom.transport import Pusher
 
 
 NAME = '[Post Ingestion]'
-SEND_N = None
+SEND_N = 1000
 PRINT_BETWEEN = 100000
 BATCH_SIZE = 1000
 

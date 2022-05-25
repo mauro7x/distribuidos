@@ -25,6 +25,11 @@
       {
         "sink": true,
         "data": "img"
+      },
+      {
+        "sink": true,
+        "msg_idx": 2,
+        "data": ["file_extension"]
       }
     ]
   },

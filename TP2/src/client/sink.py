@@ -1,4 +1,5 @@
 import logging
+import os
 import zmq
 from typing import List, NamedTuple
 from dataclasses import dataclass
@@ -8,8 +9,10 @@ from common.mom.types import MessageType, RawDataMessage
 
 
 NAME = '[Sink]'
-MEME_OUT_PATH = 'out/client.png'
-STUDENT_MEMES_OUT_PATH = 'out/student_memes.txt'
+OUT_DIRPATH = 'out'
+TEMP_MEME_FILEPATH = f'{OUT_DIRPATH}/best_meme.downloading'
+FINAL_MEME_FILENAME = f'{OUT_DIRPATH}/best_meme'
+STUDENT_MEMES_FILEPATH = f'{OUT_DIRPATH}/student_memes.txt'
 
 
 class Config(NamedTuple):
@@ -23,6 +26,7 @@ class Context:
     avg_score: float = None
     student_memes_file = None
     best_meme_file = None
+    file_extension = None
 
 
 def read_config() -> Config:
@@ -33,15 +37,17 @@ def handle_results(context: Context):
     # Student memes
     if context.student_memes_file:
         student_memes_msg = \
-            f'>>> Student memes list saved to "{STUDENT_MEMES_OUT_PATH}"'
+            f'>>> Student memes list saved to "{STUDENT_MEMES_FILEPATH}"'
         context.student_memes_file.close()
     else:
         student_memes_msg = '>>> No student memes found!'
 
     # Best meme
-    if context.best_meme_file:
-        meme_msg = f'>>> Best meme saved to "{MEME_OUT_PATH}"'
+    if context.best_meme_file and context.file_extension:
         context.best_meme_file.close()
+        final_filepath = f'{FINAL_MEME_FILENAME}{context.file_extension}'
+        os.rename(TEMP_MEME_FILEPATH, final_filepath)
+        meme_msg = f'>>> Best meme saved to "{final_filepath}"'
     else:
         meme_msg = '>>> Best meme not present!'
 
@@ -60,15 +66,19 @@ def handle_avg_posts_score(context: Context, values: List[str]):
 
 def handle_student_meme(context: Context, values: List[str]):
     if not context.student_memes_file:
-        context.student_memes_file = open(STUDENT_MEMES_OUT_PATH, 'w')
+        context.student_memes_file = open(STUDENT_MEMES_FILEPATH, 'w')
 
     student_meme = values[0]
     context.student_memes_file.write(f'{student_meme}\n')
 
 
+def handle_file_extension(context: Context, values: List[str]):
+    context.file_extension = values[0]
+
+
 def handle_highest_avg_sentiment_meme(context: Context, data: bytes):
     if not context.best_meme_file:
-        context.best_meme_file = open(MEME_OUT_PATH, 'wb')
+        context.best_meme_file = open(TEMP_MEME_FILEPATH, 'wb')
 
     context.best_meme_file.write(data)
 
@@ -81,7 +91,11 @@ def run():
     receiver.bind(config.port)
     parser = CSVParser()
     context = Context()
-    data_handlers = [handle_avg_posts_score, handle_student_meme]
+    data_handlers = [
+        handle_avg_posts_score,
+        handle_student_meme,
+        handle_file_extension
+    ]
     eof_received = 0
 
     while True:
