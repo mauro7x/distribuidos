@@ -10,8 +10,7 @@ build:
 apply:
 	LOG_LEVEL="${LOG_LEVEL}" python3 ./scripts/apply.py \
 		-p "tp2_" \
-		-o ./out \
-		-c ./config \
+		-c config \
 		> docker-compose.yaml
 .PHONY: apply
 
@@ -20,13 +19,12 @@ up:
 .PHONY: up
 
 down:
-	# docker-compose stop
 	docker-compose kill
 	docker-compose down
 .PHONY: down
 
 logs:
-	docker-compose logs -f
+	docker-compose logs
 .PHONY: logs
 
 run: down
@@ -35,7 +33,7 @@ run: down
 .PHONY: run
 
 clean:
-	rm -rf ./config/.services
+	rm -rf ./.temp
 	rm -rf ./docker-compose.yaml
 	docker images --format '{{.Repository}}' | grep tp2_ | xargs docker rmi
 .PHONY: clean

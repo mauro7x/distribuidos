@@ -7,6 +7,9 @@ import argparse
 
 # Constants
 
+# Generated output
+GENERATED_DIRPATH = './.temp'
+
 # Docker compose
 DOCKER_COMPOSE_VERSION = 3
 IMAGE_TAG = 'latest'
@@ -19,6 +22,8 @@ CLIENT_NAME = 'client'
 PIPELINE_CONFIG_FILENAME = 'pipeline.json'
 SCALE_CONFIG_FILENAME = 'scale.json'
 COMMON_CONFIG_FILENAME = 'common.json'
+INGESTION_CONFIG_FILENAME = 'ingestion.json'
+SINK_CONFIG_FILENAME = 'sink.json'
 
 # Mounting dirpaths
 CONFIG_MOUNTING_DIRPATH = '/config'
@@ -28,10 +33,11 @@ OUT_MOUNTING_DIRPATH = '/out'
 # Defaults
 DEFAULT_CONFIG_DIRPATH = './config'
 DEFAULT_DATA_DIRPATH = './data'
-DEFAULT_OUT_DIRPATH = './data'
 
 # Config
 SERVICES_CONFIG_DIRNAME = '.services'
+CLIENT_CONFIG_DIRNAME = '.client'
+OUT_CONFIG_DIRNAME = '.out'
 BASE_FILTER_CONFIG_NAME = 'filter'
 MIDDLEWARE_CONFIG_NAME = 'middleware'
 COMMON_CONFIG_NAME = 'common'
@@ -63,11 +69,6 @@ def parse_args():
                         default=DEFAULT_DATA_DIRPATH,
                         help='path to data directory '
                         f'(default: {DEFAULT_DATA_DIRPATH})')
-    parser.add_argument('-o', '--out-dirpath', dest='out_dirpath',
-                        type=str, required=False,
-                        default=DEFAULT_OUT_DIRPATH,
-                        help='path to out directory '
-                        f'(default: {DEFAULT_OUT_DIRPATH})')
     args = parser.parse_args()
 
     return args
@@ -94,28 +95,34 @@ class DockerComposeGenerator:
         self.prefix = args.prefix
         self.log_level = os.getenv(LOGGING_LEVEL_ENV_KEY)
 
+        # Init temp directory
+        shutil.rmtree(GENERATED_DIRPATH, ignore_errors=True)
+        os.makedirs(GENERATED_DIRPATH)
+
+        # Nested temp directories
+        self.svc_config_dirpath = \
+            f'{GENERATED_DIRPATH}/{SERVICES_CONFIG_DIRNAME}'
+        self.client_config_dirpath = \
+            f'{GENERATED_DIRPATH}/{CLIENT_CONFIG_DIRNAME}'
+        self.out_dirpath = \
+            f'{GENERATED_DIRPATH}/{OUT_CONFIG_DIRNAME}'
+        os.makedirs(self.svc_config_dirpath)
+        os.makedirs(self.client_config_dirpath)
+        os.makedirs(self.out_dirpath)
+
         # Config files
+        self.config_dirpath = args.config_dirpath
         pipeline = read_json(
-            f'{args.config_dirpath}/{PIPELINE_CONFIG_FILENAME}')
-        scale = read_json(f'{args.config_dirpath}/{SCALE_CONFIG_FILENAME}')
+            f'{self.config_dirpath}/{PIPELINE_CONFIG_FILENAME}')
+        scale = read_json(f'{self.config_dirpath}/{SCALE_CONFIG_FILENAME}')
         common_config = read_json(
-            f'{args.config_dirpath}/{COMMON_CONFIG_FILENAME}')
+            f'{self.config_dirpath}/{COMMON_CONFIG_FILENAME}')
         self.pipeline = pipeline
         self.scale = scale
         self.common_config = common_config
 
-        # I/O
+        # Input data
         self.data_dirpath = args.data_dirpath
-        self.out_dirpath = args.out_dirpath
-        shutil.rmtree(self.out_dirpath, ignore_errors=True)
-        os.makedirs(self.out_dirpath)
-
-        # Services config directory
-        self.base_config_dirpath = args.config_dirpath
-        config_dirpath = f'{args.config_dirpath}/{SERVICES_CONFIG_DIRNAME}'
-        shutil.rmtree(config_dirpath, ignore_errors=True)
-        os.makedirs(config_dirpath)
-        self.config_dirpath = config_dirpath
 
         # docker-compose file to write
         self.definition = []
@@ -152,13 +159,13 @@ class DockerComposeGenerator:
     def flush(self):
         for service, filename, content in self.svc_config_files:
             json_content = json.dumps(content, indent=2)
-            dirpath = f'{self.config_dirpath}/{service}'
+            dirpath = f'{self.svc_config_dirpath}/{service}'
             filepath = f'{dirpath}/{filename}.json'
             os.makedirs(dirpath, exist_ok=True)
             with open(filepath, 'w') as file:
                 file.write(json_content)
 
-        print(self)
+        print(str(self))
 
     def __str__(self):
         return '\n'.join(self.definition)
@@ -173,7 +180,7 @@ class DockerComposeGenerator:
     def pop(self):
         self.definition.pop()
 
-    # File helpers
+    # Sources
     def get_svc_sources(self, name, svc_name):
         if name in self.sources:
             return self.sources[name]
@@ -204,6 +211,26 @@ class DockerComposeGenerator:
 
         self.sources[name] = sources
         return sources
+
+    def get_client_sources(self):
+        sources = 0
+        for src_name, src_definition in self.pipeline.items():
+            outputs = src_definition['outputs']
+            is_source = any(
+                [bool(output.get('sink', False)) for output in outputs])
+            if not is_source:
+                continue
+
+            if src_definition.get('unique'):
+                sources += 1
+                continue
+
+            workers = self.scale[src_name]
+            sources += workers
+
+        return sources
+
+    # File helpers
 
     def add_svc_file(self, svc_name, filename, content):
         self.svc_config_files.append((svc_name, filename, content))
@@ -255,21 +282,22 @@ class DockerComposeGenerator:
 
         self.add_svc_file(name, MIDDLEWARE_CONFIG_NAME, middleware)
 
-    # Docker compose sections
+    # Definitions
 
-    def mount_config_volume(self, name):
-        svc_config_dirpath = f'{self.config_dirpath}/{name}'
+    def add_client_definition(self):
+        log_level = self.log_level if self.log_level else 'info'
+        self.write(f'{CLIENT_NAME}:', 1)
+        self.add_image(CLIENT_NAME)
+        self.add_container_name(CLIENT_NAME)
+        self.add_env_vars(log_level)
         self.write('volumes:', 2)
-        self.write(f'- {svc_config_dirpath}:{CONFIG_MOUNTING_DIRPATH}:ro', 3)
-
-    def add_image(self, image):
-        formatted_image = f'{self.prefix}{image}:{IMAGE_TAG}'
-        self.write(f'image: {formatted_image}', 2)
-
-    def add_container_name(self, name, i=None):
-        suffix = f'_{i}' if i else ''
-        container_name = f'{self.prefix}{name}{suffix}'
-        self.write(f'container_name: {container_name}', 2)
+        self.write(
+            f'- {self.data_dirpath}:{DATA_MOUNTING_DIRPATH}:ro', 3)
+        self.write(
+            f'- {self.client_config_dirpath}:{CONFIG_MOUNTING_DIRPATH}:ro', 3)
+        self.write(
+            f'- {self.out_dirpath}:{OUT_MOUNTING_DIRPATH}:rw', 3)
+        self.write('')
 
     def add_svc_definition(self, name, definition, i=None):
         name_suffix = f'_{i}' if i else ''
@@ -287,6 +315,22 @@ class DockerComposeGenerator:
         self.mount_config_volume(name)
         self.add_svc_env_vars(definition)
 
+    # Docker compose sections
+
+    def mount_config_volume(self, name):
+        svc_config_dirpath = f'{self.svc_config_dirpath}/{name}'
+        self.write('volumes:', 2)
+        self.write(f'- {svc_config_dirpath}:{CONFIG_MOUNTING_DIRPATH}:ro', 3)
+
+    def add_image(self, image):
+        formatted_image = f'{self.prefix}{image}:{IMAGE_TAG}'
+        self.write(f'image: {formatted_image}', 2)
+
+    def add_container_name(self, name, i=None):
+        suffix = f'_{i}' if i else ''
+        container_name = f'{self.prefix}{name}{suffix}'
+        self.write(f'container_name: {container_name}', 2)
+
     def add_svc_env_vars(self, definition):
         log_level = definition.get('log_level', self.log_level)
         self.add_env_vars(log_level)
@@ -301,18 +345,31 @@ class DockerComposeGenerator:
 
     # Service wrappers
 
+    def add_client_files(self):
+        # Common config
+        shutil.copyfile(
+            f'{self.config_dirpath}/{COMMON_CONFIG_FILENAME}',
+            f'{self.client_config_dirpath}/{COMMON_CONFIG_FILENAME}'
+        )
+
+        # Ingestion config
+        shutil.copyfile(
+            f'{self.config_dirpath}/{INGESTION_CONFIG_FILENAME}',
+            f'{self.client_config_dirpath}/{INGESTION_CONFIG_FILENAME}'
+        )
+
+        # Sink config
+        sink = {
+            "sources": self.get_client_sources()
+        }
+        json_content = json.dumps(sink, indent=2)
+        sink_filepath = f'{self.client_config_dirpath}/{SINK_CONFIG_FILENAME}'
+        with open(sink_filepath, 'w') as file:
+            file.write(json_content)
+
     def add_client(self):
-        log_level = self.log_level if self.log_level else 'info'
-        self.write(f'{CLIENT_NAME}:', 1)
-        self.add_image(CLIENT_NAME)
-        self.add_container_name(CLIENT_NAME)
-        self.add_env_vars(log_level)
-        self.write('volumes:', 2)
-        self.write(
-            f'- {self.data_dirpath}:{DATA_MOUNTING_DIRPATH}:ro', 3)
-        self.write(
-            f'- {self.out_dirpath}:{OUT_MOUNTING_DIRPATH}:rw', 3)
-        self.write('')
+        self.add_client_definition()
+        self.add_client_files()
 
     def add_group_broker(self, svc_name, definition, count):
         # Transparet behaviour to the outside: reachable at svc_name
