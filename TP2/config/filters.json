@@ -1,5 +1,8 @@
 {
   "aggr_avg_post_sent": {
+    "config": {
+      "min_comments": 1000
+    },
     "inputs": [
       { "id": "post_url", "data": ["p_id", "img_url"], "affinity_key": "p_id" },
       {

@@ -303,14 +303,11 @@ class DockerComposeGenerator:
         name_suffix = f'_{i}' if i else ''
         self.write(f'{name}{name_suffix}:', 1)
 
-        if 'base' in definition:
-            base_image = definition['base']['image']
-            base_config = definition['base']['config']
-            self.add_svc_file(name, BASE_FILTER_CONFIG_NAME, base_config)
-            self.add_image(base_image)
-        else:
-            self.add_image(name)
+        if 'config' in definition:
+            config = definition['config']
+            self.add_svc_file(name, BASE_FILTER_CONFIG_NAME, config)
 
+        self.add_image(name)
         self.add_container_name(name, i)
         self.mount_config_volume(name)
         self.add_svc_env_vars(definition)

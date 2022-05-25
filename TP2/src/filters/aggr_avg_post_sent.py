@@ -1,6 +1,9 @@
 import logging
 from common.filter import BaseFilter
-from common.utils import init_log
+from common.utils import init_log, read_json
+
+
+FILTER_CONFIG_FILEPATH = 'config/filter.json'
 
 
 class Filter(BaseFilter):
@@ -11,6 +14,10 @@ class Filter(BaseFilter):
             "post_sentiment": self.__post_sentiment_handler
         }
         self.__posts = {}
+
+        # Custom config
+        config = read_json(FILTER_CONFIG_FILEPATH)
+        self.__min_comments = int(config['min_comments'])
 
     def __post_url_handler(self, data):
         _, avg, count = self.__posts.get(data.p_id, (None, None, 0))
@@ -47,8 +54,8 @@ class Filter(BaseFilter):
     def __filter_valid_posts(self):
         result = {}
         for p_id, post in self.__posts.items():
-            url, avg, _ = post
-            if url is None or avg is None:
+            url, avg, count = post
+            if url is None or avg is None or count < self.__min_comments:
                 continue
             result[p_id] = post
 
