@@ -4,6 +4,7 @@ Desarrollo de un sistema distribuido que realiza análisis de posts de Reddit so
 
 - **Temas:** Middleware y Coordinación de Procesos
 - [Enunciado](./docs/Enunciado.pdf)
+- [Informe](./docs/Informe.pdf)
 
 # Instrucciones de uso
 
