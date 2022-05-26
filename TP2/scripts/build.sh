@@ -3,18 +3,27 @@
 # Exit when any command fails
 set -e
 
-# Colors
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-CYAN='\033[0;36m'
-CYANB='\033[1;36m'
-NC='\033[0m'
-
-# Special chars
-CHECK="${GREEN}\xE2\x9C\x93${NC}"
-
 # Config
 VERBOSE="${VERBOSE:-false}"
+PRETTY="${PRETTY:-true}"
+
+# Colors and especial formatting
+
+if ${PRETTY}; then
+    GREEN='\033[0;32m'
+    RED='\033[0;31m'
+    CYAN='\033[0;36m'
+    CYANB='\033[1;36m'
+    NC='\033[0m'
+    CHECK="${GREEN}\xE2\x9C\x93${NC}"
+else
+    GREEN=''
+    RED=''
+    CYAN=''
+    CYANB=''
+    NC=''
+    CHECK='done.'
+fi
 
 # Functions
 

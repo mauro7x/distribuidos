@@ -4,7 +4,7 @@ PWD := $(shell pwd)
 default: build
 
 build:
-	VERBOSE="${VERBOSE}" ./scripts/build.sh
+	VERBOSE="${VERBOSE}" BORING="${BORING}" ./scripts/build.sh
 .PHONY: build
 
 apply:
