@@ -23,8 +23,8 @@ class IngestionConfig(NamedTuple):
 
 def run(config: IngestionConfig):
     logging.info(f'[{config.name}] Started')
-    context = zmq.Context()
-    pusher = Pusher(context, config.batch_size, config.protocol)
+    zmq_context = zmq.Context()
+    pusher = Pusher(zmq_context, config.batch_size, config.protocol)
     pusher.connect(config.host, config.port)
 
     # Send data

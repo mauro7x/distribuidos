@@ -92,8 +92,8 @@ def handle_highest_avg_sentiment_meme(context: Context, data: bytes):
 def run(config: SinkConfig):
     signal.signal(signal.SIGTERM, sigterm_handler)
     logging.debug(f'[{config.name}] Started')
-    context = zmq.Context()
-    puller = Puller(context, config.protocol)
+    zmq_context = zmq.Context()
+    puller = Puller(zmq_context, config.protocol)
     puller.bind(config.port)
     context = Context()
     handlers = [
@@ -107,6 +107,7 @@ def run(config: SinkConfig):
         process_msgs(puller, context, handlers, config)
     except KeyboardInterrupt:
         stopped = True
+        zmq_context.destroy(0)
     finally:
         handle_results(context, stopped)
 

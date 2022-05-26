@@ -2,11 +2,10 @@ from abc import ABC, abstractclassmethod
 from typing import List
 import zmq
 import logging
-import signal
 import common.mom.constants as const
 from common.mom.transport import Puller
 from common.mom.types import MessageType, RawDataMessage
-from common.utils import read_json, sigterm_handler
+from common.utils import read_json
 from common.csv import CSVParser
 
 
@@ -16,7 +15,6 @@ LOG_NAME = 'BaseMOM'
 class BaseMOM(ABC):
     def __init__(self):
         self._context: zmq.Context = zmq.Context()
-        signal.signal(signal.SIGTERM, sigterm_handler)
         self.__parse_config()
         self.__csv_parser = CSVParser()
         self.__eofs_received = 0
@@ -33,6 +31,9 @@ class BaseMOM(ABC):
     @abstractclassmethod
     def recv(self):
         pass
+
+    def stop(self):
+        self._context.destroy(0)
 
     # Protected
 

@@ -1,6 +1,8 @@
 import logging
 from abc import ABC, abstractclassmethod
+import signal
 from common.mom.worker import BaseMOM
+from common.utils import sigterm_handler
 
 
 class BaseWrapper(ABC):
@@ -11,6 +13,7 @@ class BaseWrapper(ABC):
         logging.debug('Initialized')
 
     def run(self):
+        signal.signal(signal.SIGTERM, sigterm_handler)
         try:
             logging.info('Running...')
             while self.__running:
@@ -21,9 +24,9 @@ class BaseWrapper(ABC):
                     self._handle_eof()
                     self.__running = False
         except KeyboardInterrupt:
-            logging.info('Stopped')
+            self._mom.stop()
 
-    # Abstract
+    # Protected
 
     @abstractclassmethod
     def _handle_msg(self, msg):
