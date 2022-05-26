@@ -36,3 +36,10 @@ Luego de cualquier modificación será necesario correr `make apply` para genera
 ## Datos de entrada
 
 Se requiere un `.csv` con posts y un `.csv` con comentarios para que el sistema funcione. Estos deben ser ingestados al mismo, configurando el filepath desde `config/ingestion.json`. Por default, está configurado en `data/posts.csv` y `data/comments.csv`.
+
+# Problemas conocidos
+
+Finalizado el desarrollo el proyecto, quedaron pendientes dos problemas para los que no se encontró solución:
+
+1. **Graceful quit con Ctr-C:** a veces algún filtro no recibe la señal de salida. La primer linea del handler es un `logging.info` y no se observa este log en el container, por lo que por alguna razón que desconozco estoy perdiendo la señal.
+2. **Graceful quit mediante propagación de EOF:** de manera indeterminística observé que en algunas corridas, sucedía un fenómeno que no debería ser posible según la documentación. Cuando un proceso recibe la cantidad de EOFs necesarios para saber que los filtros superiores terminaron, propaga un EOF por el pipeline y sale. Antes de salir, cierra todos los sockets abiertos y hace un `context.term()` del contexto de pyzmq. Según la documentación de esta función, debería bloquear hasta que todos los paquetes hayan sido correctamente transferidos a la capa de red. Sin embargo se observa que no siempre es así, que en ciertas ocasiones no conocidas la función no bloquea, por lo que el container se destruye antes de que el EOF sea enviado, generando que el resto se queden esperando el EOF también.
