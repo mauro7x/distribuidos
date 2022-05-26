@@ -24,7 +24,7 @@ down:
 .PHONY: down
 
 logs:
-	docker-compose logs
+	docker-compose logs -f
 .PHONY: logs
 
 run: down

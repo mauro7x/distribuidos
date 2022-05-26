@@ -1,8 +1,9 @@
 
 import logging
+import signal
 from multiprocessing import Process
 from time import sleep, time
-
+from typing import List
 import constants as const
 from common.utils import init_log, read_json
 
@@ -14,6 +15,7 @@ from sink import run as sink_runner, SinkConfig
 class Client:
     def __init__(self):
         logging.debug('Initializing...')
+        signal.signal(signal.SIGTERM, self.__handle_sigterm)
         self.__spawn_processes()
         self.__start_sink()
         self.__wait_server_readiness()
@@ -34,7 +36,7 @@ class Client:
             raise Exception('Could not spawn processes: invalid config')
 
     def __spawn_ingestion(self):
-        self.__ingestion_processes = []
+        self.__ingestion_processes: List[Process] = []
         config = read_json(const.INGESTION_CONFIG_FILEPATH)
         common_config = read_json(const.COMMON_CONFIG_FILEPATH)
 
@@ -78,6 +80,7 @@ class Client:
         self.__ingestion_processes.append(comment_ingestion)
 
     def __spawn_sink(self):
+        self.__sink_processes: List[Process] = []
         config = read_json(const.SINK_CONFIG_FILEPATH)
         common_config = read_json(const.COMMON_CONFIG_FILEPATH)
 
@@ -90,7 +93,7 @@ class Client:
                 int(config['sources'])
             ),)
         )
-        self.__sink_processes = [sink]
+        self.__sink_processes.append(sink)
 
     def __start_ingestion(self):
         logging.debug('Starting ingestion...')
@@ -106,6 +109,21 @@ class Client:
         logging.debug('Waiting for server readiness...')
         # TODO: Replace with signal
         sleep(5)
+
+    def __handle_sigterm(self, *args):
+        self.__stop()
+
+    def __stop(self):
+        for ingestion in self.__ingestion_processes:
+            if ingestion.is_alive():
+                ingestion.kill()
+
+        for sink in self.__sink_processes:
+            if sink.is_alive():
+                sink.terminate()
+            sink.join()
+
+        exit(0)
 
     def __join(self):
         processes = [*self.__ingestion_processes, *self.__sink_processes]

@@ -3,7 +3,6 @@ import zmq
 import csv
 from io import TextIOWrapper
 from typing import NamedTuple
-
 import common.mom.constants as const
 from common.mom.transport import Pusher
 from common.csv import CSVParser
