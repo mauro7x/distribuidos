@@ -16,7 +16,6 @@ class WorkerMOM(BaseMOM):
     def __init__(self):
         logging.debug(f'[{LOG_NAME}] Initializing')
         super().__init__()
-        self.__eofs_received = 0
         logging.debug(f'[{LOG_NAME}] Initialized')
 
     def __del__(self):

@@ -3,9 +3,6 @@ from common.mom.broker import BrokerMOM
 from common.wrapper import BaseWrapper
 
 
-LOG_NAME = 'BrokerMOM'
-
-
 class Broker(BaseWrapper):
     def __init__(self):
         super().__init__()

@@ -14,7 +14,6 @@ class BrokerMOM(BaseMOM):
     def __init__(self):
         logging.debug(f'[{LOG_NAME}] Initializing...')
         super().__init__()
-        self.__running = True
         logging.debug(f'[{LOG_NAME}] Initialized')
 
     def __del__(self):
