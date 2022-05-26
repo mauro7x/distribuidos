@@ -11,4 +11,4 @@ ARG COMMON_PATH
 COPY ${DIR_PATH} /
 COPY ${COMMON_PATH} /common
 
-CMD ["python3", "main.py"]
+ENTRYPOINT ["python3", "main.py"]
