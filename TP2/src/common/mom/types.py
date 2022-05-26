@@ -17,6 +17,9 @@ class Message(NamedTuple):
     type: MessageType
     data: Any
 
+    def as_bytes(self) -> bytes:
+        return self.type + self.data
+
 
 class RawDataMessage:
     def __init__(self, raw_data: str):

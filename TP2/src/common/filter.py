@@ -32,7 +32,7 @@ class BaseFilter(BaseWrapper):
     def _send(self, data):
         send_fn = self._mom.send_bytes \
             if isinstance(data, bytes) \
-            else self._mom.send_csv
+            else self._mom.send_data_row
         send_fn(data)
 
     def _eof_handler(self):

@@ -3,8 +3,9 @@ from typing import List
 import zmq
 import logging
 import common.mom.constants as const
-from common.mom.transport import Puller
-from common.mom.types import MessageType, RawDataMessage
+from common.mom.transport.base import Puller as SimplePuller
+from common.mom.transport.batching import BatchingPuller
+from common.mom.types import Message, MessageType
 from common.utils import read_json
 from common.csv import CSVParser
 
@@ -13,15 +14,15 @@ LOG_NAME = 'BaseMOM'
 
 
 class BaseMOM(ABC):
-    def __init__(self):
+    def __init__(self, batching=True):
         self._context: zmq.Context = zmq.Context()
         self.__parse_config()
         self.__csv_parser = CSVParser()
         self.__eofs_received = 0
 
         # Init zmq pullers and pushers
-        self.__init_puller()
-        self._init_pushers()
+        self.__init_puller(batching)
+        self._init_pushers(batching)
 
     def __del__(self):
         self._puller.close()
@@ -42,7 +43,7 @@ class BaseMOM(ABC):
         pass
 
     @abstractclassmethod
-    def _init_pushers(self):
+    def _init_pushers(self, batching: bool):
         pass
 
     @abstractclassmethod
@@ -55,16 +56,16 @@ class BaseMOM(ABC):
     def _unpack(self, csv_line: str):
         return self.__csv_parser.decode(csv_line)
 
-    def _recv_data_msg(self) -> RawDataMessage:
+    def _recv_data_msg(self) -> Message:
         while True:
             msg = self._puller.recv()
-            if msg.type == MessageType.EOF.value:
+            if msg.type == MessageType.DATA.value:
+                return msg
+            elif msg.type == MessageType.EOF.value:
                 self.__eofs_received += 1
                 if self.__eofs_received == self._sources:
                     self.__eofs_received = 0
                     return None
-            elif msg.type == MessageType.DATA.value:
-                return msg.data
             else:
                 raise Exception('Invalid message received from puller')
 
@@ -91,6 +92,7 @@ class BaseMOM(ABC):
             f'\nBatch size: {self._batch_size}'
         )
 
-    def __init_puller(self):
-        self._puller = Puller(self._context, self._protocol)
+    def __init_puller(self, batching: bool):
+        PullerFactory = BatchingPuller if batching else SimplePuller
+        self._puller = PullerFactory(self._context, self._protocol)
         self._puller.bind(self._port)

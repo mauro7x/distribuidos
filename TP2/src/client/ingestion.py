@@ -4,7 +4,7 @@ import csv
 from io import TextIOWrapper
 from typing import NamedTuple
 import common.mom.constants as const
-from common.mom.transport import Pusher
+from common.mom.transport.batching import BatchingPusher as Pusher
 from common.csv import CSVParser
 
 
@@ -24,7 +24,7 @@ class IngestionConfig(NamedTuple):
 def run(config: IngestionConfig):
     logging.info(f'[{config.name}] Started')
     zmq_context = zmq.Context()
-    pusher = Pusher(zmq_context, config.batch_size, config.protocol)
+    pusher = Pusher(zmq_context, config.protocol, config.batch_size)
     pusher.connect(config.host, config.port)
 
     # Send data
@@ -52,5 +52,5 @@ def send(file: TextIOWrapper, pusher: Pusher, config: IngestionConfig):
 
         encoded = parser.encode(data)
         msg = f'{config.msg_idx}{const.MSG_SEP}{encoded}'
-        pusher.send_csv(msg)
+        pusher.send_data_row(msg)
         msgs_sent += 1

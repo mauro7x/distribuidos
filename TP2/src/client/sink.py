@@ -6,7 +6,7 @@ from typing import List, NamedTuple
 from dataclasses import dataclass
 from constants import DEFAULT_EXTENSION
 from common.csv import CSVParser
-from common.mom.transport import Puller
+from common.mom.transport.batching import BatchingPuller as Puller
 from common.mom.types import MessageType, RawDataMessage
 from common.utils import sigterm_handler
 
