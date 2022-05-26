@@ -1,6 +1,8 @@
 import json
 import logging
 import os
+import signal
+
 
 LOGGING_LEVEL_ENV_KEY = 'LOG_LEVEL'
 
@@ -20,3 +22,8 @@ def init_log():
         # datefmt='%Y-%m-%d %H:%M:%S', # <--- noise for practical purposes
         datefmt='%H:%M:%S',
     )
+
+
+def sigterm_handler(*args):
+    logging.info('<SIGTERM received>')
+    signal.raise_signal(signal.SIGINT)

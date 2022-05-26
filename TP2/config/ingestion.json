@@ -2,7 +2,7 @@
   "posts": {
     "src_filepath": "data/posts.csv",
     "host": "post_ingestion",
-    "print_info_every_msgs": 1000000,
+    "print_info_every_msgs": 100000,
     "skip_headers": true,
     "limit": 0,
     "msg_idx": 0
@@ -10,7 +10,7 @@
   "comments": {
     "src_filepath": "data/comments.csv",
     "host": "comment_ingestion",
-    "print_info_every_msgs": 1000000,
+    "print_info_every_msgs": 100000,
     "skip_headers": true,
     "limit": 0,
     "msg_idx": 0

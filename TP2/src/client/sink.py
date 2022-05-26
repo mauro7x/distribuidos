@@ -1,13 +1,14 @@
 import logging
 import os
 import zmq
+import signal
 from typing import List, NamedTuple
 from dataclasses import dataclass
-
+from constants import DEFAULT_EXTENSION
 from common.csv import CSVParser
 from common.mom.transport import Puller
 from common.mom.types import MessageType, RawDataMessage
-
+from common.utils import sigterm_handler
 
 NAME = '[Sink]'
 OUT_DIRPATH = 'out'
@@ -31,27 +32,34 @@ class Context:
     file_extension = None
 
 
-def handle_results(context: Context):
+def handle_results(context: Context, stopped=False):
+
     # Student memes
     if context.student_memes_file:
+        context.student_memes_file.close()
         student_memes_msg = \
             f'>>> Student memes list saved to "{STUDENT_MEMES_FILEPATH}"'
-        context.student_memes_file.close()
     else:
         student_memes_msg = '>>> No student memes found!'
 
     # Best meme
-    if context.best_meme_file and context.file_extension:
+    if context.best_meme_file:
         context.best_meme_file.close()
-        final_filepath = f'{FINAL_MEME_FILENAME}{context.file_extension}'
+        extension = context.file_extension \
+            if context.file_extension else DEFAULT_EXTENSION
+        final_filepath = f'{FINAL_MEME_FILENAME}{extension}'
         os.rename(TEMP_MEME_FILEPATH, final_filepath)
         meme_msg = f'>>> Best meme saved to "{final_filepath}"'
     else:
         meme_msg = '>>> Best meme not present!'
 
+    if stopped:
+        logging.warn('Stopped.')
+        return
+
     # Log results
     logging.info(
-        'Finished, results:'
+        f'Finished, results:'
         f'\n>>> Average posts score: {context.avg_score}'
         f'\n{meme_msg}'
         f'\n{student_memes_msg}'
@@ -82,6 +90,7 @@ def handle_highest_avg_sentiment_meme(context: Context, data: bytes):
 
 
 def run(config: SinkConfig):
+    signal.signal(signal.SIGTERM, sigterm_handler)
     logging.debug(f'[{config.name}] Started')
     context = zmq.Context()
     puller = Puller(context, config.protocol)
@@ -92,9 +101,12 @@ def run(config: SinkConfig):
         handle_student_meme,
         handle_file_extension
     ]
-
-    process_msgs(puller, context, handlers, config)
-    handle_results(context)
+    try:
+        process_msgs(puller, context, handlers, config)
+    except KeyboardInterrupt:
+        stopped = True
+    finally:
+        handle_results(context, stopped)
 
     logging.debug(f'[{config.name}] Finished')
 
