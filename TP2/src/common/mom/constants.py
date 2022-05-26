@@ -5,3 +5,6 @@ COMMON_CONFIG_FILEPATH = f'{CONFIG_DIRPATH}/common.json'
 
 # Data message serialization
 MSG_SEP = ' '
+
+# Transport
+HWM_ZMQ = 10

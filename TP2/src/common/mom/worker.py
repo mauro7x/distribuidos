@@ -5,7 +5,7 @@ from common.utils import read_json
 from common.mom.base import BaseMOM
 from common.mom.types import \
     Sendable, Input, Output, RawDataMessage, DataMessage
-from common.mom.transport import Pusher
+from common.mom.transport.batching import BatchingPusher as Pusher
 import common.mom.constants as const
 
 
@@ -49,7 +49,7 @@ class WorkerMOM(BaseMOM):
     def recv(self) -> DataMessage:
         msg = self._recv_data_msg()
         if msg:
-            return self.__parse_msg(msg)
+            return self.__parse_msg(msg.data)
 
     def _parse_custom_config(self):
         logging.debug(f'[{LOG_NAME}] Parsing configuration...')
