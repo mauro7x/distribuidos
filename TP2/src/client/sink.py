@@ -101,6 +101,8 @@ def run(config: SinkConfig):
         handle_student_meme,
         handle_file_extension
     ]
+
+    stopped = False
     try:
         process_msgs(puller, context, handlers, config)
     except KeyboardInterrupt:

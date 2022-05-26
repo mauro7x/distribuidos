@@ -1,7 +1,7 @@
 {
   "aggr_avg_post_sent": 3,
   "comment_ingestion": 1,
-  "extract_post_id": 1,
+  "extract_post_id": 2,
   "filter_post_by_score": 1,
   "filter_student_post": 1,
   "filter_valid_post_by_url": 2,

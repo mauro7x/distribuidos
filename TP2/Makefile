@@ -19,7 +19,7 @@ up:
 .PHONY: up
 
 down:
-	docker-compose kill
+	docker-compose stop
 	docker-compose down
 .PHONY: down
 
