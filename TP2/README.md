@@ -35,4 +35,4 @@ Luego de cualquier modificación será necesario correr `make apply` para genera
 
 ## Datos de entrada
 
-Se requiere un `.csv` con posts y un `.csv` con comentarios para que el sistema funcione. Estos deben ser ingestados al mismo, configurando el filepath a los mismos desde `config/ingestion.json`. Por default, está configurado en `data/posts.csv` y `data/comments.csv`.
+Se requiere un `.csv` con posts y un `.csv` con comentarios para que el sistema funcione. Estos deben ser ingestados al mismo, configurando el filepath desde `config/ingestion.json`. Por default, está configurado en `data/posts.csv` y `data/comments.csv`.
