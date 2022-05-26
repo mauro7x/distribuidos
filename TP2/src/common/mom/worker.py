@@ -21,14 +21,14 @@ class WorkerMOM(BaseMOM):
     def __del__(self):
         super().__del__()
 
-    def send_csv(self, result: Sendable):
+    def send_data_row(self, result: Sendable):
         for output in self.__csv_outputs:
             pusher = self.__pushers[output.host]
             serialized = self.__serialize(
                 output.msg_idx, output.data, result)
             logging.debug(
                 f'[{LOG_NAME}] Sending "{serialized}" to {output.host}')
-            pusher.send_csv(serialized)
+            pusher.send_data_row(serialized)
 
     def send_bytes(self, data: bytes):
         for output in self.__bytearray_outputs:
@@ -71,7 +71,7 @@ class WorkerMOM(BaseMOM):
             f'\nOutputs: {pretty_outputs}'
         )
 
-    def _init_pushers(self):
+    def _init_pushers(self, _):
         self.__pushers: Dict[str, Pusher] = {}
 
         csv_hosts = [output.host for output in self.__csv_outputs]
@@ -82,7 +82,7 @@ class WorkerMOM(BaseMOM):
             if host in self.__pushers:
                 continue
 
-            pusher = Pusher(self._context, self._batch_size, self._protocol)
+            pusher = Pusher(self._context, self._protocol, self._batch_size)
             pusher.connect(host, self._port)
             self.__pushers[host] = pusher
 

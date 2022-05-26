@@ -48,6 +48,7 @@ HASH_SEED_VALUE = 42
 
 # Other
 LOGGING_LEVEL_ENV_KEY = 'LOG_LEVEL'
+AFFINITY_ENABLED_ENV_KEY = 'AFFINITY'
 
 
 # Auxiliar functions
@@ -181,6 +182,7 @@ class DockerComposeGenerator:
         self.definition.pop()
 
     # Sources
+
     def get_svc_sources(self, name, svc_name):
         if name in self.sources:
             return self.sources[name]
@@ -230,6 +232,15 @@ class DockerComposeGenerator:
 
         return sources
 
+    # Affinity
+
+    def has_affinity_messages(self, definition):
+        inputs = definition['inputs']
+        for input in inputs:
+            if input.get('affinity_key'):
+                return True
+        return False
+
     # File helpers
 
     def add_svc_file(self, svc_name, filename, content):
@@ -243,12 +254,16 @@ class DockerComposeGenerator:
         common['sources'] = self.get_svc_sources(name, svc_name)
         self.add_svc_file(name, COMMON_CONFIG_NAME, common)
 
-    def add_broker_middleware_file(self, name, definition, svc_name, count):
+    def add_broker_middleware_file(
+        self, name, definition, svc_name, count, affinity
+    ):
         middleware = {
             'base_hostname': svc_name,
-            'count': count,
-            'inputs': definition['inputs']
+            'count': count
         }
+
+        if affinity:
+            middleware['inputs'] = definition['inputs']
 
         self.add_svc_file(name, MIDDLEWARE_CONFIG_NAME, middleware)
 
@@ -377,7 +392,11 @@ class DockerComposeGenerator:
         self.add_container_name(name)
         self.mount_config_volume(name)
         self.add_svc_env_vars(definition)
-        self.add_broker_middleware_file(name, definition, svc_name, count)
+        affinity = self.has_affinity_messages(definition)
+        self.write(f'- {AFFINITY_ENABLED_ENV_KEY}={str(affinity).upper()}', 3)
+        # Files
+        self.add_broker_middleware_file(
+            name, definition, svc_name, count, affinity)
         self.add_common_config_file(name, svc_name)
 
     def add_svc_group(self, name, definition, count):

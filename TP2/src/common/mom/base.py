@@ -22,7 +22,7 @@ class BaseMOM(ABC):
 
         # Init zmq pullers and pushers
         self.__init_puller(batching)
-        self._init_pushers()
+        self._init_pushers(batching)
 
     def __del__(self):
         self._puller.close()
@@ -43,7 +43,7 @@ class BaseMOM(ABC):
         pass
 
     @abstractclassmethod
-    def _init_pushers(self):
+    def _init_pushers(self, batching: bool):
         pass
 
     @abstractclassmethod

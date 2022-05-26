@@ -1,12 +1,22 @@
+import os
 from common.utils import init_log
-from common.mom.broker import BrokerMOM
+from common.mom.broker.roundrobin import RRBrokerMOM
+from common.mom.broker.affinity import AffinityBrokerMOM
 from common.wrapper import BaseWrapper
+
+
+AFFINITY_ENABLED_ENV_KEY = 'AFFINITY'
 
 
 class Broker(BaseWrapper):
     def __init__(self):
         super().__init__()
-        self._mom = BrokerMOM()
+        affinity_env_value = os.getenv(AFFINITY_ENABLED_ENV_KEY, 'false')
+        affinity = affinity_env_value.lower() == 'true'
+        if affinity:
+            self._mom = AffinityBrokerMOM()
+        else:
+            self._mom = RRBrokerMOM()
 
     # Base class implementations
 

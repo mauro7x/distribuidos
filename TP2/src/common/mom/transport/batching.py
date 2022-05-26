@@ -22,17 +22,17 @@ class BatchingPuller(Puller):
         msg = self._recv_msg()
 
         if msg.type == MessageType.EOF.value \
-                or type == MessageType.BYTEARRAY.value:
+                or msg.type == MessageType.BYTEARRAY.value:
             self.__buffer.append(msg)
         elif msg.type == MessageType.DATA.value:
             decoded = msg.data.decode('utf-8')
             batch = json.loads(decoded)
             for data_msg in batch:
                 data = RawDataMessage(data_msg)
-                msg = Message(type, data)
+                msg = Message(msg.type, data)
                 self.__buffer.append(msg)
         else:
-            raise Exception(f'Unknown message type received: {type}')
+            raise Exception(f'Unknown message type received: {msg.type}')
 
 
 class BatchingPusher(Pusher):
