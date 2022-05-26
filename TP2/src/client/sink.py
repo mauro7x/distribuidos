@@ -10,7 +10,7 @@ from common.mom.transport.batching import BatchingPuller as Puller
 from common.mom.types import MessageType, RawDataMessage
 from common.utils import sigterm_handler
 
-NAME = '[Sink]'
+
 OUT_DIRPATH = 'out'
 TEMP_MEME_FILEPATH = f'{OUT_DIRPATH}/best_meme.downloading'
 FINAL_MEME_FILENAME = f'{OUT_DIRPATH}/best_meme'

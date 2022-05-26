@@ -6,7 +6,6 @@ from common.filter import BaseFilter
 from common.utils import init_log
 
 
-DOWNLOADED_FILEPATH = '/tmp/downloaded.png'
 CHUNK_SIZE = 1024
 
 
