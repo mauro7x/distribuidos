@@ -23,18 +23,21 @@ down:
 	docker-compose down
 .PHONY: down
 
+kill:
+	docker-compose kill >/dev/null 2>&1
+	docker-compose down >/dev/null 2>&1
+.PHONY: kill
+
 logs:
 	docker-compose logs -f
 .PHONY: logs
 
-run:
-	docker-compose stop >/dev/null 2>&1
-	docker-compose down >/dev/null 2>&1
+run: kill
 	docker-compose up
 	docker-compose down
 .PHONY: run
 
-clean:
+clean: kill
 	rm -rf ./.temp
 	rm -rf ./docker-compose.yaml
 	docker images --format '{{.Repository}}' | grep tp2_ | xargs docker rmi
