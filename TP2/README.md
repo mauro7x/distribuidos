@@ -4,3 +4,34 @@ Desarrollo de un sistema distribuido que realiza análisis de posts de Reddit so
 
 - **Temas:** Middleware y Coordinación de Procesos
 - [Enunciado](./docs/Enunciado.pdf)
+
+# Instrucciones de uso
+
+Se provee de un `Makefile` para poder levantar el sistema, con sus principales comandos:
+
+- `make build` para buildear las imágenes de docker.
+  - `VERBOSE`: variable de entorno para decidir si mostrar output. _Default: false._
+  - `PRETTY`: variable de entorno para colorear el output. _Default: true._
+- `make apply` para aplicar la configuración (ver [Configuración](#configuración)).
+  - `LOG_LEVEL`: variable de entorno para controlar el nivel de logging. Valores posibles: `debug`, `info`, `warning`, `error`, `critical`. _Default: `warning`._
+- `make run` para una corrida automatizada del sistema _(up + down)_.
+- `make up` para iniciar el sistema.
+- `make down` para destruirlo.
+- `make logs` para attachearse a los logs de todos los containers.
+- `make clean` para limpiar los archivos y las imágenes generadas.
+
+## Configuración
+
+El sistema queda definido por los archivos de configuración de `/config`:
+
+- Archivos modificables
+  - `scale.json`: permite escalar los servicios que lo soportan.
+  - `ingestion.json`: permite modificar distintos parámetros del envío de información.
+  - `common.json`: permite modificar distintos parámetros comunes como el tamaño de los batches.
+- **Archivo sólo lectura** `filters.json`. Definición de los distintos filtros del pipeline y cómo se comunicacn entre sí. **Advertencia:** modificar este archivo probablemente resulte en un sistema que no funciona, ya que de tal archivo depende la correcta inicialización del pipeline.
+
+Luego de cualquier modificación será necesario correr `make apply` para generar la nueva configuración del sistema.
+
+## Datos de entrada
+
+Se requiere un `.csv` con posts y un `.csv` con comentarios para que el sistema funcione. Estos deben ser ingestados al mismo, configurando el filepath a los mismos desde `config/ingestion.json`. Por default, está configurado en `data/posts.csv` y `data/comments.csv`.
