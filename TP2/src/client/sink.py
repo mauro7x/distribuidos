@@ -54,7 +54,7 @@ def handle_results(context: Context, stopped=False):
         meme_msg = '>>> Best meme not present!'
 
     if stopped:
-        logging.warn('Stopped.')
+        logging.warn('Stopped')
         return
 
     # Log results

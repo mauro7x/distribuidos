@@ -13,6 +13,7 @@ class BaseWrapper(ABC):
         logging.debug('Initialized')
 
     def run(self):
+        logging.debug('Setting signal')
         signal.signal(signal.SIGTERM, sigterm_handler)
         try:
             logging.info('Running...')
@@ -23,8 +24,11 @@ class BaseWrapper(ABC):
                 else:
                     self._handle_eof()
                     self.__running = False
+            logging.info('Finished')
         except KeyboardInterrupt:
+            logging.info('Received KeyboardInterrupt, stopping...')
             self._mom.stop()
+            logging.info('Stopped')
 
     # Protected
 

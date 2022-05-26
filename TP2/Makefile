@@ -27,7 +27,9 @@ logs:
 	docker-compose logs -f
 .PHONY: logs
 
-run: down
+run:
+	docker-compose stop >/dev/null 2>&1
+	docker-compose down >/dev/null 2>&1
 	docker-compose up
 	docker-compose down
 .PHONY: run
