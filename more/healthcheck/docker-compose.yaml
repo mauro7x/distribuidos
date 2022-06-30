@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  monitor:
+    container_name: monitor
+    build: ./monitor
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  node_1:
+    container_name: node_1
+    build: ./node
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  node_2:
+    container_name: node_2
+    build: ./node
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  node_3:
+    container_name: node_3
+    build: ./node
+    environment:
+      - PYTHONUNBUFFERED=1
