@@ -1,6 +1,4 @@
-import os
 import signal
-import time
 import zmq
 
 PORT = 3000
@@ -31,9 +29,11 @@ def main():
     socket.bind(f'tcp://*:{PORT}')
 
     while True:
-        socket.recv()
-        print(f'Received ping!')
-        socket.send(b'')
+        try:
+            socket.recv()
+            socket.send(b'')
+        except KeyboardInterrupt:
+            break
 
 
 if __name__ == "__main__":

@@ -1,7 +1,8 @@
 FROM python:3.10.4-slim
 
-# Install zmq
+# Install dependencies
 RUN pip install pyzmq
+RUN pip install docker
 
 COPY . .
 

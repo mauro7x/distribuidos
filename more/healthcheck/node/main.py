@@ -12,7 +12,7 @@ class Executor:
         self.__set_signal_handlers()
 
     def __set_signal_handlers(self):
-        handler = lambda *args: self.__term()
+        handler = lambda *_: self.__term()
         signal.signal(signal.SIGTERM, handler)
         signal.signal(signal.SIGINT, handler)
 

@@ -1,4 +1,3 @@
-import os
 from time import sleep
 import signal
 import os
@@ -10,9 +9,9 @@ def print(msg):
     _print(f'<data> {msg}')
 
 
-def sigterm_handler(*args):
+def sigterm_handler(*_):
     print('Sigterm handler')
-    os._exit(0)
+    exit(0)
 
 
 def main():
