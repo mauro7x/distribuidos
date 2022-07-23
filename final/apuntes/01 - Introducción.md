@@ -1,4 +1,4 @@
-# Introducción
+# Introducción a los Sistemas Distribuidos
 
 ## Motivación
 

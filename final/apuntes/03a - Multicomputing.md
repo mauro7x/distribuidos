@@ -1,6 +1,6 @@
 # Multicomputing
 
-## Muchos procesadores
+Muchos procesadores:
 
 -   **Comparten** mediante BUS:
     -   Network Interface Controller.
