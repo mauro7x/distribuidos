@@ -72,8 +72,8 @@
     -   Compartir información entre nodos que no se conocen.
 -   **Desventajas:**
     -   Desalienta la distribución,
-    -   genera latencia,
-    -   cuello único de botella (SPOF).
+    -   Genera latencia,
+    -   Cuello único de botella (SPOF).
 
 ### Implementación naive
 
@@ -90,16 +90,14 @@
     -   Alternativa: permitir sub-delegación.
 -   Consistencia garantizada.
 
-### Replicación de Memory Pages
-
-#### RO
+### Replicación de Memory Pages (RO)
 
 -   Favorece escenario **muchas lecturas pocas escrituras**.
 -   **Leer** => replicación en modo RO.
 -   **Escrituras coordinadas** por servidor.
     -   Ante cambios, invalida réplicas.
 
-#### R/W
+### Replicación de Memory Pages (RW)
 
 -   Servidor tiene las páginas en memoria h/ ser pedidas.
 -   Cliente toma **control total** sobre la página replicada.
@@ -125,9 +123,7 @@
 -   **Heterogeneidad de Hardware.** Adaptación.
 -   **Tolerancia a Fallos.** Permitir `at-least-once` o `at-most-once`.
 
-### Casos de estudio
-
-#### Network File System (NFS)
+## Network File System (NFS)
 
 -   Objetivo: **independencia de plataformas**.
 -   Requiere abstracción del kernel: **VFS (Virtual File System)**.
@@ -136,13 +132,13 @@
     -   Requiere invocación remota.
 -   Soporta POSIX.
 
-#### Hadoop DFS (HDFS)
+## Hadoop DFS (HDFS)
 
 -   Objetivo: **hardware de bajo costo**.
 -   Basada en GFS.
 -   No soporta POSIX => considerado **Data Storage**.
 
-##### Factores de diseño
+### Factores de diseño
 
 **"Moving computation is cheaper than moving data."** (a computation requested by an application is much more efficient if it is **executed near the data** it operates on).
 
@@ -151,7 +147,7 @@
 -   **Portabilidad.** Utiliza TCP entre servidores y RPC con clientes.
 -   **Performance.** Favorece operaciones de lectura.
 
-##### Arquitectura
+### Arquitectura
 
 -   **Master-Slave.**
 -   **Namenode:** contiene metadata de archivo, coordina los datanodes.
@@ -159,7 +155,7 @@
 -   Cliente consulta namenode por el FS y la ubicación.
     -   Luego, comunicación directa.
 
-##### Almacenamiento
+### Almacenamiento
 
 -   Bloques de **tamaño fijo**.
 -   **Replicados** en distintos datanodes.

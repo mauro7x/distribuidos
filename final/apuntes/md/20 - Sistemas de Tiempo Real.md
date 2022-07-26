@@ -62,7 +62,7 @@ Escenarios donde un sistema intenta **controlar** de forma manual o automática 
 -   **Controlador (referencia).** Sistema encargado de determinar qué hay que hacer.
 -   **Actuador.** Sensores físicos.
 
-## CIclos
+## Ciclos
 
 -   **Lazo Abierto.** Manual, no automatizado.
     -   No hay feedback.

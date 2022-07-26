@@ -27,7 +27,7 @@
 
 -   **Transactional Procedure.** Transaccionalidad respecto a datos.
     -   Conectan muchas fuentes de datos.
-    -   Acceso trasnparente al grupo.
+    -   Acceso transparente al grupo.
     -   Políticas de retries y tolerancia a fallos.
 -   **Procedure Oriented.** Servidor de funciones que se pueden invocar.
     -   Servicios stateless entre invocaciones (idempotencia).
