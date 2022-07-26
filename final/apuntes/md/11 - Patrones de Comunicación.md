@@ -1,4 +1,6 @@
-# Request-Reply
+# Patrones de Comunicación
+
+## Request-Reply
 
 -   **Sincrónico** (bloqueante) por defecto.
 -   ACK trivial (el mismo reply).
@@ -6,7 +8,7 @@
 -   **Estructura:** `messageID | requestID | operationID | argumentos`.
 -   **Tolerancia a fallos:** timeout con retries.
 
-# Publisher-Subscriber
+## Publisher-Subscriber
 
 -   Comunicación por **eventos**.
 -   Productores y consumidores.
@@ -14,24 +16,24 @@
     -   **Tópicos**: indicando tipo de evento (tópico) -> **BUS**.
     -   **Canales**: orientadas a canales específicos -> **colas**.
 
-# Pipeline
+## Pipeline
 
 -   `Source - Filter(s) - Sink`.
 -   **Flujo de datos** procesados **secuencialmente** por filtros.
 
-## Modelo de Procesamiento
+### Modelo de Procesamiento
 
 -   **Worker por Filter.** Una unidad de procesamiento a cada etapa del pipeline.
 -   **Worker por Item.** Una unidad de procesamiento a cada item.
     -   Un worker acompaña a un dato paso a paso h/ el final del pipeline.
 
-## Tipos de etapas (filtros)
+### Tipos de etapas (filtros)
 
 -   **Paralela:** cada item es **independiente** de los anteriores y posteriores, **admite paralelismo**.
 -   **Secuencial:** no puede procesar más de uno a la vez.
     -   Los puede retornar **ordenados o desordenados**.
 
-## Ventajas
+### Ventajas
 
 -   **Algoritmos online.** Iniciar procesamiento antes de que estén todos los datos.
 -   **Información infinita.**

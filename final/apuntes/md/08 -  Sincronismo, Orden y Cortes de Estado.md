@@ -10,10 +10,10 @@ Algoritmo / protocolo es sincrónico si sus **acciones pueden ser delimitadas en
 
 -   **Tiempo de Delivery:** tiempo que tarda mensaje en ser recibido luego de haber sido enviado.
 -   **Timeout de Delivery:** todo mensaje enviado va a ser recibido antes de un tiempo conocido.
--   **Steadiness (σ):** máxima diferencia entre el mínimo y máximo tiempo de delivery de cualquier mensaje recibido por un proceso.
+-   **Steadiness:** máxima diferencia entre el mínimo y máximo tiempo de delivery de cualquier mensaje recibido por un proceso.
     -   Define varianza con la cual un proceso observa que recibe los msjs.
     -   Qué tan constante es la recepción de mensajes.
--   **Tightness (𝞽):** máxima diferencia entre los tiempos de delivery para cualquier mensaje.
+-   **Tightness:** máxima diferencia entre los tiempos de delivery para cualquier mensaje.
     -   Define simultaneidad con la cual un mensaje es definido por múltiples procesos.
 
 ## Protocolos

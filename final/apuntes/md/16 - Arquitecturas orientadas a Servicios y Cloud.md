@@ -89,18 +89,18 @@ Tener una plataforma para desarrollar. Viene con:
 -   **Monitoreo.**
 -   **Escalabilidad.** Balanceo, elasticidad.
 
-# Google AppEngine
+## Google AppEngine
 
 Plataforma basada en buenas prácticas (forzadas).
 
-## Buenas prácticas
+### Buenas prácticas
 
 -   Sistemas **granulares**.
 -   Escalamiento **horizontal**.
 -   **Requests breves**, los largos son encolables.
 -   Independencia de SO / HW.
 
-## Servicios integrados
+### Servicios integrados
 
 -   Cache.
 -   Colas de mensajes.
@@ -109,7 +109,7 @@ Plataforma basada en buenas prácticas (forzadas).
 -   Herramientas de log, debugging, monitoreo.
 -   Modelos No-Relacionales (Datastore, BigTable).
 
-## Microservicios
+### Microservicios
 
 -   **Aplicaciones**:
     -   **Servicios**, pueden o no hablar entre ellos.
@@ -118,7 +118,7 @@ Plataforma basada en buenas prácticas (forzadas).
         -   Datastore.
         -   Task Queues.
 
-## Componentes
+### Componentes
 
 -   **Servicios:** módulos.
 -   **Instancias (AppServers):** servidores de backend.
@@ -131,7 +131,7 @@ Plataforma basada en buenas prácticas (forzadas).
     -   Evidentemente BUENO tener **stateless**.
     -   Si mi req tarda mucho, tiran la instancia.
 
-## Arquitectura
+### Arquitectura
 
 -   Primer Data Center.
     -   Google **front end**.
@@ -144,7 +144,7 @@ Plataforma basada en buenas prácticas (forzadas).
         -   App Servers.
             -   Instancias.
 
-## Comunicación interna
+### Comunicación interna
 
 -   **Push Queues:** cuando algo llega, la **cola es algo activo**.
     -   Puede invocar cosas.
@@ -159,7 +159,7 @@ Plataforma basada en buenas prácticas (forzadas).
     -   Todo el resto es **serverless**.
 -   Mensajes en modo **leasing** (ACK de Rabbit).
 
-## Almacenamiento
+### Almacenamiento
 
 -   Datastore.
 -   Basado en BigTable.

@@ -1,4 +1,6 @@
-# Datos en Sistemas de Gran Escala
+# Data Intensive Applications
+
+## Datos en Sistemas de Gran Escala
 
 -   **NoSQL mejor** que SQL. **Flexibilidad** de esquemas.
 -   Enfoques transaccionales:
@@ -11,7 +13,7 @@
         -   Vistas con pre-cálculos estadísticos.
         -   Agrupaciones por diferentes dimensiones.
 
-# Replicación
+## Replicación
 
 -   **Leader based:**
     -   **1 lider RW.**
@@ -30,20 +32,20 @@
     -   **Conflictos muy frecuentes** si no hay particionado.
     -   Alternativa: **consenso** para escrituras (paxos?).
 
-# Particionamiento
+## Particionamiento
 
-## Motivaciones
+### Motivaciones
 
 -   **Performance.** Aumentar velocidades de R/W.
 -   **Conflictos.** Evitar colisiones/resoluciones de conflictos.
 -   **Redundancia.** Tolerancia a fallos.
 
-## Tipos de particionado
+### Tipos de particionado
 
 -   **Horizontal** (por filas). Registro en UNA partición a la vez.
 -   **Vertical** (por atributos/dimensiones/campos). Registro en TODAS las particiones a la vez.
 
-## Función de partición
+### Función de partición
 
 -   Por **Key-Value**.
 -   Por **Key-Range**.
@@ -54,7 +56,7 @@
     -   Generar **N shards** para cada key. Da igual _en cuál_ guardo.
     -   Partición por claves secundarias.
 
-## Enrutamiento
+### Enrutamiento
 
 -   Si **conozco la función de particionamiento**, ir directamente.
     -   Ojo: implica conocer la dirección de cada partición, etc etc.
@@ -62,7 +64,7 @@
     -   Opción 1: ir a cualquier partición, si es miss, **ser redireccionado**.
     -   Opción 2: ir a un **centinela** que sabe donde esta la data.
 
-# Distributed Shared Memory (DSM)
+## Distributed Shared Memory (DSM)
 
 -   **Objetivo:** ilusión de **memoria compartida centralizada**.
 -   **Ventajas:**
@@ -73,14 +75,14 @@
     -   genera latencia,
     -   cuello único de botella (SPOF).
 
-## Implementación naive
+### Implementación naive
 
 -   Información en **memoria** de un **servidor** (_memory pages_).
 -   Clientes acceden mediante **requests**.
 -   Consistencia = **serialización de requests**.
 -   Baja performance p/ clientes.
 
-## Migración de Memory Pages
+### Migración de Memory Pages
 
 -   Información en memoria del servidor, **delegada en los clientes**.
 -   Optimizar **localidad de acceso** pidiendo memory page **prestada**.
@@ -88,31 +90,31 @@
     -   Alternativa: permitir sub-delegación.
 -   Consistencia garantizada.
 
-## Replicación de Memory Pages
+### Replicación de Memory Pages
 
-### RO
+#### RO
 
 -   Favorece escenario **muchas lecturas pocas escrituras**.
 -   **Leer** => replicación en modo RO.
 -   **Escrituras coordinadas** por servidor.
     -   Ante cambios, invalida réplicas.
 
-### R/W
+#### R/W
 
 -   Servidor tiene las páginas en memoria h/ ser pedidas.
 -   Cliente toma **control total** sobre la página replicada.
 -   Servidor => **secuenciador de operaciones**.
 -   Servidor aplica cambios ante caídas.
 
-# Distributed File Systems (DFS)
+## Distributed File Systems (DFS)
 
-## Motivaciones
+### Motivaciones
 
 -   **Esquema centralizado de información persistente.**
     -   Control de backups, acceso, y monitoreo.
 -   **Optimización de recursos** gracias a concentración.
 
-## Factores de diseño
+### Factores de diseño
 
 -   **Transparencia a los clientes.**
     -   **Acceso** con credenciales.
@@ -123,9 +125,9 @@
 -   **Heterogeneidad de Hardware.** Adaptación.
 -   **Tolerancia a Fallos.** Permitir `at-least-once` o `at-most-once`.
 
-## Casos de estudio
+### Casos de estudio
 
-### Network File System (NFS)
+#### Network File System (NFS)
 
 -   Objetivo: **independencia de plataformas**.
 -   Requiere abstracción del kernel: **VFS (Virtual File System)**.
@@ -134,13 +136,13 @@
     -   Requiere invocación remota.
 -   Soporta POSIX.
 
-### Hadoop DFS (HDFS)
+#### Hadoop DFS (HDFS)
 
 -   Objetivo: **hardware de bajo costo**.
 -   Basada en GFS.
 -   No soporta POSIX => considerado **Data Storage**.
 
-#### Factores de diseño
+##### Factores de diseño
 
 **"Moving computation is cheaper than moving data."** (a computation requested by an application is much more efficient if it is **executed near the data** it operates on).
 
@@ -149,7 +151,7 @@
 -   **Portabilidad.** Utiliza TCP entre servidores y RPC con clientes.
 -   **Performance.** Favorece operaciones de lectura.
 
-#### Arquitectura
+##### Arquitectura
 
 -   **Master-Slave.**
 -   **Namenode:** contiene metadata de archivo, coordina los datanodes.
@@ -157,14 +159,14 @@
 -   Cliente consulta namenode por el FS y la ubicación.
     -   Luego, comunicación directa.
 
-#### Almacenamiento
+##### Almacenamiento
 
 -   Bloques de **tamaño fijo**.
 -   **Replicados** en distintos datanodes.
 -   Metadata mantenida en memoria, con **log de transacciones**.
 -   Cluster permite **re-balanceo de bloques**.
 
-# Big Table
+## Big Table
 
 -   Claves, datos, columnas.
     -   Almacena Clave-Datos.
@@ -176,14 +178,14 @@
     -   Auto-splitting.
 -   **Jerarquía de tres niveles:** root metadata.
 
-## Arquitectura
+### Arquitectura
 
 -   **Master.**
     -   Locks en Chubby.
     -   Asignación de tablets.
 -   **Tablet Servers** (R/W directo con clientes).
 
-## Auto-splitting
+### Auto-splitting
 
 -   Exitoso: **randomly distributed keys**.
     -   R/W se handlean por rangos, por ej.

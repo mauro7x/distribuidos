@@ -1,4 +1,6 @@
-# Cliente Servidor
+# Arquitecturas Distribuidas Simples
+
+## Cliente Servidor
 
 -   Roles:
     -   **Servidor:** pasivo, provee servicios.
@@ -7,7 +9,7 @@
 -   Servidor tiene ubicación conocida.
 -   Modelos de _callback_ posibles: long polling, push notifications.
 
-# Peer to Peer
+## Peer to Peer
 
 -   **Red de nodos pares** entre sí.
 -   Objetivos de **colaboración**.
@@ -15,20 +17,20 @@
     -   Lógica distribuida requiere **coherencia entre nodos**.
 -   Tracker (esquema mixto C-S) como servicio de nombres.
 
-# RPC
+## RPC
 
 -   **Ejecución remota** de procedimientos.
 -   Modelo C-S: servidor ejecuta el procedimiento y devuelve resultado.
 -   Comunicación transparente.
 -   **Portabilidad** mediante **interfaces**.
 
-## IDL
+### IDL
 
 -   Diferentes lenguajes se invocan entre sí.
 -   **Interfaz s/ input y output.**
 -   **Definición de tipos de mensajes a enviar** como parte de IDL.
 
-## Tolerancia a Fallos
+### Tolerancia a Fallos
 
 -   Puede o no ser ejecutado.
 -   **Garantizar delivery** con estrategias:
@@ -36,7 +38,7 @@
     -   Filtrado de duplicados.
     -   **Re-transmisión / Re-ejecución** de operación.
 
-## Implementación
+### Implementación
 
 `Cliente <-> Stub <-> Communications Module (Client-Side) <-> Communications Module (Server-Side) <-> Stub <-> Server`
 
@@ -48,7 +50,7 @@
     -   Envía info de las **calls** al módulo de comunicación y al C-S.
 -   **Módulo de comunicación.** Abstrae al stub de la comunicación con el server.
 
-# Distributed Objects
+## Distributed Objects
 
 -   Servidores proveen **objetos**.
 -   **Middleware** p/ ocultar complejidad.
@@ -57,7 +59,7 @@
     -   Errores.
     -   Recolección de basura.
 
-## CORBA
+### CORBA
 
 -   Estandar definido.
 -   Protocolo y serialización.
@@ -65,7 +67,7 @@
 -   Seguridad.
 -   Discovery de Objetos.
 
-## RMI
+### RMI
 
 -   Lo mismo, optimizado en Java.
 -   **Registry:** directorio de servicios.

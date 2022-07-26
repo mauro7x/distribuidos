@@ -12,7 +12,7 @@
     1. Serialización de requests.
     2. Ejecución serial.
 
-# Open MPI
+## Open MPI
 
 -   Transmisión y recepción de mensajes.
 -   **Ejecución transparente** de 1 a N nodos.
@@ -23,9 +23,9 @@
     -   `MPI_Scatter`, `MPI_Gather`.
     -   `MPI_Allgather`, `MPI_Reduce`.
 
-# Apache
+## Apache
 
-## Flink
+### Flink
 
 -   Plataforma p/ **procesamiento distribuido** de datos.
 -   Motor de ejecución de **pipelines de transformación**.
@@ -33,20 +33,20 @@
 -   **Ventanas** para streaming.
 -   Casos de uso: ETL, Data Pipelines.
 
-### Dataflow
+#### Dataflow
 
 DAG de operaciones sobre un flujo de datos.
 
 -   **Streams:** flujo de información que eventualmente no finaliza.
 -   **Batchs:** dataset de tamaño conocido.
 
-### Bloques de pipeline
+#### Bloques de pipeline
 
 -   **Source:** inyecta datos.
 -   **Transformation (operador):** modifica o filtra datos.
 -   **Sink:** almacenamiento final
 
-## Beam
+### Beam
 
 Modelo de **definición de pipelines** de procesamiento de datos con **portabilidad de lenguajes** y **motores de ejecucución**.
 
@@ -55,7 +55,7 @@ Modelo de **definición de pipelines** de procesamiento de datos con **portabili
     -   Motores de cluster.
     -   Plataformas cloud.
 
-### Bloques de un pipeline
+#### Bloques de un pipeline
 
 -   **Input** y **Output** _(source y sink)_.
 -   **PCollection:** colecciones paralelizables de elementos _(streams)_.
