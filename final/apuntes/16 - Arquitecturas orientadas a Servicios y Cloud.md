@@ -55,7 +55,7 @@
     -   Frameworks y plataformas p/ desarrollar aplicaciones _Cloud Ready_.
     -   Recursos expuestos como **servicios p/ desarrollo** y **manejo de ciclo de vida** (logs,monitoreo).
     -   **Customer Managed:** Apps.
-    -   _Ej. Google App Engine._
+    -   _Ej. Google AppEngine._
 -   **SaaS.**
     -   Alquiler de servicios, **software a demanda**.
     -   Soluciones **genéricas** y **adaptables**.
@@ -80,3 +80,91 @@
     -   Exposición de datos sensibles,
 
 # PaaS
+
+Tener una plataforma para desarrollar. Viene con:
+
+-   **Infraestructura.** Ya está en la plataforma, todo como IaaS.
+-   **Plataforma de Desarrollo.** SOs, librerías especiales, middlewares.
+-   **Persistencia.** Bases de datos, archivos blobs, colas de mensajes.
+-   **Monitoreo.**
+-   **Escalabilidad.** Balanceo, elasticidad.
+
+# Google AppEngine
+
+Plataforma basada en buenas prácticas (forzadas).
+
+## Buenas prácticas
+
+-   Sistemas **granulares**.
+-   Escalamiento **horizontal**.
+-   **Requests breves**, los largos son encolables.
+-   Independencia de SO / HW.
+
+## Servicios integrados
+
+-   Cache.
+-   Colas de mensajes.
+-   Elasticidad.
+-   Versionado.
+-   Herramientas de log, debugging, monitoreo.
+-   Modelos No-Relacionales (Datastore, BigTable).
+
+## Microservicios
+
+-   **Aplicaciones**:
+    -   **Servicios**, pueden o no hablar entre ellos.
+    -   C/ servicio tiene capa de:
+        -   Memcached.
+        -   Datastore.
+        -   Task Queues.
+
+## Componentes
+
+-   **Servicios:** módulos.
+-   **Instancias (AppServers):** servidores de backend.
+    -   Unidad de procesamiento.
+    -   **Dinámicas:** creadas x requests.
+    -   **Residentes:** escaladas manualmente.
+    -   Depende de:
+        -   Alguien que se encargue de bufferear cosas,
+        -   Que no sea importante el estado dentro de las instancias.
+    -   Evidentemente BUENO tener **stateless**.
+    -   Si mi req tarda mucho, tiran la instancia.
+
+## Arquitectura
+
+-   Primer Data Center.
+    -   Google **front end**.
+        -   1st level validations.
+    -   **Edge Cache.**
+-   Segundo Data Center.
+    -   Tiene a la App en sí.
+    -   **AppEngine front end.**
+        -   CDN.
+        -   App Servers.
+            -   Instancias.
+
+## Comunicación interna
+
+-   **Push Queues:** cuando algo llega, la **cola es algo activo**.
+    -   Puede invocar cosas.
+    -   La cola creaba los handlers si no estaban.
+    -   Si habían pocos workers, la cola creaba más.
+    -   La cola hacía el balanceo.
+    -   El mensaje debe tener una URL (p/ atenderlo).
+-   **Pull Queues:** las de siempre.
+    -   Procesamientos largos.
+    -   Payload, Etiqueta.
+-   Se comparte **Datastore** y **Memcached**.
+    -   Todo el resto es **serverless**.
+-   Mensajes en modo **leasing** (ACK de Rabbit).
+
+## Almacenamiento
+
+-   Datastore.
+-   Basado en BigTable.
+-   Clave-Valores.
+-   Atomicidad? **Particionado**.
+    -   Guardar las cosas que component mi transaccion todas juntas.
+    -   Transacciones con poco delay.
+    -   Localidad espacial p/ acceso.
