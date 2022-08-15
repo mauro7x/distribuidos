@@ -1,0 +1,13 @@
+**/.ipynb_checkpoints/
+results/
+.data_backup/
+.vscode/
+.services/
+.DS_Store
+
+# Data specifics
+the-reddit-irl-dataset-comments.csv
+the-reddit-irl-dataset-posts.csv
+
+data/comments.csv
+data/posts.csv

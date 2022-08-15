@@ -1,0 +1,19 @@
+{
+    "logging_level": "INFO",
+    "broker_config": {
+        "host": "rabbitmq",
+        "n_connect_attempts": 6,
+        "freq_retry_connect": 10,
+        "batch_size": 15000,
+        "backup_period": 5,
+        "backup_on_flush": false
+    },
+    "server_config": {
+        "host": "ingestor",
+        "port": 12346,
+        "listen_backlog": 3
+    },
+    "healthcheck": {
+        "port": 3000
+    }
+}

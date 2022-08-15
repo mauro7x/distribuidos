@@ -1,0 +1,31 @@
+{
+  "container_name": "monitor",
+  "replicas": 5,
+  "control": {
+    "logging_level": "INFO",
+    "port": 12345,
+    "bully_config": {
+      "n_connection_retries": 3,
+      "connection_frequency_secs": 2,
+      "connection_frequency_dispersion_secs": 2,
+      "control_plane_join_timeout_secs": 2,
+      "health_check_frequency_secs": 2,
+      "discovery_timeout_ms": 1000,
+      "election_response_timeout_ms": 5000,
+      "coordinator_response_timeout_ms": 5000,
+      "health_check_timeout_ms": 1000,
+      "coordinator_data_plane_check_frequency_ms": 10000
+    }
+  },
+  "healthcheck": {
+    "logging_level": "INFO",
+    "port": 3000,
+    "response_timeout_secs": 1,
+    "ping_frequency_secs": 3,
+    "container_manager": {
+      "restart_timeout_secs": 3,
+      "restart_retries": 3,
+      "restart_wait_sleep_secs": 0.5
+    }
+  }
+}

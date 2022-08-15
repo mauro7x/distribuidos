@@ -1,0 +1,573 @@
+# Generated automatically by generate_docker_compose.py
+
+version: '3'
+services:
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:latest
+    ports:
+      - 15672:15672
+    networks:
+      - tp3-distribuidos-net
+
+  
+  monitor_0:
+    container_name: monitor_0
+    image: monitor:latest
+    environment:
+      - PYTHONUNBUFFERED=1
+      - ENTITY_NAME=monitor
+      - ENTITY_SUB_ID=0
+    volumes:
+      - ./config/monitor.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - tp3-distribuidos-net
+
+  monitor_1:
+    container_name: monitor_1
+    image: monitor:latest
+    environment:
+      - PYTHONUNBUFFERED=1
+      - ENTITY_NAME=monitor
+      - ENTITY_SUB_ID=1
+    volumes:
+      - ./config/monitor.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - tp3-distribuidos-net
+
+  monitor_2:
+    container_name: monitor_2
+    image: monitor:latest
+    environment:
+      - PYTHONUNBUFFERED=1
+      - ENTITY_NAME=monitor
+      - ENTITY_SUB_ID=2
+    volumes:
+      - ./config/monitor.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - tp3-distribuidos-net
+
+  monitor_3:
+    container_name: monitor_3
+    image: monitor:latest
+    environment:
+      - PYTHONUNBUFFERED=1
+      - ENTITY_NAME=monitor
+      - ENTITY_SUB_ID=3
+    volumes:
+      - ./config/monitor.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - tp3-distribuidos-net
+
+  monitor_4:
+    container_name: monitor_4
+    image: monitor:latest
+    environment:
+      - PYTHONUNBUFFERED=1
+      - ENTITY_NAME=monitor
+      - ENTITY_SUB_ID=4
+    volumes:
+      - ./config/monitor.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - tp3-distribuidos-net
+
+  
+  client_0:
+    container_name: client_0
+    image: client:latest
+    entrypoint: python3 /client.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - ENTITY_NAME=client
+    volumes:
+      - ./data/comments.csv:/comments.csv
+      - ./data/posts.csv:/posts.csv
+      - ./config/pipeline_entity.json:/config.json
+      - ./results/:/results/
+    depends_on:
+      - rabbitmq
+      - ingestor
+    networks:
+      - tp3-distribuidos-net
+
+  client_1:
+    container_name: client_1
+    image: client:latest
+    entrypoint: python3 /client.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - ENTITY_NAME=client
+    volumes:
+      - ./data/comments.csv:/comments.csv
+      - ./data/posts.csv:/posts.csv
+      - ./config/pipeline_entity.json:/config.json
+      - ./results/:/results/
+    depends_on:
+      - rabbitmq
+      - ingestor
+    networks:
+      - tp3-distribuidos-net
+
+  client_2:
+    container_name: client_2
+    image: client:latest
+    entrypoint: python3 /client.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - ENTITY_NAME=client
+    volumes:
+      - ./data/comments.csv:/comments.csv
+      - ./data/posts.csv:/posts.csv
+      - ./config/pipeline_entity.json:/config.json
+      - ./results/:/results/
+    depends_on:
+      - rabbitmq
+      - ingestor
+    networks:
+      - tp3-distribuidos-net
+
+  client_3:
+    container_name: client_3
+    image: client:latest
+    entrypoint: python3 /client.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - ENTITY_NAME=client
+    volumes:
+      - ./data/comments.csv:/comments.csv
+      - ./data/posts.csv:/posts.csv
+      - ./config/pipeline_entity.json:/config.json
+      - ./results/:/results/
+    depends_on:
+      - rabbitmq
+      - ingestor
+    networks:
+      - tp3-distribuidos-net
+
+  client_4:
+    container_name: client_4
+    image: client:latest
+    entrypoint: python3 /client.py
+    environment:
+      - PYTHONUNBUFFERED=1
+      - ENTITY_NAME=client
+    volumes:
+      - ./data/comments.csv:/comments.csv
+      - ./data/posts.csv:/posts.csv
+      - ./config/pipeline_entity.json:/config.json
+      - ./results/:/results/
+    depends_on:
+      - rabbitmq
+      - ingestor
+    networks:
+      - tp3-distribuidos-net
+
+  
+  ingestor:
+    container_name: ingestor
+    image: ingestor:latest
+    environment:
+      - PYTHONUNBUFFERED=1
+      - ENTITY_NAME=ingestor
+      - PYTHONHASHSEED=1
+    volumes:
+      - ./data/comments.csv:/comments.csv
+      - ./data/posts.csv:/posts.csv
+      - ./config/pipeline_entity.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - ./.data_backup/:/.data_backup/
+    depends_on:
+      - rabbitmq
+    networks:
+      - tp3-distribuidos-net
+
+  
+  filter_posts_0:
+    container_name: filter_posts_0
+    image: filter_posts:latest
+    environment:
+      - ENTITY_NAME=filter_posts
+      - ENTITY_SUB_ID=0
+      - PYTHONHASHSEED=1
+    volumes:
+      - ./config/pipeline_entity.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - ./.data_backup/:/.data_backup/
+    depends_on:
+      - rabbitmq
+    networks:
+      - tp3-distribuidos-net
+
+  filter_posts_1:
+    container_name: filter_posts_1
+    image: filter_posts:latest
+    environment:
+      - ENTITY_NAME=filter_posts
+      - ENTITY_SUB_ID=1
+      - PYTHONHASHSEED=1
+    volumes:
+      - ./config/pipeline_entity.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - ./.data_backup/:/.data_backup/
+    depends_on:
+      - rabbitmq
+    networks:
+      - tp3-distribuidos-net
+
+  filter_posts_2:
+    container_name: filter_posts_2
+    image: filter_posts:latest
+    environment:
+      - ENTITY_NAME=filter_posts
+      - ENTITY_SUB_ID=2
+      - PYTHONHASHSEED=1
+    volumes:
+      - ./config/pipeline_entity.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - ./.data_backup/:/.data_backup/
+    depends_on:
+      - rabbitmq
+    networks:
+      - tp3-distribuidos-net
+
+  filter_comments_0:
+    container_name: filter_comments_0
+    image: filter_comments:latest
+    environment:
+      - ENTITY_NAME=filter_comments
+      - ENTITY_SUB_ID=0
+      - PYTHONHASHSEED=1
+    volumes:
+      - ./config/pipeline_entity.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - ./.data_backup/:/.data_backup/
+    depends_on:
+      - rabbitmq
+    networks:
+      - tp3-distribuidos-net
+
+  filter_comments_1:
+    container_name: filter_comments_1
+    image: filter_comments:latest
+    environment:
+      - ENTITY_NAME=filter_comments
+      - ENTITY_SUB_ID=1
+      - PYTHONHASHSEED=1
+    volumes:
+      - ./config/pipeline_entity.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - ./.data_backup/:/.data_backup/
+    depends_on:
+      - rabbitmq
+    networks:
+      - tp3-distribuidos-net
+
+  filter_comments_2:
+    container_name: filter_comments_2
+    image: filter_comments:latest
+    environment:
+      - ENTITY_NAME=filter_comments
+      - ENTITY_SUB_ID=2
+      - PYTHONHASHSEED=1
+    volumes:
+      - ./config/pipeline_entity.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - ./.data_backup/:/.data_backup/
+    depends_on:
+      - rabbitmq
+    networks:
+      - tp3-distribuidos-net
+
+  
+  
+  calculator_post_avg_score:
+    container_name: calculator_post_avg_score
+    image: calculator_post_avg_score:latest
+    environment:
+      - ENTITY_NAME=calculator_post_avg_score
+      - PYTHONHASHSEED=1
+    volumes:
+      - ./config/pipeline_entity.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - ./.data_backup/:/.data_backup/
+    depends_on:
+      - rabbitmq
+    networks:
+      - tp3-distribuidos-net
+
+  calculator_avg_sentiment_by_post_0:
+    container_name: calculator_avg_sentiment_by_post_0
+    image: calculator_avg_sentiment_by_post:latest
+    environment:
+      - ENTITY_NAME=calculator_avg_sentiment_by_post
+      - ENTITY_SUB_ID=0
+      - PYTHONHASHSEED=1
+    volumes:
+      - ./config/pipeline_entity.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - ./.data_backup/:/.data_backup/
+    depends_on:
+      - rabbitmq
+    networks:
+      - tp3-distribuidos-net
+
+  calculator_avg_sentiment_by_post_1:
+    container_name: calculator_avg_sentiment_by_post_1
+    image: calculator_avg_sentiment_by_post:latest
+    environment:
+      - ENTITY_NAME=calculator_avg_sentiment_by_post
+      - ENTITY_SUB_ID=1
+      - PYTHONHASHSEED=1
+    volumes:
+      - ./config/pipeline_entity.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - ./.data_backup/:/.data_backup/
+    depends_on:
+      - rabbitmq
+    networks:
+      - tp3-distribuidos-net
+
+  calculator_avg_sentiment_by_post_2:
+    container_name: calculator_avg_sentiment_by_post_2
+    image: calculator_avg_sentiment_by_post:latest
+    environment:
+      - ENTITY_NAME=calculator_avg_sentiment_by_post
+      - ENTITY_SUB_ID=2
+      - PYTHONHASHSEED=1
+    volumes:
+      - ./config/pipeline_entity.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - ./.data_backup/:/.data_backup/
+    depends_on:
+      - rabbitmq
+    networks:
+      - tp3-distribuidos-net
+
+  calculator_avg_sentiment_by_post_3:
+    container_name: calculator_avg_sentiment_by_post_3
+    image: calculator_avg_sentiment_by_post:latest
+    environment:
+      - ENTITY_NAME=calculator_avg_sentiment_by_post
+      - ENTITY_SUB_ID=3
+      - PYTHONHASHSEED=1
+    volumes:
+      - ./config/pipeline_entity.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - ./.data_backup/:/.data_backup/
+    depends_on:
+      - rabbitmq
+    networks:
+      - tp3-distribuidos-net
+
+  
+  joiner_0:
+    container_name: joiner_0
+    image: joiner_post_comment_by_id:latest
+    environment:
+      - ENTITY_NAME=joiner
+      - ENTITY_SUB_ID=0
+      - PYTHONHASHSEED=1
+    volumes:
+      - ./config/pipeline_entity.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - ./.data_backup/:/.data_backup/
+    depends_on:
+      - rabbitmq
+    networks:
+      - tp3-distribuidos-net
+
+  joiner_1:
+    container_name: joiner_1
+    image: joiner_post_comment_by_id:latest
+    environment:
+      - ENTITY_NAME=joiner
+      - ENTITY_SUB_ID=1
+      - PYTHONHASHSEED=1
+    volumes:
+      - ./config/pipeline_entity.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - ./.data_backup/:/.data_backup/
+    depends_on:
+      - rabbitmq
+    networks:
+      - tp3-distribuidos-net
+
+  joiner_2:
+    container_name: joiner_2
+    image: joiner_post_comment_by_id:latest
+    environment:
+      - ENTITY_NAME=joiner
+      - ENTITY_SUB_ID=2
+      - PYTHONHASHSEED=1
+    volumes:
+      - ./config/pipeline_entity.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - ./.data_backup/:/.data_backup/
+    depends_on:
+      - rabbitmq
+    networks:
+      - tp3-distribuidos-net
+
+  joiner_3:
+    container_name: joiner_3
+    image: joiner_post_comment_by_id:latest
+    environment:
+      - ENTITY_NAME=joiner
+      - ENTITY_SUB_ID=3
+      - PYTHONHASHSEED=1
+    volumes:
+      - ./config/pipeline_entity.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - ./.data_backup/:/.data_backup/
+    depends_on:
+      - rabbitmq
+    networks:
+      - tp3-distribuidos-net
+
+  joiner_4:
+    container_name: joiner_4
+    image: joiner_post_comment_by_id:latest
+    environment:
+      - ENTITY_NAME=joiner
+      - ENTITY_SUB_ID=4
+      - PYTHONHASHSEED=1
+    volumes:
+      - ./config/pipeline_entity.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - ./.data_backup/:/.data_backup/
+    depends_on:
+      - rabbitmq
+    networks:
+      - tp3-distribuidos-net
+
+  joiner_5:
+    container_name: joiner_5
+    image: joiner_post_comment_by_id:latest
+    environment:
+      - ENTITY_NAME=joiner
+      - ENTITY_SUB_ID=5
+      - PYTHONHASHSEED=1
+    volumes:
+      - ./config/pipeline_entity.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - ./.data_backup/:/.data_backup/
+    depends_on:
+      - rabbitmq
+    networks:
+      - tp3-distribuidos-net
+
+  
+  
+  filter_post_max_avg_sentiment:
+    container_name: filter_post_max_avg_sentiment
+    image: filter_post_max_avg_sentiment:latest
+    environment:
+      - ENTITY_NAME=filter_post_max_avg_sentiment
+      - PYTHONHASHSEED=1
+    volumes:
+      - ./config/pipeline_entity.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - ./.data_backup/:/.data_backup/
+    depends_on:
+      - rabbitmq
+    networks:
+      - tp3-distribuidos-net
+
+  
+  filter_student_liked_posts_0:
+    container_name: filter_student_liked_posts_0
+    image: filter_student_liked_posts:latest
+    environment:
+      - ENTITY_NAME=filter_student_liked_posts
+      - ENTITY_SUB_ID=0
+      - PYTHONHASHSEED=1
+    volumes:
+      - ./config/pipeline_entity.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - ./.data_backup/:/.data_backup/
+    depends_on:
+      - rabbitmq
+    networks:
+      - tp3-distribuidos-net
+
+  filter_student_liked_posts_1:
+    container_name: filter_student_liked_posts_1
+    image: filter_student_liked_posts:latest
+    environment:
+      - ENTITY_NAME=filter_student_liked_posts
+      - ENTITY_SUB_ID=1
+      - PYTHONHASHSEED=1
+    volumes:
+      - ./config/pipeline_entity.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - ./.data_backup/:/.data_backup/
+    depends_on:
+      - rabbitmq
+    networks:
+      - tp3-distribuidos-net
+
+  filter_student_liked_posts_2:
+    container_name: filter_student_liked_posts_2
+    image: filter_student_liked_posts:latest
+    environment:
+      - ENTITY_NAME=filter_student_liked_posts
+      - ENTITY_SUB_ID=2
+      - PYTHONHASHSEED=1
+    volumes:
+      - ./config/pipeline_entity.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - ./.data_backup/:/.data_backup/
+    depends_on:
+      - rabbitmq
+    networks:
+      - tp3-distribuidos-net
+
+  filter_student_liked_posts_3:
+    container_name: filter_student_liked_posts_3
+    image: filter_student_liked_posts:latest
+    environment:
+      - ENTITY_NAME=filter_student_liked_posts
+      - ENTITY_SUB_ID=3
+      - PYTHONHASHSEED=1
+    volumes:
+      - ./config/pipeline_entity.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - ./.data_backup/:/.data_backup/
+    depends_on:
+      - rabbitmq
+    networks:
+      - tp3-distribuidos-net
+
+  filter_student_liked_posts_4:
+    container_name: filter_student_liked_posts_4
+    image: filter_student_liked_posts:latest
+    environment:
+      - ENTITY_NAME=filter_student_liked_posts
+      - ENTITY_SUB_ID=4
+      - PYTHONHASHSEED=1
+    volumes:
+      - ./config/pipeline_entity.json:/config.json
+      - ./config/pipeline.json:/pipeline.json
+      - ./.data_backup/:/.data_backup/
+    depends_on:
+      - rabbitmq
+    networks:
+      - tp3-distribuidos-net
+
+
+networks:
+  tp3-distribuidos-net:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.25.125.0/24
