@@ -4,16 +4,16 @@ Trabajos prácticos de la materia [**Sistemas Distribuidos I** (75.74)](https://
 
 ## Índice
 
-- [TP0: Docker, Docker Compose](./TP0)
-- [TP1: Concurrencia y Comunicaciones](./TP1)
-- [TP2: Middleware y Coordinación de Procesos](./TP2)
-- To be continued...
+-   [TP0: Docker, Docker Compose](./TP0)
+-   [TP1: Concurrencia y Comunicaciones](./TP1)
+-   [TP2: Middleware y Coordinación de Procesos](./TP2)
+-   [TP3: Tolerancia a Fallos](./TP3) _(trabajo grupal)_
 
 ## Alumno
 
-- Nombre: **Mauro Parafati**
-- Padrón: **102749**
-- Contacto: **mparafati** at **fi.uba.ar**
+-   Nombre: **Mauro Parafati**
+-   Padrón: **102749**
+-   Contacto: **mparafati** at **fi.uba.ar**
 
 ## ¿Por qué un monorepo?
 
@@ -21,10 +21,10 @@ Desde hace no mucho suelo tomar la decisión de organizar los trabajos de las di
 
 ¿Por qué? Las **ventajas** que encuentro en la práctica son varias: (lista no exhaustiva)
 
-- **Configurar el repositorio una única vez** (workflows, templates, labels, milestones).
-- **Tener todo en un mismo lugar.** Con un `git clone` me puedo poner a desarrollar código de la materia en cualquier lugar sin necesidad de andar buscando en otros repositorios
-- Compartir configuraciones **propias del lenguaje** de programación utilizado, como podrían ser librerías en común (loggers, por dar un ejemplo) o flujos automáticos de linting o testing.
-- Y por último, aprender buenas prácticas de Git, que se hace indispensable para mantener el repositorio organizado ante la adición de nuevos trabajos.
+-   **Configurar el repositorio una única vez** (workflows, templates, labels, milestones).
+-   **Tener todo en un mismo lugar.** Con un `git clone` me puedo poner a desarrollar código de la materia en cualquier lugar sin necesidad de andar buscando en otros repositorios
+-   Compartir configuraciones **propias del lenguaje** de programación utilizado, como podrían ser librerías en común (loggers, por dar un ejemplo) o flujos automáticos de linting o testing.
+-   Y por último, aprender buenas prácticas de Git, que se hace indispensable para mantener el repositorio organizado ante la adición de nuevos trabajos.
 
 Como desventaja principal _(y diría única real)_ es que para trabajar sobre un trabajo en particular (o corregirlo) hay que clonar el repositorio entero, incluyendo el resto de trabajos. Pero sabiendo que se trata de un codebase didáctico y su tamaño nunca será comparable a uno productivo como para que esto pueda llegar a ser molesto, considero que las ventajas superan ampliamente este punto negativo.
 
@@ -36,5 +36,5 @@ Para facilitar la integración continua, se habilitó un pre-commit hook, que pu
 
 ## Links de interés
 
-- [Página de cátedra](https://campus.fi.uba.ar/course/view.php?id=2008)
-- [Aula virtual](https://campus.fi.uba.ar/course/view.php?id=761)
+-   [Página de cátedra](https://campus.fi.uba.ar/course/view.php?id=2008)
+-   [Aula virtual](https://campus.fi.uba.ar/course/view.php?id=761)
