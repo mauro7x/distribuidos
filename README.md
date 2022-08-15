@@ -15,7 +15,7 @@ Trabajos prácticos de la materia [**Sistemas Distribuidos I** (75.74)](https://
 -   Padrón: **102749**
 -   Contacto: **mparafati** at **fi.uba.ar**
 
-## ¿Por qué un monorepo?
+<details><summary><h2>¿Por qué un monorepo?</h2></summary>
 
 Desde hace no mucho suelo tomar la decisión de organizar los trabajos de las distintas materias que curso en un sólo repositorio en lugar de utilizar un repositorio por cada proyecto.
 
@@ -28,11 +28,13 @@ Desde hace no mucho suelo tomar la decisión de organizar los trabajos de las di
 
 Como desventaja principal _(y diría única real)_ es que para trabajar sobre un trabajo en particular (o corregirlo) hay que clonar el repositorio entero, incluyendo el resto de trabajos. Pero sabiendo que se trata de un codebase didáctico y su tamaño nunca será comparable a uno productivo como para que esto pueda llegar a ser molesto, considero que las ventajas superan ampliamente este punto negativo.
 
+</details>
+
 ## Pre-commit hooks (Outdated)
 
 Para facilitar la integración continua, se habilitó un pre-commit hook, que puede ser instalado con el script proporcionado (`./install_hooks.sh`) para que justamente corra antes de cada commit. Este hook se asegurará de que el formato siga los estándares esperados, así como de chequear si existen warnings en tiempo de compilación.
 
-**Actualización:** este hook se encuentra deshabilitado ya que fue pensado para los proyectos Rust (TP0 y TP1) pero no para los hechos en Python (TP2)
+**Actualización:** este hook se encuentra deshabilitado ya que fue pensado para los proyectos Rust (TP0 y TP1) pero no para los hechos en Python (TP2 y TP3).
 
 ## Links de interés
 
