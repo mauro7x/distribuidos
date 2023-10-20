@@ -1,6 +1,6 @@
 # Shared Dockerfile for all services
 
-FROM rust:1.59
+FROM rust:1.73
 WORKDIR /usr/app
 
 # Weird hacky mechanism for avoiding re-build dependencies everytime
