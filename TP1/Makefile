@@ -8,16 +8,16 @@ build:
 .PHONY: build
 
 up:
-	docker-compose up -d --scale app=0 --scale client=0
+	docker compose up -d --scale app=0 --scale client=0
 .PHONY: up
 
 down:
-	docker-compose stop
-	docker-compose down
+	docker compose stop
+	docker compose down
 .PHONY: down
 
 logs:
-	docker-compose logs -f
+	docker compose logs -f
 .PHONY: logs
 
 manual-app:
